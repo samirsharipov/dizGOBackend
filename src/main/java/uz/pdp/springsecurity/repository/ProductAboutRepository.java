@@ -16,4 +16,7 @@ public interface ProductAboutRepository extends JpaRepository<ProductAbout, UUID
     Page<ProductAbout> findAllByProductTypePriceIdOrderByCreatedAtDesc(UUID productTypePriceId, Pageable pageable);
     Page<ProductAbout> findAllByProductTypePriceIdAndBranchIdOrderByCreatedAtDesc(UUID productTypePriceId, UUID branchId, Pageable pageable);
     List<ProductAbout> findAllByTradeId(UUID tradeId);
+
+
 }
+    

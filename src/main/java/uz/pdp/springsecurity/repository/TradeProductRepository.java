@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import uz.pdp.springsecurity.entity.TradeProduct;
 
 import java.sql.Timestamp;
@@ -42,7 +43,8 @@ public interface TradeProductRepository extends JpaRepository<TradeProduct, UUID
 
     List<TradeProduct> findAllByTrade_BranchId(UUID product_branch_id);
 
-    Page<TradeProduct> findAllByTrade_BranchIdOrderByCreatedAt(UUID branchId, Pageable pageable);
+    @Query("SELECT tp FROM TradeProduct tp WHERE tp.trade.branch.id = :branchId ORDER BY tp.createdAt")
+    Page<TradeProduct> findAllByTrade_BranchIdOrderByCreatedAt(@Param("branchId") UUID branchId, Pageable pageable);
 
     List<TradeProduct> findAllByTrade_BranchIdAndProductTypePriceId(UUID trade_branch_id, UUID productTypePrice_id);
 

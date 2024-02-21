@@ -102,6 +102,7 @@ public class ProductService {
         for (User user1 : userRepository.findAllByBusiness_Id(businessId)) {
             uuids.add(user1.getId());
         }
+
         String message = "Mahsulot tahrirlandi!" +
                          "\n\nAvvalgi holat" +
                          "\nMahsulot Nomi: " + product.getName() +
@@ -1125,6 +1126,8 @@ public class ProductService {
         }
         return new ApiResponse("all", true, getForPurchaseDtoList);
     }
+
+
 
 
 

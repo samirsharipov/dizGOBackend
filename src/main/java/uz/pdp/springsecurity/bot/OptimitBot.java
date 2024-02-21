@@ -21,7 +21,7 @@ import uz.pdp.springsecurity.util.Constants;
 
 import java.util.Objects;
 
-//@Component
+@Component
 public class OptimitBot extends TelegramLongPollingBot {
     private TelegramUser telegramUser;
     private final TelegramUserRepository telegramUserRepository;

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Column;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,8 +15,8 @@ public class NotificationDto {
 
     private String name;
 
+    @Column(name = "message", columnDefinition = "TEXT")
     private String message;
-
     private String type;
 
     private String notificationKay;
