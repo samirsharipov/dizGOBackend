@@ -22,6 +22,7 @@ public class Attachment extends AbsEntity {
 
     private String name;
 
+
     @ManyToOne
     private Branch branch;
 }

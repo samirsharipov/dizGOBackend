@@ -11,6 +11,7 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 @SpringBootApplication
 @EnableJpaRepositories("uz.pdp.springsecurity")
 @EnableScheduling
+
 public class SpringSecurityApplication {
     public static void main(String[] args) {
         SpringApplication.run(SpringSecurityApplication.class, args);

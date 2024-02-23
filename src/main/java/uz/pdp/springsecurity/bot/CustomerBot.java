@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-@Component
+//@Component
 public class CustomerBot extends TelegramLongPollingBot {
     private final   CustomerTelegramUserRepository customerTelegramUserRepository;
     private final CustomerRepository customerRepository;

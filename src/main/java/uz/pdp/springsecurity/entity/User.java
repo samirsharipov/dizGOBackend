@@ -62,6 +62,9 @@ public class User extends AbsEntity implements UserDetails {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Attachment photo;
 
+
+
+
     private boolean active;
 
     private String address;
@@ -93,7 +96,7 @@ public class User extends AbsEntity implements UserDetails {
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private boolean grossPriceControlOneUser;
     private Long chatId;
-    public User(String firstName, String lastName, String username, String password, Role role, boolean enabled, Business business) {
+    public User(String firstName, String lastName, String username, String password, Role role, boolean enabled, Business business, Attachment photo) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.username = username;
@@ -101,6 +104,8 @@ public class User extends AbsEntity implements UserDetails {
         this.role = role;
         this.enabled = enabled;
         this.business = business;
+        this.photo = photo;
+
     }
 
     public User(String firstName, String lastName, String username, String password, Role role, boolean enabled, Business business, Set<Branch> branches, boolean active) {
@@ -113,15 +118,18 @@ public class User extends AbsEntity implements UserDetails {
         this.business = business;
         this.branches = branches;
         this.active = active;
+        this.photo = photo;
     }
 
-    public User(String firstName, String lastName, String username, String password, Role role, boolean enabled) {
+    public User(String firstName, String lastName, String username, String password, Role role, boolean enabled, Attachment photo) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.username = username;
         this.password = password;
         this.role = role;
         this.enabled = enabled;
+        this.photo = photo;
+
     }
 
     public User(String firstName, String lastName, String username, String password, Role role, Business business, Attachment photo, boolean enabled, boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired) {
@@ -146,6 +154,36 @@ public class User extends AbsEntity implements UserDetails {
             grantedAuthorities.add(new SimpleGrantedAuthority(permission.name()));
         }
         return grantedAuthorities;
+    }
+
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return this.accountNonExpired;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return this.accountNonLocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return this.credentialsNonExpired;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.enabled;
     }
 
 }
