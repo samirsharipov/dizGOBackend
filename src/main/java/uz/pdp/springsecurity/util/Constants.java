@@ -6,6 +6,6 @@ public interface Constants {
     String EMPLOYEE = "Employee";
     String SUPERADMIN = "Super Admin";
     String OPERATOR = "Operator";
-    String BOT_TOKEN = "6972170183:AAFg1cCq_Z6AV0xOVfOVZbbA0UUNZqjnD5g";
-    String CUSTOMER_BOT_TOKEN = "6784268248:AAHSyUWhx_OX91rR1HYxLxFDcprhIgnH3vA";
+    String BOT_TOKEN = "6972170183:AAFcR8oCskyp2TAfwVZ0v1tTY1G23IsOCro";
+    String CUSTOMER_BOT_TOKEN = "6784268248:AAFUHK7vdYeUaY0lYWvGIUh6_T-v7l10bUo";
 }

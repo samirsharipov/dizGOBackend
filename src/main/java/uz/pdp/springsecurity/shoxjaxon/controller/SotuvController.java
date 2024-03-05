@@ -35,23 +35,21 @@ public class SotuvController {
     public HttpEntity<?> getBusinessTotalSum(
             @RequestParam(name = "businessId", required = true) UUID businessId,
             @RequestParam(name = "startDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
-            @RequestParam(name = "endDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate)
-    {
+            @RequestParam(name = "endDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
         try {
-
             if (startDate == null && endDate == null) {
-                // Agar startDate va endDate belgilanmagan bo'lsa, barcha sanalarni hisoblab olish
-                BigDecimal totalSum = (BigDecimal) sotuvRepositiry.calculateTotalSumForBranch(businessId);
+                // If startDate and endDate are not specified, calculate total sum without date range
+                BigDecimal totalSum = sotuvRepositiry.calculateTotalSumForBranchWithDateRange(businessId);
                 return ResponseEntity.ok(totalSum);
             } else {
-                // Aks holda, startDate va endDate bo'yicha sanalarni hisoblab olish
-                BigDecimal totalSum = (BigDecimal) sotuvRepositiry.calculateTotalSumForBranchWithDateRange(businessId, startDate, endDate);
+                // If startDate and endDate are specified, calculate total sum within the date range
+                BigDecimal totalSum = sotuvRepositiry.calculateTotalSumForBranchWithDateRangeFiltered(businessId, startDate, endDate);
                 return ResponseEntity.ok(totalSum);
             }
-
-        }  catch (Exception e) {
+        } catch (Exception e) {
             logger.error("Unexpected error calculating total sum for businessId: " + businessId, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error calculating total sum for businessId: " + businessId);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Unexpected error calculating total sum for businessId: " + businessId);
         }
     }
 
@@ -67,13 +65,58 @@ public class SotuvController {
     }
 
     @GetMapping("/businessTotalXarajat")
-    public HttpEntity<?> getBusinessTotalXarajat(@RequestParam(name = "businessId", required = true) UUID businessId) {
+    public HttpEntity<?> getBusinessTotalXarajat(
+            @RequestParam(name = "businessId", required = true) UUID businessId,
+            @RequestParam(name = "startDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+            @RequestParam(name = "endDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
         try {
-            BigDecimal totalXarajat = (BigDecimal) sotuvRepositiry.calculateTotalXarajatForBranch(businessId);
+            BigDecimal totalXarajat;
+
+            if (startDate == null && endDate == null) {
+                totalXarajat = sotuvRepositiry.calculateTotalXarajatForBranch(businessId);
+            } else {
+                totalXarajat = sotuvRepositiry.calculateTotalXarajatForBranchWithDateRange(businessId, startDate, endDate);
+            }
+
             return ResponseEntity.ok(totalXarajat);
         }  catch (Exception e) {
-            logger.error("Unexpected error calculating total sum for businessId: " + businessId, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error calculating total sum for businessId: " + businessId);
+            logger.error("Unexpected error calculating total xarajat for businessId: " + businessId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error calculating total xarajat for businessId: " + businessId);
         }
+    }
+
+
+
+
+    @GetMapping("/xarajatForBranch")
+    public ResponseEntity<BigDecimal> getXarajatForBranchWithDateRange(
+            @RequestParam(name = "branchId", required = true) UUID branchId,
+            @RequestParam(name = "startDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+            @RequestParam(name = "endDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
+
+        try {
+            BigDecimal totalXarajat;
+
+            if (startDate == null && endDate == null) {
+                totalXarajat = sotuvRepositiry.calculateTotalXarajatForBranch(branchId);
+            } else {
+                totalXarajat = sotuvRepositiry.calculateTotalXarajatForBranchWithDateRange(branchId, startDate, endDate);
+            }
+
+            return ResponseEntity.ok(totalXarajat);
+
+        } catch (Exception e) {
+            // Handle the exception appropriately
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    @GetMapping("/xarajatForBusiness")
+    public ResponseEntity<BigDecimal> getXarajatForBusinessWithDateRange(
+            @RequestParam(name = "businessId", required = true) UUID businessId,
+            @RequestParam(name = "startDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+            @RequestParam(name = "endDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
+        // ...
+        return null;
     }
 }

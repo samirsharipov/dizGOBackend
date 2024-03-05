@@ -18,5 +18,7 @@ public interface ProductAboutRepository extends JpaRepository<ProductAbout, UUID
     List<ProductAbout> findAllByTradeId(UUID tradeId);
 
 
+
+
 }
     

@@ -24,13 +24,13 @@ public class SotuvRepositiry {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public BigDecimal calculateTotalSumForBranchWithDateRange(UUID branchId, Date startDate, Date endDate) {
+    public BigDecimal calculateTotalSumForBranchWithDateRange(UUID branchId) {
         String sql = "SELECT SUM(total_sum) AS total_sum_for_branch " +
                 "FROM trade " +
                 "WHERE branch_id = ? " +
                 "AND created_at BETWEEN ? AND ?";
 
-        return jdbcTemplate.queryForObject(sql, BigDecimal.class, branchId, startDate, endDate);
+        return jdbcTemplate.queryForObject(sql, BigDecimal.class, branchId);
     }
     public BigDecimal calculateTotalSumForBranch(UUID branchId) {
         String sql = "SELECT SUM(total_sum) AS total_sum_for_branch " +
@@ -61,4 +61,26 @@ public class SotuvRepositiry {
 
         return jdbcTemplate.queryForObject(sql, BigDecimal.class, branchId);
     }
+
+    public BigDecimal calculateTotalXarajatForBranchWithDateRange(UUID branchId, Date startDate, Date endDate) {
+        String sql = "SELECT SUM(total_sum) AS total_xarajat_for_branch " +
+                "FROM outlay " +
+                "WHERE branch_id = ? " +
+                "AND created_at BETWEEN ? AND ?";
+
+        return jdbcTemplate.queryForObject(sql, BigDecimal.class, branchId, startDate, endDate);
+    }
+
+
+
+    public BigDecimal calculateTotalSumForBranchWithDateRangeFiltered(UUID branchId, Date startDate, Date endDate) {
+        String sql = "SELECT SUM(total_sum) AS total_sum_for_branch " +
+                "FROM trade " +
+                "WHERE branch_id = ? " +
+                "AND created_at BETWEEN ? AND ?";
+
+        return jdbcTemplate.queryForObject(sql, BigDecimal.class, branchId, startDate, endDate);
+    }
+
+
 }

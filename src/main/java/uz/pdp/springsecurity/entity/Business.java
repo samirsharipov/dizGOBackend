@@ -34,7 +34,10 @@ public class Business extends AbsEntity {
     private boolean delete;
 
     private Boolean exchangeProductByConfirmation;
+
+    @Column(name = "cheap_selling_price", columnDefinition = "boolean default false", nullable = false)
     private boolean cheapSellingPrice;
+
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private boolean grossPriceControl;
 }

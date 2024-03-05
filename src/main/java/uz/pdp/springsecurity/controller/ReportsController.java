@@ -1,7 +1,9 @@
 package uz.pdp.springsecurity.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uz.pdp.springsecurity.annotations.CheckPermission;
@@ -10,6 +12,7 @@ import uz.pdp.springsecurity.entity.User;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.service.ReportsService;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
 
@@ -164,11 +167,17 @@ public class ReportsController {
     @GetMapping("/benefit-by-branch/{branchId}")
     public HttpEntity<?> benefitByBranchReports(@PathVariable UUID branchId,
                                                 @RequestParam(required = false) String date,
-                                                @RequestParam(required = false) Date startDate,
-                                                @RequestParam(required = false) Date endDate) {
+                                                @RequestParam(name = "startDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+                                                @RequestParam(name = "endDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate)
+    {
+
+
         ApiResponse apiResponse = reportsService.dateBenefitAndLostByProductReports(branchId, date, startDate, endDate);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
+
+
+
 
     @CheckPermission("VIEW_REPORT")
     @GetMapping("/benefit-by-branch")

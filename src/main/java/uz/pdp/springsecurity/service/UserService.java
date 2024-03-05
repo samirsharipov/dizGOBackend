@@ -407,4 +407,7 @@ public class UserService {
         user.setGrossPriceControlOneUser(checked);
         userRepository.save(user);
     }
+
+
+
 }

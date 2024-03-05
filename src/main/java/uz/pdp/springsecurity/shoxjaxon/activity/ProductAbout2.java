@@ -1,12 +1,17 @@
 package uz.pdp.springsecurity.shoxjaxon.activity;
 
 import lombok.Data;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
 public class ProductAbout2 {
+
+    @Setter
+    private double totalAmount;
+
 
     private UUID id;
     private LocalDateTime createdAt;
@@ -23,7 +28,13 @@ public class ProductAbout2 {
     private String productName;
 
     private String productTypeName;  // Yangi ustun
-    private String measurementName;  // Yangi qo'shilgan maydon
+    private String measurementName;
+    @Setter
+    private double totalProfit;  // Yangi ustun
+
+
+
+    // Yangi qo'shilgan maydon
 
 
 
@@ -34,7 +45,7 @@ public class ProductAbout2 {
     // Parameterized constructor
     public ProductAbout2(UUID id, LocalDateTime createdAt, LocalDateTime updatedAt, Double amount,
                          String description, UUID tradeId, UUID branchId, UUID productId, UUID productTypePriceId,
-                         String branchName, String productName, String productTypeName ) {
+                         String branchName, String productName, String productTypeName, double totalProfit ) {
         this.id = id;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -47,5 +58,10 @@ public class ProductAbout2 {
         this.branchName = branchName;
         this.productName = productName;
         this.productTypeName =  productTypeName;
+        this.totalProfit = totalProfit;
+
+
+
     }
+
 }
