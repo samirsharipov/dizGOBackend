@@ -21,7 +21,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class RoleService {
+public class RoleService  {
     private final RoleRepository roleRepository;
     private final BusinessRepository businessRepository;
     private final UserRepository userRepository;
@@ -34,18 +34,21 @@ public class RoleService {
         boolean exists = roleRepository.existsByNameIgnoreCaseAndBusinessId(roleDto.getName(), roleDto.getBusinessId());
         if (exists || roleDto.getName().equalsIgnoreCase(Constants.SUPERADMIN) || roleDto.getName().equalsIgnoreCase(Constants.ADMIN))
             return new ApiResponse("ROLE ALREADY EXISTS", false);
+
         Role role = new Role();
         role.setName(roleDto.getName());
-        role.setOffice(roleDto.getIsOffice());
         role.setPermissions(roleDto.getPermissions());
         role.setDescription(roleDto.getDescription());
         role.setBusiness(optionalBusiness.get());
+
+        if (roleDto.getIsOffice() != null) {
+            role.setOffice(roleDto.getIsOffice());
+        }
 
         if (roleDto.getParentRole() != null) {
             Optional<Role> optionalRole = roleRepository.findById(roleDto.getParentRole());
             optionalRole.ifPresent(role::setParentRole);
         }
-
 
         roleRepository.save(role);
         return new ApiResponse("ADDED", true);
@@ -67,10 +70,13 @@ public class RoleService {
         System.out.println(allByBusinessId);
         Role role = optionalRole.get();
         role.setName(roleDto.getName());
-        role.setOffice(roleDto.getIsOffice());
         role.setPermissions(roleDto.getPermissions());
         role.setDescription(roleDto.getDescription());
         role.setBusiness(optionalBusiness.get());
+
+        if (roleDto.getIsOffice() != null) {
+            role.setOffice(roleDto.getIsOffice());
+        }
 
         if (roleDto.getParentRole() != null) {
             Optional<Role> optionalParent = roleRepository.findById(roleDto.getParentRole());
@@ -80,6 +86,7 @@ public class RoleService {
         roleRepository.save(role);
         return new ApiResponse("EDITED", true);
     }
+
 
     public ApiResponse get(@NotNull UUID id) {
         Optional<Role> optionalRole = roleRepository.findById(id);

@@ -11,7 +11,7 @@ import uz.pdp.springsecurity.payload.CostTypeDto;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-03-06T21:34:29+0500",
+    date = "2024-06-06T08:25:15+0500",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.10 (Amazon.com Inc.)"
 )
 @Component

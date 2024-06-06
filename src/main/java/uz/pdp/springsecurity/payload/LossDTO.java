@@ -24,4 +24,6 @@ public class LossDTO {
 
     @NotNull
     List<LossProductDto> lossProductDtoList;
+
+    private String comment; // New field for comment
 }

@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.stereotype.Repository;
 import uz.pdp.springsecurity.shoxjaxon.activity.Customer2;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 @Repository // Add this annotation
@@ -49,4 +50,33 @@ public class CustomerRepository2 {
             return customer2;
         });
     }
+
+    public Integer getTotalCustomersForBusiness(UUID businessId) {
+        String sql = "SELECT COUNT(*) FROM customer WHERE business_id = ?";
+        return jdbcTemplate.queryForObject(sql, Integer.class, businessId);
+    }
+
+
+
+    public Integer getTotalCustomersForBranch(UUID branchId) {
+        String sql = "SELECT COUNT(*) FROM customer_branches WHERE branches_id = ?";
+        return jdbcTemplate.queryForObject(sql, Integer.class, branchId);
+    }
+
+    public Integer getTotalSuppliersForBusiness(UUID businessId) {
+        String sql = "SELECT COUNT(*) FROM supplier WHERE business_id = ?";
+        return jdbcTemplate.queryForObject(sql, Integer.class, businessId);
+    }
+
+    public Integer getTotalTradesForBranch(UUID branchId, Date startDate, Date endDate) {
+        String sql = "SELECT COUNT(*) FROM trade WHERE branch_id = ? AND created_at BETWEEN ? AND ?";
+        return jdbcTemplate.queryForObject(sql, new Object[]{branchId, startDate, endDate}, Integer.class);
+    }
+
+    public Integer getTotalTradesForBusiness(UUID businessId, Date startDate, Date endDate) {
+        String sql = "SELECT COUNT(*) FROM trade WHERE branch_id IN (SELECT id FROM branches WHERE business_id = ?) AND created_at BETWEEN ? AND ?";
+        return jdbcTemplate.queryForObject(sql, new Object[]{businessId, startDate, endDate}, Integer.class);
+    }
+
+
 }

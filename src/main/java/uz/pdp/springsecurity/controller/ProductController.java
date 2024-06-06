@@ -12,6 +12,7 @@ import uz.pdp.springsecurity.payload.ProductBarcodeDto;
 import uz.pdp.springsecurity.payload.ProductDto;
 import uz.pdp.springsecurity.payload.ProductIdsDto;
 import uz.pdp.springsecurity.service.ProductService;
+import uz.pdp.springsecurity.service.ProductTypeService;
 import uz.pdp.springsecurity.utils.AppConstant;
 
 import javax.validation.Valid;
@@ -23,6 +24,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
+    private ProductTypeService productTypePriceService;
 
 
     @CheckPermission("ADD_PRODUCT")
@@ -59,6 +61,13 @@ public class ProductController {
     public HttpEntity<?> deleteFew(@RequestBody ProductIdsDto productIdsDto) {
         ApiResponse apiResponse = productService.deleteProducts(productIdsDto);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
+    @CheckPermission("DELETE_PRODUCT")
+    @PutMapping("/deactivate/{id}")
+    public ResponseEntity<String> deactivateProduct(@PathVariable UUID id) {
+        System.out.println("Deactivating product with ID: " + id); // Tekshiruv
+        productService.deactivateProduct(id);
+        return ResponseEntity.ok("Product deactivated successfully");
     }
 
     @CheckPermission("VIEW_PRODUCT")

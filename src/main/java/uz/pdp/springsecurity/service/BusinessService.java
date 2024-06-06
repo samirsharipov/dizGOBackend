@@ -410,4 +410,17 @@ public class BusinessService {
         businessRepository.save(business);
         return new ApiResponse("successfully", true);
     }
+
+    public int getEditDays(UUID businessId) {
+        return businessRepository.findById(businessId)
+                .map(Business::getEditDays)
+                .orElse(30); // topilmasa 30 kunni qaytaradi
+    }
+
+    public void updateEditDays(UUID businessId, int editDays) {
+        businessRepository.findById(businessId).ifPresent(business -> {
+            business.setEditDays(editDays);
+            businessRepository.save(business);
+        });
+    }
 }

@@ -2,6 +2,7 @@ package uz.pdp.springsecurity.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -36,9 +37,11 @@ public class TradeController {
 
     @CheckPermission("EDIT_TRADE")
     @PutMapping("/{tradeId}")
-    public HttpEntity<?> edit(@PathVariable UUID tradeId, @RequestBody TradeDTO tradeDTO) {
+    public ResponseEntity<?> editTrade(@PathVariable UUID tradeId, @RequestBody TradeDTO tradeDTO) {
+        System.out.println("editTrade called with tradeId: " + tradeId);
         ApiResponse apiResponse = tradeService.edit(tradeId, tradeDTO);
-        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+        System.out.println("editTrade response: " + apiResponse.getMessage());
+        return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(apiResponse);
     }
 
     //Bitta savdoni ko'rish

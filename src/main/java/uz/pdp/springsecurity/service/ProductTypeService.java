@@ -243,4 +243,15 @@ public class ProductTypeService {
 
         return new ApiResponse("successfully deleted", true);
     }
+
+    public void deactivateProduct(UUID id) {
+        Optional<ProductTypePrice> optionalProductTypePrice = productTypePriceRepository.findById(id);
+        if (optionalProductTypePrice.isPresent()) {
+            ProductTypePrice productTypePrice = optionalProductTypePrice.get();
+            productTypePrice.setActive(false);
+            productTypePriceRepository.save(productTypePrice);
+        } else {
+            throw new RuntimeException("Product not found");
+        }
+    }
 }

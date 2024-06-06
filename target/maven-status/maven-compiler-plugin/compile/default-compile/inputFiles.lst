@@ -197,6 +197,7 @@
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/controller/ExchangeProductBranchController.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/hr/payload/WarehouseDto.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/mapper/CurrencyMapper.java
+/Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/shoxjaxon/request/GrupoRequest.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/payload/ExchangeProductDTO.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/hr/service/auth/AuthServiceImpl.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/enums/ExchangeStatusName.java
@@ -281,6 +282,7 @@
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/payload/ProductTypeViewDto.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/service/NavigationProcessService.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/entity/Loss.java
+/Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/shoxjaxon/repository/GrupoResponse.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/entity/Trade.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/entity/NavigationProcess.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/mapper/ShablonMapper.java
@@ -339,6 +341,7 @@
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/payload/projections/MonthProjection.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/payload/BalancePostDto.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/controller/SalaryCountController.java
+/Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/shoxjaxon/controller/GrupoController.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/payload/MessageDto.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/entity/template/AbsEntity.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/controller/TaskController.java
@@ -428,6 +431,7 @@
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/payload/TaskStatusDto.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/repository/AgentPlanRepository.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/payload/ApiResponse.java
+/Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/shoxjaxon/controller/MijozlarController.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/entity/WarehouseSector.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/entity/User.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/payload/CustomerLidDto.java

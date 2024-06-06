@@ -31,6 +31,8 @@ import uz.pdp.springsecurity.utils.ConstantProduct;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -74,6 +76,9 @@ public class TradeService {
     private final ProductRepository productRepository;
     private final HistoryRepository historyRepository;
 
+    private final BusinessService businessService;
+
+
     @SneakyThrows
     public ApiResponse create(TradeDTO tradeDTO) {
         Optional<Branch> optionalBranch = branchRepository.findById(tradeDTO.getBranchId());
@@ -106,14 +111,25 @@ public class TradeService {
             return new ApiResponse("NOT FOUND TRADE", false);
         }
         Trade trade = optionalTrade.get();
-        if (!trade.isEditable()) return new ApiResponse("YOU CAN NOT EDIT AFTER 30 DAYS", false);
-        int days = LocalDateTime.now().getDayOfYear() - trade.getCreatedAt().toLocalDateTime().getDayOfYear();
-        if (days > 30) {
+
+        UUID businessId = trade.getBranch().getBusiness().getId(); // Business id ni olish
+        int editDays = businessService.getEditDays(businessId);
+
+        // createdAt ni LocalDateTime ga o'tkazish
+        Timestamp createdAt = trade.getCreatedAt();
+        LocalDateTime createdAtLocalDateTime = createdAt.toLocalDateTime();
+
+        int days = (int) ChronoUnit.DAYS.between(createdAtLocalDateTime.toLocalDate(), LocalDateTime.now().toLocalDate());
+        if (!trade.isEditable()) {
+            return new ApiResponse("SIZNING SAVDONI TAXRIRLASH MUDDATINGIZ O'TGAN MUDDAT: " + editDays + " KUN", false);
+        }
+        if (days > editDays) {
             trade.setEditable(false);
-            return new ApiResponse("YOU CAN NOT EDIT AFTER 30 DAYS", false);
+            return new ApiResponse("SIZNING SAVDONI TAXRIRLASH MUDDATINGIZ O'TGAN MUDDAT: " + editDays + " KUN", false);
         }
         return createOrEditTrade(trade, tradeDTO, true);
     }
+
 
     @Transactional
     public ApiResponse createOrEditTrade(Trade trade, TradeDTO tradeDTO, boolean isEdit) {
@@ -502,7 +518,7 @@ public class TradeService {
                        "<b>To'lov usuli: </b>" + trade.getPayMethod().getType() + "\n\n" +
                        "<b>To'lov statusi: </b>" + trade.getPaymentStatus().getStatus() + "\n\n" +
                        "<b><i>MAHSULOTLAR \uD83D\uDCD1</i></b>\n\n" + products + "\n\n" +
-                       "<b>Qarz qoldig'i: </b>" + trade.getCustomer().getDebt() + "\n\n" +
+                       "<b>Qolgan " + (trade.getCustomer().getDebt() < 0 ? "haqingiz" : "qarzingiz") + ": </b>" + Math.abs(trade.getCustomer().getDebt()) + "\n\n" +
                        "SAVDO SANASI: " + trade.getCreatedAt();
         } else {
             sendText = "<b>#YANGI_SAVDO \uD83D\uDECD \n\n</b>" +

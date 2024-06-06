@@ -30,13 +30,18 @@ public class Loss extends AbsEntity {
     @Column(nullable = false)
     private Date date;
 
+    @Column(nullable = true) // Komponent null bo'lishi mumkin
+    private String comment; // Yangi qo'shilgan maydon
+
     private double price;
 
     private boolean editable;
 
-    public Loss(User user, Branch branch, Date date) {
+    public Loss(User user, Branch branch, Date date, String comment) {
         this.user = user;
         this.branch = branch;
         this.date = date;
+        this.comment = comment; // Konstruktor orqali qabul qilish
+
     }
 }

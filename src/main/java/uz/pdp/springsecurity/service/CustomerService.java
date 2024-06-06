@@ -225,7 +225,7 @@ public class CustomerService {
                                   "<b>MIJOZ: </b>" + customer.getName() + "\n" +
                                   "<b>TO'LOV SUMMASI: </b>" + repaymentDto.getRepayment() + "UZS" + "\n" +
                                   "<b>TO'LOV TURI: </b>" + optionalPaymentMethod.get().getType() + "\n\n" +
-                                  "<b>HOZIRGI QARZINGIZ</b>: " + customer.getDebt();
+                                  "<b>HOZIRGI " + (customer.getDebt() < 0 ? "HAQINGIZ" : "QARZINGIZ") + "</b>: " + (customer.getDebt() < 0 ? Math.abs(customer.getDebt()) : customer.getDebt());
                     SendMessage sendMessage = SendMessage
                             .builder()
                             .chatId(customer.getChatId())

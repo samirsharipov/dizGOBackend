@@ -119,4 +119,16 @@ public class BusinessController {
         ApiResponse apiResponse = businessService.changeGrossSell(businessId, checked);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
+
+    @PutMapping("/{businessId}/edit-days")
+    public ResponseEntity<?> updateEditDays(@PathVariable UUID businessId, @RequestBody int editDays) {
+        businessService.updateEditDays(businessId, editDays);
+        return ResponseEntity.ok(new ApiResponse("Edit days updated successfully", true));
+    }
+
+    @GetMapping("/{businessId}/edit-days")
+    public ResponseEntity<?> getEditDays(@PathVariable UUID businessId) {
+        int editDays = businessService.getEditDays(businessId);
+        return ResponseEntity.ok(editDays);
+    }
 }

@@ -3,13 +3,12 @@ package uz.pdp.springsecurity.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
 import uz.pdp.springsecurity.utils.ConstantProduct;
-
+import org.springframework.data.domain.Pageable;
 import java.util.*;
 
 @Service
@@ -27,22 +26,28 @@ public class LossService {
     private final WarehouseRepository warehouseRepository;
 
     public ApiResponse create(LossDTO lossDTO) {
+        System.out.println("Received DTO: " + lossDTO);
+
         Optional<Branch> optionalBranch = branchRepository.findById(lossDTO.getBranchId());
         if (optionalBranch.isEmpty())
             return new ApiResponse("BRANCH NOT FOUND", false);
+
         Optional<User> optionalUser = userRepository.findById(lossDTO.getUserId());
         if (optionalUser.isEmpty())
             return new ApiResponse("USER NOT FOUND", false);
+
         Loss loss = new Loss(
                 optionalUser.get(),
                 optionalBranch.get(),
-                lossDTO.getDate()
+                lossDTO.getDate(),
+                lossDTO.getComment() // Kommentni qabul qilish
         );
 
         List<LossProduct> lossProductList = new ArrayList<>();
         ApiResponse apiResponse = toLossProductList(loss, lossProductList, lossDTO.getLossProductDtoList());
         if (!apiResponse.isSuccess())
             return apiResponse;
+
         lossRepository.save(loss);
         lossProductRepository.saveAll(lossProductList);
         return new ApiResponse("SUCCESS", true);
@@ -50,10 +55,12 @@ public class LossService {
 
     private ApiResponse toLossProductList(Loss loss, List<LossProduct> lossProductList, List<LossProductDto> lossProductDtoList) {
         for (LossProductDto dto : lossProductDtoList) {
+            double quantity = dto.getQuantity();
+            String status = findStatus(quantity);
             LossProduct lossProduct = new LossProduct(
                     loss,
-                    Math.abs(dto.getQuantity()),
-                    findStatus(dto.getQuantity())
+                    quantity,
+                    status
             );
             if (dto.getProductId() != null) {
                 Optional<Product> optionalProduct = productRepository.findById(dto.getProductId());
@@ -74,10 +81,10 @@ public class LossService {
                 lossProduct.setProductTypePrice(optionalProductTypePrice.get());
                 lossProduct.setLastAmount(warehouseRepository.amountByProductTypePrice(dto.getProductTypePriceId()));
             }
-            warehouseService.createOrEditWareHouseHelper(loss.getBranch(), lossProduct.getProduct(), lossProduct.getProductTypePrice(), dto.getQuantity());
+            warehouseService.createOrEditWareHouseHelper(loss.getBranch(), lossProduct.getProduct(), lossProduct.getProductTypePrice(), quantity);
             fifoCalculationService.createLossProduct(loss.getBranch(), lossProduct);
             lossProductList.add(lossProduct);
-            // save product history
+            // product haqida saqlash
             productAboutRepository.save(new ProductAbout(
                     lossProduct.getProduct(),
                     lossProduct.getProductTypePrice(),
@@ -92,15 +99,16 @@ public class LossService {
 
     private String findStatus(double quantity) {
         if (quantity < 0) {
-            return "HARM";
+            return "BENEFIT";
         }
-        return "BENEFIT";
+        return "HARM";
     }
 
     public ApiResponse get(UUID branchId, int page, int size) {
         if (!branchRepository.existsById(branchId))
             return new ApiResponse("BRANCH NOT FOUND", false);
-        Pageable pageable = PageRequest.of(page, size);
+
+        Pageable pageable = PageRequest.of(page, size); // To'g'ri Pageable interfeysi
         Page<Loss> lossPage = lossRepository.findAllByBranchIdOrderByCreatedAtDesc(branchId, pageable);
 
         return makeResult(lossPage);
@@ -112,7 +120,8 @@ public class LossService {
             list.add(new LossGetDto(
                     loss.getId(),
                     loss.getUser().getFirstName() + " " + loss.getUser().getLastName(),
-                    loss.getDate()
+                    loss.getDate(),
+                    loss.getComment() // Qo'shilgan maydon
             ));
         }
         return list;
@@ -150,8 +159,8 @@ public class LossService {
     public ApiResponse getSearchByDate(UUID branchId, Date startDate, Date endDate, Integer page, Integer size) {
         if (!branchRepository.existsById(branchId))
             return new ApiResponse("BRANCH NOT FOUND", false);
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Loss> lossPage = lossRepository.findAllByBranchIdAndCreatedAtBetweenOrderByCreatedAtDesc(branchId, startDate, endDate, pageable);
+        Pageable pageable = (Pageable) PageRequest.of(page, size);
+        Page<Loss> lossPage = lossRepository.findAllByBranchIdAndCreatedAtBetweenOrderByCreatedAtDesc(branchId, startDate, endDate, (org.springframework.data.domain.Pageable) pageable);
 
         return makeResult(lossPage);
     }
@@ -196,12 +205,12 @@ public class LossService {
         if (branch == null) {
             return new ApiResponse("Filial topilmadi!", false);
         }
-        Pageable pageable = PageRequest.of(page - 1, limit);
+        Pageable pageable = (Pageable) PageRequest.of(page - 1, limit);
         Page<LossProduct> lossProductPage = null;
         if (startDate == null || endDate == null) {
-            lossProductPage = lossProductRepository.findAllByLoss_Branch_IdOrderByCreatedAtDesc(branchId, pageable);
+            lossProductPage = lossProductRepository.findAllByLoss_Branch_IdOrderByCreatedAtDesc(branchId, (org.springframework.data.domain.Pageable) pageable);
         } else {
-            lossProductPage = lossProductRepository.findAllByLoss_Branch_IdAndCreatedAtBetweenOrderByCreatedAtDesc(branchId, startDate, endDate, pageable);
+            lossProductPage = lossProductRepository.findAllByLoss_Branch_IdAndCreatedAtBetweenOrderByCreatedAtDesc(branchId, startDate, endDate, (org.springframework.data.domain.Pageable) pageable);
         }
         List<LossProductGetDto> list = new ArrayList<>();
         for (LossProduct l : lossProductPage.getContent()) {

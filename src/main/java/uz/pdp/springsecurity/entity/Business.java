@@ -40,4 +40,7 @@ public class Business extends AbsEntity {
 
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private boolean grossPriceControl;
+
+    private int editDays = 30; // default 30 days
+
 }

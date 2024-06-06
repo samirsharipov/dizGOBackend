@@ -856,6 +856,15 @@ public class ProductService {
         return new ApiResponse("DELETED", true);
     }
 
+    public void deactivateProduct(UUID id) {
+        Optional<ProductTypePrice> productOpt = productTypePriceRepository.findById(id);
+        if (productOpt.isPresent()) {
+            ProductTypePrice product = productOpt.get();
+            product.setActive(false);
+            productTypePriceRepository.save(product);
+        }
+
+    }
     private ApiResponse getProductByBranch(UUID branchId) {
         List<ProductViewDto> productViewDtoList = new ArrayList<>();
         Optional<Branch> optionalBranch = branchRepository.findById(branchId);

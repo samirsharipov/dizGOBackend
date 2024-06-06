@@ -14,4 +14,6 @@ public class LossGetDto {
     private UUID id;
     private String userName;
     private Date date;
+    private String comment; // Qo'shilgan maydon
+
 }
