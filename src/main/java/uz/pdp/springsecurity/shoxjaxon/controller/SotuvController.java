@@ -257,13 +257,13 @@ public class SotuvController {
             @RequestParam(name = "startDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
             @RequestParam(name = "endDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
         try {
+            BigDecimal totalRepaymentDebt;
             if (startDate == null && endDate == null) {
-                BigDecimal totalRepaymentDebt = sotuvRepositiry.calculateTotalRepaymentDebtSumForBranchWithDateRange(businessId, null, null);
-                return ResponseEntity.ok(totalRepaymentDebt);
+                totalRepaymentDebt = sotuvRepositiry.calculateTotalRepaymentDebtSumForBranchWithDateRange(businessId, null, null);
             } else {
-                BigDecimal totalRepaymentDebt = sotuvRepositiry.calculateTotalRepaymentDebtSumForBranchWithDateRange(businessId, startDate, endDate);
-                return ResponseEntity.ok(totalRepaymentDebt);
+                totalRepaymentDebt = sotuvRepositiry.calculateTotalRepaymentDebtSumForBranchWithDateRange(businessId, startDate, endDate);
             }
+            return ResponseEntity.ok(totalRepaymentDebt);
         } catch (Exception e) {
             logger.error("Unexpected error calculating total repayment debt for businessId: " + businessId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -285,6 +285,24 @@ public class SotuvController {
                     .body("Unexpected error retrieving repayment debt sums by payment method for branchId: " + branchId);
         }
     }
+
+    @GetMapping("/repaymentDebtSumsByPaymentMethodWithDollar")
+    public ResponseEntity<?> getRepaymentDebtSumsByPaymentMethodWithDollar(
+            @RequestParam(name = "businessId", required = true) UUID businessId,
+            @RequestParam(name = "branchId", required = false) UUID branchId,
+            @RequestParam(name = "startDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+            @RequestParam(name = "endDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
+        try {
+            Map<String, Object> repaymentDebtSums = sotuvRepositiry.getRepaymentDebtSumsByPaymentMethodWithDollar(businessId, branchId, startDate, endDate);
+            return ResponseEntity.ok(repaymentDebtSums);
+        } catch (Exception e) {
+            logger.error("Unexpected error retrieving repayment debt sums by payment method for businessId: " + businessId + ", branchId: " + branchId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Unexpected error retrieving repayment debt sums by payment method for businessId: " + businessId + ", branchId: " + branchId);
+        }
+    }
+
+
 
     @GetMapping("/debtCanculsByPaymentMethod")
     public ResponseEntity<?> getDebtCanculsByPaymentMethod(

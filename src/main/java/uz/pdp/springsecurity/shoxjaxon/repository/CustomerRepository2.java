@@ -4,9 +4,9 @@ import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.stereotype.Repository;
 import uz.pdp.springsecurity.shoxjaxon.activity.Customer2;
 
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.math.BigDecimal;
+import java.util.*;
+
 @Repository // Add this annotation
 
 public class CustomerRepository2 {
@@ -77,6 +77,92 @@ public class CustomerRepository2 {
         String sql = "SELECT COUNT(*) FROM trade WHERE branch_id IN (SELECT id FROM branches WHERE business_id = ?) AND created_at BETWEEN ? AND ?";
         return jdbcTemplate.queryForObject(sql, new Object[]{businessId, startDate, endDate}, Integer.class);
     }
+
+    public Integer getTotalHaridForBranch(UUID branchId, Date startDate, Date endDate) {
+        String sql = "SELECT COUNT(*) FROM purchase WHERE branch_id = ? AND created_at BETWEEN ? AND ?";
+        return jdbcTemplate.queryForObject(sql, new Object[]{branchId, startDate, endDate}, Integer.class);
+    }
+
+    public Integer getTotalHaridForBusiness(UUID businessId, Date startDate, Date endDate) {
+        String sql = "SELECT COUNT(*) FROM purchase WHERE branch_id IN (SELECT id FROM branches WHERE business_id = ?) AND created_at BETWEEN ? AND ?";
+        return jdbcTemplate.queryForObject(sql, new Object[]{businessId, startDate, endDate}, Integer.class);
+    }
+
+    public Integer getTotalIshlaForBranch(UUID branchId, Date startDate, Date endDate) {
+        String sql = "SELECT COUNT(*) FROM purchase WHERE branch_id = ? AND created_at BETWEEN ? AND ?";
+        return jdbcTemplate.queryForObject(sql, new Object[]{branchId, startDate, endDate}, Integer.class);
+    }
+
+    public Integer getTotalIshlaForBusiness(UUID businessId, Date startDate, Date endDate) {
+        String sql = "SELECT COUNT(*) FROM purchase WHERE branch_id IN (SELECT id FROM branches WHERE business_id = ?) AND created_at BETWEEN ? AND ?";
+        return jdbcTemplate.queryForObject(sql, new Object[]{businessId, startDate, endDate}, Integer.class);
+    }
+
+    public Integer getTotalXarForBranch(UUID branchId, Date startDate, Date endDate) {
+        String sql = "SELECT COUNT(*) FROM outlay WHERE branch_id = ? AND created_at BETWEEN ? AND ?";
+        return jdbcTemplate.queryForObject(sql, new Object[]{branchId, startDate, endDate}, Integer.class);
+    }
+
+    public Integer getTotalXarForBusiness(UUID businessId, Date startDate, Date endDate) {
+        String sql = "SELECT COUNT(*) FROM outlay WHERE branch_id IN (SELECT id FROM branches WHERE business_id = ?) AND created_at BETWEEN ? AND ?";
+        return jdbcTemplate.queryForObject(sql, new Object[]{businessId, startDate, endDate}, Integer.class);
+    }
+
+
+    public Map<String, BigDecimal> getTotalTayyorDetailsForBranch(UUID branchId, Date startDate, Date endDate) {
+        String sql = "SELECT SUM(content_price) AS totalContentPrice, SUM(cost) AS totalCost, SUM(total_price) AS totalPrice FROM production WHERE branch_id = ? AND created_at BETWEEN ? AND ?";
+        return jdbcTemplate.queryForObject(sql, new Object[]{branchId, startDate, endDate}, (rs, rowNum) -> {
+            Map<String, BigDecimal> result = new HashMap<>();
+            result.put("totalContentPrice", rs.getBigDecimal("totalContentPrice"));
+            result.put("totalCost", rs.getBigDecimal("totalCost"));
+            result.put("totalPrice", rs.getBigDecimal("totalPrice"));
+            return result;
+        });
+    }
+
+    public Map<String, BigDecimal> getTotalTayyorDetailsForBusiness(UUID businessId, Date startDate, Date endDate) {
+        String sql = "SELECT SUM(content_price) AS totalContentPrice, SUM(cost) AS totalCost, SUM(total_price) AS totalPrice FROM production WHERE branch_id IN (SELECT id FROM branches WHERE business_id = ?) AND created_at BETWEEN ? AND ?";
+        return jdbcTemplate.queryForObject(sql, new Object[]{businessId, startDate, endDate}, (rs, rowNum) -> {
+            Map<String, BigDecimal> result = new HashMap<>();
+            result.put("totalContentPrice", rs.getBigDecimal("totalContentPrice"));
+            result.put("totalCost", rs.getBigDecimal("totalCost"));
+            result.put("totalPrice", rs.getBigDecimal("totalPrice"));
+            return result;
+        });
+    }
+
+    public List<Map<String, Object>> getTotalCostsByTypeForBranch(UUID branchId, Date startDate, Date endDate) {
+        String sql = "SELECT ct.name as costType, SUM(c.sum) as totalSum " +
+                "FROM cost c " +
+                "JOIN cost_type ct ON c.cost_type_id = ct.id " +
+                "WHERE ct.branch_id = ? AND c.created_at BETWEEN ? AND ? " +
+                "GROUP BY ct.name";
+        return jdbcTemplate.query(sql, new Object[]{branchId, startDate, endDate}, (rs, rowNum) -> {
+            Map<String, Object> result = new HashMap<>();
+            result.put("costType", rs.getString("costType"));
+            result.put("totalSum", rs.getBigDecimal("totalSum"));
+            return result;
+        });
+    }
+
+    public List<Map<String, Object>> getTotalCostsByTypeForBusiness(UUID businessId, Date startDate, Date endDate) {
+        String sql = "SELECT ct.name as costType, SUM(c.sum) as totalSum " +
+                "FROM cost c " +
+                "JOIN cost_type ct ON c.cost_type_id = ct.id " +
+                "WHERE ct.branch_id IN (SELECT id FROM branches WHERE business_id = ?) " +
+                "AND c.created_at BETWEEN ? AND ? " +
+                "GROUP BY ct.name";
+        return jdbcTemplate.query(sql, new Object[]{businessId, startDate, endDate}, (rs, rowNum) -> {
+            Map<String, Object> result = new HashMap<>();
+            result.put("costType", rs.getString("costType"));
+            result.put("totalSum", rs.getBigDecimal("totalSum"));
+            return result;
+        });
+    }
+
+
+
+
 
 
 }

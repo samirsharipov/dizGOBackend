@@ -8,10 +8,7 @@ import org.springframework.stereotype.Repository;
 import uz.pdp.springsecurity.shoxjaxon.BusinessTotalSum;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Repository
 public class SotuvRepositiry {
@@ -174,6 +171,8 @@ public class SotuvRepositiry {
                 "FROM trade t " +
                 "JOIN payment_method pm ON t.pay_method_id = pm.id " +
                 "WHERE t.branch_id = ? " +
+                "AND t.dollar != 'DOLLAR' " + // dollar ustunidagi qiymat 'DOLLAR' bo'lgan yozuvlarni chiqarib tashlaydi
+                "AND t.dollar_trade != true " + // dollar_trade ustunidagi qiymat true bo'lgan yozuvlarni chiqarib tashlaydi
                 (startDate != null && endDate != null ? "AND t.created_at BETWEEN ? AND ? " : "") +
                 "GROUP BY pm.type";
 
@@ -183,6 +182,9 @@ public class SotuvRepositiry {
             return jdbcTemplate.queryForList(sql, branchId);
         }
     }
+
+
+
 
     public BigDecimal calculateTotalPurchaseSumForBranch(UUID branchId) {
         String sql = "SELECT SUM(total_sum) AS total_purchase_sum_for_branch " +
@@ -217,15 +219,17 @@ public class SotuvRepositiry {
     }
 
     public BigDecimal calculateTotalRepaymentDebtSumForBranchWithDateRange(UUID branchId, Date startDate, Date endDate) {
-        String sql = "SELECT SUM(rd.debt_sum) AS total_repayment_debt_sum_for_branch " +
+        String sql = "SELECT SUM(CASE WHEN rd.is_dollar_repayment THEN rd.debt_sum_dollar ELSE rd.debt_sum END) AS total_repayment_debt_sum_for_branch " +
                 "FROM repayment_debt rd " +
                 "JOIN customer c ON rd.customer_id = c.id " +
                 "WHERE c.branch_id = ? AND rd.created_at BETWEEN ? AND ?";
         return jdbcTemplate.queryForObject(sql, BigDecimal.class, branchId, startDate, endDate);
     }
 
+
     public List<Map<String, Object>> getRepaymentDebtSumsByPaymentMethod(UUID branchId, Date startDate, Date endDate) {
-        String sql = "SELECT pm.type AS payment_method_type, SUM(rd.debt_sum) AS total_sum " +
+        String sql = "SELECT pm.type AS payment_method_type, " +
+                "SUM(CASE WHEN rd.is_dollar_repayment THEN 0 ELSE rd.debt_sum END) AS total_sum " +
                 "FROM repayment_debt rd " +
                 "JOIN payment_method pm ON rd.payment_method_id = pm.id " +
                 "JOIN customer c ON rd.customer_id = c.id " +
@@ -233,6 +237,38 @@ public class SotuvRepositiry {
                 "GROUP BY pm.type";
         return jdbcTemplate.queryForList(sql, branchId, startDate, endDate);
     }
+
+    public Map<String, Object> getRepaymentDebtSumsByPaymentMethodWithDollar(UUID businessId, UUID branchId, Date startDate, Date endDate) {
+        String sql = "SELECT pm.type AS payment_method_type, " +
+                "SUM(CASE WHEN rd.is_dollar_repayment THEN rd.debt_sum_dollar ELSE rd.debt_sum END) AS total_sum, " +
+                "SUM(CASE WHEN rd.is_dollar_repayment THEN rd.debt_sum_dollar ELSE 0 END) AS total_sum_dollar " +
+                "FROM repayment_debt rd " +
+                "JOIN payment_method pm ON rd.payment_method_id = pm.id " +
+                "JOIN customer c ON rd.customer_id = c.id " +
+                "WHERE c.business_id = ? " +
+                (branchId != null ? "AND c.branch_id = ? " : "") +
+                "AND rd.created_at BETWEEN ? AND ? " +
+                "GROUP BY pm.type";
+
+        List<Map<String, Object>> results = branchId != null ?
+                jdbcTemplate.queryForList(sql, businessId, branchId, startDate, endDate) :
+                jdbcTemplate.queryForList(sql, businessId, startDate, endDate);
+
+        BigDecimal totalDollarDebt = BigDecimal.ZERO;
+        for (Map<String, Object> row : results) {
+            BigDecimal dollarDebt = (BigDecimal) row.get("total_sum_dollar");
+            totalDollarDebt = totalDollarDebt.add(dollarDebt);
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("repaymentDebtSums", results);
+        response.put("totalDollarDebt", totalDollarDebt);
+        return response;
+    }
+
+
+
+
 
     public List<Map<String, Object>> getDebtCanculsByPaymentMethod(UUID branchId, Date startDate, Date endDate) {
         String sql = "SELECT pm.type AS payment_method_type, " +
