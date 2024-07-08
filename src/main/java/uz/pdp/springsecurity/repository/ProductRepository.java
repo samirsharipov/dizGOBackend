@@ -36,8 +36,11 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     List<Product> findAllByBranchIdAndActiveIsTrueAndBarcodeContainingIgnoreCase(UUID branch_id, String name);
 
-    Page<Product> findAllByBranchIdAndNameContainingIgnoreCaseOrBranchIdAndBarcodeContainingIgnoreCase(
-            UUID branchId, String name, UUID branchId2, String barcode, Pageable pageable);
+//    Page<Product> findAllByBranchIdAndNameContainingIgnoreCaseOrBranchIdAndBarcodeContainingIgnoreCase(
+//            UUID branchId, String name, UUID branchId2, String barcode, Pageable pageable);
+
+    Page<Product> findAllByBranchIdAndNameContainingIgnoreCaseOrBranchIdAndBarcodeContainingIgnoreCaseOrBranchIdAndCategoryIdAndActiveTrue
+            (UUID branch_id, String name, UUID branch_id2, String barcode, UUID branch_id3, UUID category_id, Pageable pageable);
 
     List<Product> findAllByBranchIdAndBarcodeOrNameAndActiveTrue(UUID branch_id, String barcode, String name);
 

@@ -30,14 +30,14 @@ public class ProductController {
     @CheckPermission("ADD_PRODUCT")
     @PostMapping()
     public HttpEntity<?> add(@Valid @RequestBody ProductDto productDto, @CurrentUser User user) throws ParseException {
-        ApiResponse apiResponse = productService.addProduct(productDto,user);
+        ApiResponse apiResponse = productService.addProduct(productDto, user);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
     @CheckPermission("EDIT_PRODUCT")
     @PutMapping("{id}")
     public HttpEntity<?> edit(@PathVariable UUID id, @RequestBody ProductDto productDto, @CurrentUser User user) {
-        ApiResponse apiResponse = productService.editProduct(id, productDto,user);
+        ApiResponse apiResponse = productService.editProduct(id, productDto, user);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
@@ -62,6 +62,7 @@ public class ProductController {
         ApiResponse apiResponse = productService.deleteProducts(productIdsDto);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
+
     @CheckPermission("DELETE_PRODUCT")
     @PutMapping("/deactivate/{id}")
     public ResponseEntity<String> deactivateProduct(@PathVariable UUID id) {
@@ -116,14 +117,14 @@ public class ProductController {
     @GetMapping("/search/{branch_id}")
     public HttpEntity<?> search(@PathVariable UUID branch_id,
                                 @RequestParam String name) {
-        ApiResponse apiResponse = productService.search(branch_id,name);
+        ApiResponse apiResponse = productService.search(branch_id, name);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
     @CheckPermission("VIEW_PRODUCT")
     @GetMapping("/get-by-branch-for-trade/{branch_id}")
-    public HttpEntity<?> getByBranchForTrade(@PathVariable UUID branch_id, @RequestParam int page, @RequestParam int size,@RequestParam(defaultValue = "") String searchValue) {
-        ApiResponse apiResponse = productService.getByBranchForTrade(searchValue, branch_id, page, size);
+    public HttpEntity<?> getByBranchForTrade(@PathVariable UUID branch_id,@RequestParam UUID category_id, @RequestParam int page, @RequestParam int size, @RequestParam(defaultValue = "") String searchValue) {
+        ApiResponse apiResponse = productService.getByBranchForTrade(searchValue, branch_id, category_id, page, size);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
@@ -155,7 +156,7 @@ public class ProductController {
                                                @RequestParam(defaultValue = "0", required = false) int page,
                                                @RequestParam(defaultValue = "10", required = false) int size
     ) {
-        ApiResponse apiResponse = productService.getByBusinessPageable(business_id, branch_id, brand_id, categoryId,search,page,size);
+        ApiResponse apiResponse = productService.getByBusinessPageable(business_id, branch_id, brand_id, categoryId, search, page, size);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
