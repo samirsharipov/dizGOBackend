@@ -36,7 +36,6 @@ public class ScheduleTaskService {
 
     @Scheduled(cron = "0 0/46 10 * * *")
     public void execute() {
-
         List<Subscription> subscriptions = subscriptionRepository
                 .findAllByEndDayBetweenAndDeleteIsFalse(Timestamp.valueOf(TODAY), Timestamp.valueOf(END_TODAY));
 
