@@ -42,12 +42,18 @@ public class ProductExportService {
         List<Business> all = businessRepository.findAll();
         List<Product> products = new ArrayList<>();
         for (Business business : all) {
-            products.addAll(productRepository.findAllByBusiness_IdAndActiveTrue(business.getId()));
+            products.addAll(productRepository.findAllByBusiness_IdAndActiveTrueAndIsGlobalTrue(business.getId()));
         }
         writeProductsToCSV(products);
 
         Optional<Attachment> optionalAttachment = attachmentRepository.findByName("products.csv");
-        optionalAttachment.ifPresent(attachment -> attachmentService.delete(attachment.getId()));
+        if (optionalAttachment.isPresent()) {
+            Optional<AttachmentContent> optionalAttachmentContent = attachmentContentRepository.findByAttachmentId(optionalAttachment.get().getId());
+            if (optionalAttachmentContent.isPresent()) {
+                attachmentContentRepository.delete(optionalAttachmentContent.get());
+                attachmentRepository.delete(optionalAttachment.get());
+            }
+        }
 
         String fileName = "products.csv";
         try {
@@ -75,7 +81,6 @@ public class ProductExportService {
                 attachmentContent.setAttachment(savedAttachment);
 
                 attachmentContentRepository.save(attachmentContent);
-                attachmentRepository.save(attachment);
             }
         } catch (IOException e) {
             e.printStackTrace();

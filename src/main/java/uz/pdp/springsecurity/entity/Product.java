@@ -125,4 +125,6 @@ public class Product extends AbsEntity {
 
     @Transient
     private double quantity;
+
+    private Boolean isGlobal;
 }
