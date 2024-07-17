@@ -34,5 +34,13 @@ public class ProductAboutController {
         ApiResponse apiResponse = productAboutService.getOneAmount(productId, branchId, page, size);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
-
+    @PutMapping("/deactivate/{productTypePriceId}")
+    public HttpEntity<?> deactivateProduct(@PathVariable UUID productTypePriceId) {
+        System.out.println("Received UUID: " + productTypePriceId);  // UUID ni tekshirish uchun qo'shildi
+        if (productTypePriceId == null) {
+            return ResponseEntity.status(400).body(new ApiResponse(false, "Invalid UUID"));
+        }
+        ApiResponse apiResponse = productAboutService.deactivateProduct(productTypePriceId);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
 }
