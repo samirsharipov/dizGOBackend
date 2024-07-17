@@ -20,7 +20,6 @@ import java.util.UUID;
 public class LidFieldService {
 
     private final LidFieldRepository repository;
-
     private final LidFieldMapper mapper;
     private final FormRepository formRepository;
 

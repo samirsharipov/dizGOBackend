@@ -1182,9 +1182,20 @@ public class ProductService {
         productTypePriceRepository.saveAll(productTypePriceList);
     }
 
-    public ApiResponse getByBranchForTrade(String searchValue, UUID branchId, UUID categoryId,int page, int size) {
+    public ApiResponse getByBranchForTrade(String searchValue, UUID branchId, UUID categoryId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Product> all = productRepository.findAllByBranchIdAndNameContainingIgnoreCaseOrBranchIdAndBarcodeContainingIgnoreCaseOrBranchIdAndCategoryIdAndActiveTrue(branchId, searchValue, branchId, searchValue, branchId, categoryId, pageable);
+        Page<Product> all;
+//        productRepository.findAllByBranchIdAndNameContainingIgnoreCaseOrBranchIdAndBarcodeContainingIgnoreCaseOrBranchIdAndCategoryIdAndActiveTrue(branchId, searchValue, branchId, searchValue, branchId, categoryId, pageable);
+
+
+        if (searchValue != null && branchId != null) {
+            all = productRepository.findAllByBranch_IdAndNameContainingIgnoreCaseAndActiveTrueOrBusinessIdAndBarcodeContainingIgnoreCaseAndActiveTrue(branchId, searchValue, branchId, searchValue, pageable);
+        } else if (categoryId != null && branchId != null) {
+            all = productRepository.findAllByCategory_IdAndBranch_IdAndActiveTrue(categoryId, branchId,pageable);
+        } else {
+            all = productRepository.findAllByBranch_IdAndActiveIsTrue(branchId, pageable);
+        }
+
         if (all.isEmpty()) {
             return new ApiResponse("not found", false);
         }
