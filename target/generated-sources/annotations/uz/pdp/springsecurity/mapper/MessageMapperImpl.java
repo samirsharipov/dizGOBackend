@@ -9,8 +9,8 @@ import uz.pdp.springsecurity.payload.MessageDto;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-07-09T15:05:15+0500",
-    comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.10 (Amazon.com Inc.)"
+    date = "2024-07-01T11:50:49+0500",
+    comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.11 (Amazon.com Inc.)"
 )
 @Component
 public class MessageMapperImpl implements MessageMapper {

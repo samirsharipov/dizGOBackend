@@ -56,9 +56,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(
                         "/api/auth/login",
+                        "/api/product-export/*",
                         "/api/v1/hr/auth/login",
                         "/swagger-ui/**",
                         "/swagger-resources/**",
+                        "/api/attachment/download/*",
                         "/v2/api-docs",
                         "/api/business/create",
                         "/api/business/checkBusinessName",

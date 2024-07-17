@@ -32,6 +32,8 @@ public class ProductViewDto {
     private double minQuantity;
     private Date expiredDate;
     private String category;
+    private String childCategory;
+    private String subChildCategory;
     private double buyPriceDollar;
     private boolean buyDollar;
     private double salePriceDollar;
@@ -41,4 +43,30 @@ public class ProductViewDto {
     private double grossPriceControl;
     private boolean grossPricePermission;
     private Double kpi;
+
+
+    private String uniqueSKU;//unique SKU
+    private String language;//language ru,uz,en
+    private Double stockAmount;// stock amount
+    private Boolean inStock; // in stock (stockda mavjudmi?)
+    private Boolean preorder; // Preorder(oldindan buyurtma?)
+    private Double length; // uzunligi
+    private Double width; // // kengligi
+    private Double height; // balandigi
+    private Double weight; // og'irligi
+    private String hsCode12;// frontend dan numeric kelishi kere
+    private String hsCode22;//frontend dan numeric kelishi kere
+    private String hsCode32;//frontend dan numeric kelishi kere
+    private String hsCode44;//frontend dan numeric kelishi kere
+    private String keyWord;
+    private String briefDescription;//qisqa eslatma
+    private String longDescription;//eslatma
+    private String agreementExportsID;
+    private String agreementExportsPID;
+    private String agreementLocalID;
+    private String agreementLocalPID;
+    private String langGroup;
+    private String shippingClass;
+    private String attributes;
+    private Boolean soldIndividualy;
 }

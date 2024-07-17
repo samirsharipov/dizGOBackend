@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.entity.Currency;
+import uz.pdp.springsecurity.enums.Language;
 import uz.pdp.springsecurity.enums.Type;
 import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
@@ -58,11 +59,11 @@ public class ProductService {
             uuids.add(user1.getId());
         }
         String message = "Mahsulot qo'shildi!" +
-                         "\nMahsulot Nomi: " + productDto.getName() +
-                         "\nMahsulot Shtrix Kodi: " + productDto.getBarcode() +
-                         "\nKim tomonidan qo'shildi:" +
-                         "\nIsmi: " + user.getFirstName() + "" +
-                         "\nUsername: " + user.getUsername();
+                "\nMahsulot Nomi: " + productDto.getName() +
+                "\nMahsulot Shtrix Kodi: " + productDto.getBarcode() +
+                "\nKim tomonidan qo'shildi:" +
+                "\nIsmi: " + user.getFirstName() + "" +
+                "\nUsername: " + user.getUsername();
         notificationService.create(new NotificationDto(
                 "Mahsulot qo'shildi!",
                 message,
@@ -104,15 +105,15 @@ public class ProductService {
         }
 
         String message = "Mahsulot tahrirlandi!" +
-                         "\n\nAvvalgi holat" +
-                         "\nMahsulot Nomi: " + product.getName() +
-                         "\nMahsulot Shtrix Kodi: " + product.getBarcode() +
-                         "\nMahsulot Sotuv Narxi: " + product.getSalePrice() +
-                         "\n\nHozirgi holat" +
-                         "\nMahsulot Nomi: " + productDto.getName() +
-                         "\nMahsulot Shtrix Kodi: " + productDto.getBarcode() +
-                         "\nMahsulot Sotuv Narxi: " + productDto.getSalePrice() +
-                         "\nKim tomonidan tahrirlandi: " + user.getUsername();
+                "\n\nAvvalgi holat" +
+                "\nMahsulot Nomi: " + product.getName() +
+                "\nMahsulot Shtrix Kodi: " + product.getBarcode() +
+                "\nMahsulot Sotuv Narxi: " + product.getSalePrice() +
+                "\n\nHozirgi holat" +
+                "\nMahsulot Nomi: " + productDto.getName() +
+                "\nMahsulot Shtrix Kodi: " + productDto.getBarcode() +
+                "\nMahsulot Sotuv Narxi: " + productDto.getSalePrice() +
+                "\nKim tomonidan tahrirlandi: " + user.getUsername();
         notificationService.create(new NotificationDto(
                 "Mahsulot tahrirlandi!",
                 message,
@@ -160,18 +161,49 @@ public class ProductService {
         product.setWarehouseCount(productDto.getWarehouseCount());
         product.setGrossPriceMyControl(productDto.getGrossPriceControl());
 
+
+        product.setUniqueSKU(productDto.getUniqueSKU());
+        product.setLanguage(Language.valueOf(productDto.getLanguage()));
+        product.setStockAmount(productDto.getStockAmount());
+        product.setInStock(productDto.getInStock());
+        product.setPreorder(productDto.getPreorder());
+        product.setLength(productDto.getLength());
+        product.setWidth(productDto.getWidth());
+        product.setHeight(productDto.getHeight());
+        product.setWeight(productDto.getWeight());
+        product.setHsCode12(productDto.getHsCode12());
+        product.setHsCode22(productDto.getHsCode22());
+        product.setHsCode32(productDto.getHsCode32());
+        product.setHsCode44(productDto.getHsCode44());
+        product.setKeyWord(productDto.getKeyWord());
+        product.setBriefDescription(productDto.getBriefDescription());
+        product.setLongDescription(productDto.getLongDescription());
+        product.setAgreementExportsID(productDto.getAgreementExportsID());
+        product.setAgreementExportsPID(productDto.getAgreementExportsPID());
+        product.setAgreementLocalID(productDto.getAgreementLocalID());
+        product.setAgreementLocalPID(productDto.getAgreementLocalPID());
+        product.setLangGroup(productDto.getLangGroup());
+        product.setShippingClass(productDto.getShippingClass());
+        product.setAttributes(productDto.getAttributes());
+        product.setSoldIndividualy(productDto.getSoldIndividualy());
+        product.setIsGlobal(productDto.isGlobal());
+
+
         if (productDto.getCategoryId() != null) {
             UUID categoryId = productDto.getCategoryId();
             Optional<Category> optionalCategory = categoryRepository.findById(categoryId);
             optionalCategory.ifPresent(product::setCategory);
-
         }
 
         if (productDto.getChildCategoryId() != null) {
             UUID categoryId = productDto.getChildCategoryId();
             Optional<Category> optionalCategory = categoryRepository.findById(categoryId);
             optionalCategory.ifPresent(product::setChildCategory);
+        }
 
+        if (productDto.getSubChildCategoryId() != null) {
+            Optional<Category> optionalCategory = categoryRepository.findById(productDto.getSubChildCategoryId());
+            optionalCategory.ifPresent(product::setSubChildCategory);
         }
 
         if (productDto.getBrandId() != null) {
@@ -282,11 +314,11 @@ public class ProductService {
         if (productDto.getBarcode() != null && !productDto.getBarcode().isBlank()) {
             if (isUpdate) {
                 if (productRepository.existsByBarcodeAndBusinessIdAndIdIsNotAndActiveTrue(productDto.getBarcode(), product.getBusiness().getId(), product.getId())
-                    || productTypePriceRepository.existsByBarcodeAndProduct_BusinessIdAndActiveTrue(productDto.getBarcode(), product.getBusiness().getId()))
+                        || productTypePriceRepository.existsByBarcodeAndProduct_BusinessIdAndActiveTrue(productDto.getBarcode(), product.getBusiness().getId()))
                     return new ApiResponse("product with the barcode is already exist");
             } else {
                 if (productRepository.existsByBarcodeAndBusinessIdAndActiveTrue(productDto.getBarcode(), product.getBusiness().getId())
-                    || productTypePriceRepository.existsByBarcodeAndProduct_BusinessIdAndActiveTrue(productDto.getBarcode(), product.getBusiness().getId()))
+                        || productTypePriceRepository.existsByBarcodeAndProduct_BusinessIdAndActiveTrue(productDto.getBarcode(), product.getBusiness().getId()))
                     return new ApiResponse("product with the barcode is already exist");
             }
             product.setBarcode(productDto.getBarcode());
@@ -363,14 +395,14 @@ public class ProductService {
         if (dto.getBarcode() != null && !dto.getBarcode().isBlank()) {
             if (edit) {
                 if (productTypePriceRepository.existsByBarcodeAndProduct_BusinessIdAndIdIsNotAndActiveTrue(dto.getBarcode(), product.getBusiness().getId(), productTypePrice.getId())
-                    || productRepository.existsByBarcodeAndBusinessIdAndIdIsNotAndActiveTrue(dto.getBarcode(), product.getBusiness().getId(), productTypePrice.getId())) {
+                        || productRepository.existsByBarcodeAndBusinessIdAndIdIsNotAndActiveTrue(dto.getBarcode(), product.getBusiness().getId(), productTypePrice.getId())) {
                     productTypePrice.setBarcode(generateBarcode(product.getBusiness().getId(), product.getName(), productTypePrice.getId(), false));
                 } else {
                     productTypePrice.setBarcode(dto.getBarcode());
                 }
             } else {
                 if (productTypePriceRepository.existsByBarcodeAndProduct_BusinessIdAndActiveTrue(dto.getBarcode(), product.getBusiness().getId())
-                    || productRepository.existsByBarcodeAndBusinessIdAndActiveTrue(dto.getBarcode(), product.getBusiness().getId())) {
+                        || productRepository.existsByBarcodeAndBusinessIdAndActiveTrue(dto.getBarcode(), product.getBusiness().getId())) {
                     productTypePrice.setBarcode(generateBarcode(product.getBusiness().getId(), product.getName(), productTypePrice.getId(), edit));
                 } else {
                     productTypePrice.setBarcode(dto.getBarcode());
@@ -494,9 +526,9 @@ public class ProductService {
             if (optionalProduct.isPresent()) {
                 Product product = optionalProduct.get();
                 String message = "Mahsulot O'chirildi!!!" +
-                                 "\nMahsulot Nomi: " + product.getName() +
-                                 "\nMahsulot Shtrix Kodi: " + product.getBarcode() +
-                                 "\nKim tomonidan o'chirildi: \nIsmi: " + user.getFirstName() + "\nusername: " + user.getUsername();
+                        "\nMahsulot Nomi: " + product.getName() +
+                        "\nMahsulot Shtrix Kodi: " + product.getBarcode() +
+                        "\nKim tomonidan o'chirildi: \nIsmi: " + user.getFirstName() + "\nusername: " + user.getUsername();
                 notificationService.create(
                         new NotificationDto("Mahsulot O'chirildi", message, "type", "key", user.getBusiness().getId(), users)
                 );
@@ -865,6 +897,7 @@ public class ProductService {
         }
 
     }
+
     private ApiResponse getProductByBranch(UUID branchId) {
         List<ProductViewDto> productViewDtoList = new ArrayList<>();
         Optional<Branch> optionalBranch = branchRepository.findById(branchId);
@@ -882,6 +915,35 @@ public class ProductService {
         double amount;
         for (Product product : productList) {
             ProductViewDto productViewDto = new ProductViewDto();
+
+
+            productViewDto.setUniqueSKU(product.getUniqueSKU());
+            if (product.getLanguage() != null) {
+                productViewDto.setLanguage(product.getLanguage().name());
+            }
+            productViewDto.setStockAmount(product.getStockAmount());
+            productViewDto.setInStock(product.getInStock());
+            productViewDto.setPreorder(product.getPreorder());
+            productViewDto.setLength(product.getLength());
+            productViewDto.setWidth(product.getWidth());
+            productViewDto.setHeight(product.getHeight());
+            productViewDto.setWeight(product.getWeight());
+            productViewDto.setHsCode12(product.getHsCode12());
+            productViewDto.setHsCode22(product.getHsCode22());
+            productViewDto.setHsCode32(product.getHsCode32());
+            productViewDto.setHsCode44(product.getHsCode44());
+            productViewDto.setKeyWord(product.getKeyWord());
+            productViewDto.setBriefDescription(product.getBriefDescription());
+            productViewDto.setLongDescription(product.getLongDescription());
+            productViewDto.setAgreementExportsID(product.getAgreementExportsID());
+            productViewDto.setAgreementExportsPID(product.getAgreementExportsPID());
+            productViewDto.setAgreementLocalID(product.getAgreementLocalID());
+            productViewDto.setAgreementLocalPID(product.getAgreementLocalPID());
+            productViewDto.setLangGroup(product.getLangGroup());
+            productViewDto.setShippingClass(product.getShippingClass());
+            productViewDto.setAttributes(product.getAttributes());
+            productViewDto.setSoldIndividualy(product.getSoldIndividualy());
+
             productViewDto.setProductId(product.getId());
             productViewDto.setProductName(product.getName());
             productViewDto.setBarcode(product.getBarcode());
@@ -891,13 +953,22 @@ public class ProductService {
             productViewDto.setSaleDollar(product.isSaleDollar());
             productViewDto.setBranch(product.getBranch());
             productViewDto.setExpiredDate(product.getExpireDate());
+
             if (product.getBrand() != null)
                 productViewDto.setBrandName(product.getBrand().getName());
+
             if (product.getCategory() != null)
                 productViewDto.setCategory(product.getCategory().getName());
-            if (product.getPhoto() != null) {
+
+            if (product.getChildCategory() != null)
+                productViewDto.setChildCategory(product.getChildCategory().getName());
+
+            if (product.getSubChildCategory() != null)
+                productViewDto.setSubChildCategory(product.getSubChildCategory().getName());
+
+            if (product.getPhoto() != null)
                 productViewDto.setPhotoId(product.getPhoto().getId());
-            }
+
             if (product.getMeasurement() != null) {
                 productViewDto.setMeasurementId(product.getMeasurement().getName());
                 if (product.getMeasurement().getSubMeasurement() != null) {
@@ -1111,15 +1182,22 @@ public class ProductService {
         productTypePriceRepository.saveAll(productTypePriceList);
     }
 
-    public ApiResponse getByBranchForTrade(String searchValue, UUID branchId, int page, int size) {
+    public ApiResponse getByBranchForTrade(String searchValue, UUID branchId, UUID categoryId,int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Product> all = productRepository.findAllByBranchIdAndNameContainingIgnoreCaseOrBranchIdAndBarcodeContainingIgnoreCase(branchId, searchValue, branchId, searchValue, pageable);
+        Page<Product> all = productRepository.findAllByBranchIdAndNameContainingIgnoreCaseOrBranchIdAndBarcodeContainingIgnoreCaseOrBranchIdAndCategoryIdAndActiveTrue(branchId, searchValue, branchId, searchValue, branchId, categoryId, pageable);
         if (all.isEmpty()) {
             return new ApiResponse("not found", false);
         }
         List<ProductGetForPurchaseDto> getForPurchaseDtoList = new ArrayList<>();
         toViewDtoMto(branchId, getForPurchaseDtoList, all.toList());
-        return new ApiResponse("all", true, getForPurchaseDtoList);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("productHistoryDtoList", getForPurchaseDtoList);
+        response.put("currentPage", all.getNumber());
+        response.put("totalItem", all.getTotalElements());
+        response.put("totalPage", all.getTotalPages());
+
+        return new ApiResponse("all", true, response);
     }
 
     public ApiResponse search(UUID branchId, String name) {
@@ -1135,10 +1213,6 @@ public class ProductService {
         }
         return new ApiResponse("all", true, getForPurchaseDtoList);
     }
-
-
-
-
 
 
 }

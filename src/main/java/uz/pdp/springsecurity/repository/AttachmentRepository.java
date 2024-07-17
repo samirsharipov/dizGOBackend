@@ -10,4 +10,5 @@ public interface AttachmentRepository extends JpaRepository<Attachment, UUID> {
 
     Optional<Attachment> findByName(String name);
     Optional<Attachment> findAllById(UUID id);
+    void deleteByName(String name);
 }
