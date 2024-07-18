@@ -658,4 +658,31 @@ public class CustomerService {
 
         return new ApiResponse(true, filteredMonths);
     }
+
+     public ApiResponse getAllPageAble(UUID businessId, UUID branchId, UUID groupId, int size, int page, String name) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Customer> all;
+
+        if (name != null) {
+            all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCase(businessId, name, pageable);
+        } else if (branchId != null) {
+            all = customerRepository.findAllByBranch_IdAndActiveIsTrue(pageable, branchId);
+        } else if (groupId != null) {
+            all = customerRepository.findAllByCustomerGroupIdAndActiveIsTrue(groupId, pageable);
+        } else {
+            all = customerRepository.findAllByBusiness_Id(businessId, pageable);
+        }
+
+        if (all.isEmpty()) {
+            return new ApiResponse("not found");
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", toCustomerDtoList(all.stream().toList()));
+        response.put("currentPage", all.getNumber());
+        response.put("totalItems", all.getTotalElements());
+        response.put("totalPages", all.getTotalPages());
+
+        return new ApiResponse("found", true, response);
+    }
 }
