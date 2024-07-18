@@ -119,7 +119,6 @@ public class Product extends AbsEntity {
 
     @ManyToMany
     @OnDelete(action = OnDeleteAction.CASCADE)
-
     private List<WarehouseRasta> rastas = new ArrayList<>();
     private Integer warehouseCount;
 

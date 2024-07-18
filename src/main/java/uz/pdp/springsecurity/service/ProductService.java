@@ -11,6 +11,7 @@ import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.entity.Currency;
 import uz.pdp.springsecurity.enums.Language;
 import uz.pdp.springsecurity.enums.Type;
+import uz.pdp.springsecurity.mapper.ProductMapper;
 import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
 
@@ -21,27 +22,16 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
-
     private final BrandRepository brandRepository;
-
     private final CategoryRepository categoryRepository;
-
     private final MeasurementRepository measurementRepository;
-
     private final AttachmentRepository attachmentRepository;
-
     private final BranchRepository branchRepository;
-
     private final BusinessRepository businessRepository;
-
     private final ProductTypePriceRepository productTypePriceRepository;
-
     private final ProductTypeValueRepository productTypeValueRepository;
-
     private final WarehouseRepository warehouseRepository;
-
     private final ProductTypeComboRepository comboRepository;
-
     private final SubscriptionRepository subscriptionRepository;
     private final PurchaseProductRepository purchaseProductRepository;
     private final TradeProductRepository tradeProductRepository;
@@ -50,6 +40,7 @@ public class ProductService {
     private final FifoCalculationRepository fifoCalculationRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final ProductMapper productMapper;
 
     @Transactional
     public ApiResponse addProduct(ProductDto productDto, User user) {
@@ -114,6 +105,7 @@ public class ProductService {
                 "\nMahsulot Shtrix Kodi: " + productDto.getBarcode() +
                 "\nMahsulot Sotuv Narxi: " + productDto.getSalePrice() +
                 "\nKim tomonidan tahrirlandi: " + user.getUsername();
+
         notificationService.create(new NotificationDto(
                 "Mahsulot tahrirlandi!",
                 message,
@@ -1187,11 +1179,10 @@ public class ProductService {
         Page<Product> all;
 //        productRepository.findAllByBranchIdAndNameContainingIgnoreCaseOrBranchIdAndBarcodeContainingIgnoreCaseOrBranchIdAndCategoryIdAndActiveTrue(branchId, searchValue, branchId, searchValue, branchId, categoryId, pageable);
 
-
         if (searchValue != null && branchId != null) {
             all = productRepository.findAllByBranch_IdAndNameContainingIgnoreCaseAndActiveTrueOrBusinessIdAndBarcodeContainingIgnoreCaseAndActiveTrue(branchId, searchValue, branchId, searchValue, pageable);
         } else if (categoryId != null && branchId != null) {
-            all = productRepository.findAllByCategory_IdAndBranch_IdAndActiveTrue(categoryId, branchId,pageable);
+            all = productRepository.findAllByCategory_IdAndBranch_IdAndActiveTrue(categoryId, branchId, pageable);
         } else {
             all = productRepository.findAllByBranch_IdAndActiveIsTrue(branchId, pageable);
         }
@@ -1200,13 +1191,14 @@ public class ProductService {
             return new ApiResponse("not found", false);
         }
         List<ProductGetForPurchaseDto> getForPurchaseDtoList = new ArrayList<>();
+
         toViewDtoMto(branchId, getForPurchaseDtoList, all.toList());
 
         Map<String, Object> response = new HashMap<>();
         response.put("productHistoryDtoList", getForPurchaseDtoList);
         response.put("currentPage", all.getNumber());
-        response.put("totalItem", all.getTotalElements());
-        response.put("totalPage", all.getTotalPages());
+        response.put("totalItem", getForPurchaseDtoList.size());
+        response.put("totalPage", getForPurchaseDtoList.size() / size);
 
         return new ApiResponse("all", true, response);
     }
@@ -1224,7 +1216,5 @@ public class ProductService {
         }
         return new ApiResponse("all", true, getForPurchaseDtoList);
     }
-
-
 }
 
