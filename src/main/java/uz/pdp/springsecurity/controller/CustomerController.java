@@ -192,4 +192,15 @@ public class CustomerController {
         ApiResponse apiResponse = customerService.getMonthsByYear(branchId);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
+        @CheckPermission("VIEW_CUSTOMER")
+    @GetMapping("/get-all-pageable/{businessId}")
+    public HttpEntity<?> getAllPageAble(@PathVariable UUID businessId,
+                                        @RequestParam(required = false) UUID branchId,
+                                        @RequestParam(required = false) UUID groupId,
+                                        @RequestParam(required = false) String name,
+                                        @RequestParam int size,
+                                        @RequestParam int page) {
+        ApiResponse apiResponse = customerService.getAllPageAble(businessId,branchId,groupId,size,page,name);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
 }
