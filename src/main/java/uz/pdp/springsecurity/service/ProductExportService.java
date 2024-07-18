@@ -76,7 +76,6 @@ public class ProductExportService {
                 Attachment savedAttachment = attachmentRepository.save(attachment);
 
                 AttachmentContent attachmentContent = new AttachmentContent();
-                attachmentContent.setId(attachment.getId());
                 attachmentContent.setMainContent(fileContent);
                 attachmentContent.setAttachment(savedAttachment);
 

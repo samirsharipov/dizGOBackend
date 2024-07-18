@@ -99,5 +99,5 @@ public class ProductDto {
     private String shippingClass;
     private String attributes;
     private Boolean soldIndividualy;
-    private boolean isGlobal;
+    private Boolean global;
 }
