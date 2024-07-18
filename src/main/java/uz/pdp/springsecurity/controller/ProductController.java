@@ -123,7 +123,11 @@ public class ProductController {
 
     @CheckPermission("VIEW_PRODUCT")
     @GetMapping("/get-by-branch-for-trade/{branch_id}")
-    public HttpEntity<?> getByBranchForTrade(@PathVariable UUID branch_id,@RequestParam(required = false) UUID category_id, @RequestParam int page, @RequestParam int size, @RequestParam(defaultValue = "") String searchValue) {
+    public HttpEntity<?> getByBranchForTrade(@PathVariable UUID branch_id,
+                                             @RequestParam(required = false) UUID category_id,
+                                             @RequestParam int page,
+                                             @RequestParam int size,
+                                             @RequestParam(required = false) String searchValue) {
         ApiResponse apiResponse = productService.getByBranchForTrade(searchValue, branch_id, category_id, page, size);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }

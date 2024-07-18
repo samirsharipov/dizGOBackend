@@ -77,6 +77,4 @@ public class Trade extends AbsEntity {
     private String tradeDescription;
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean differentPayment;
-
-
 }

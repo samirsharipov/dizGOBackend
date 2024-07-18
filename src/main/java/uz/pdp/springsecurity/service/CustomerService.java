@@ -222,10 +222,10 @@ public class CustomerService {
                                         repaymentDto.getPayDate())));
                 if (customer.getChatId() != null) {
                     String text = "<b>#YANGI_TOLOV</b>\n\n" +
-                                  "<b>MIJOZ: </b>" + customer.getName() + "\n" +
-                                  "<b>TO'LOV SUMMASI: </b>" + repaymentDto.getRepayment() + "UZS" + "\n" +
-                                  "<b>TO'LOV TURI: </b>" + optionalPaymentMethod.get().getType() + "\n\n" +
-                                  "<b>HOZIRGI " + (customer.getDebt() < 0 ? "HAQINGIZ" : "QARZINGIZ") + "</b>: " + (customer.getDebt() < 0 ? Math.abs(customer.getDebt()) : customer.getDebt());
+                            "<b>MIJOZ: </b>" + customer.getName() + "\n" +
+                            "<b>TO'LOV SUMMASI: </b>" + repaymentDto.getRepayment() + "UZS" + "\n" +
+                            "<b>TO'LOV TURI: </b>" + optionalPaymentMethod.get().getType() + "\n\n" +
+                            "<b>HOZIRGI " + (customer.getDebt() < 0 ? "HAQINGIZ" : "QARZINGIZ") + "</b>: " + (customer.getDebt() < 0 ? Math.abs(customer.getDebt()) : customer.getDebt());
                     SendMessage sendMessage = SendMessage
                             .builder()
                             .chatId(customer.getChatId())
@@ -589,7 +589,7 @@ public class CustomerService {
                 List<TradeProduct> tradeList = findTradeProductList(customer, branchId, productId, selectedLocalDateTime, day);
                 if (!tradeList.isEmpty()) {
                     if (selectedMonth.equals(formatDate(tradeList.get(0).getCreatedAt()).getMonth()) &&
-                        selectedYear.equals(formatDate(tradeList.get(0).getCreatedAt()).getYear())) {
+                            selectedYear.equals(formatDate(tradeList.get(0).getCreatedAt()).getYear())) {
                         timestampList.add(tradeList.get(0).getCreatedAt());
                     }
                 }
@@ -659,7 +659,7 @@ public class CustomerService {
         return new ApiResponse(true, filteredMonths);
     }
 
-     public ApiResponse getAllPageAble(UUID businessId, UUID branchId, UUID groupId, int size, int page, String name) {
+    public ApiResponse getAllPageAble(UUID businessId, UUID branchId, UUID groupId, int size, int page, String name) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Customer> all;
 

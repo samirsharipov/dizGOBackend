@@ -245,15 +245,4 @@ public class ProductAboutService {
             list.add(dto);
         }
     }
-
-    public ApiResponse deactivateProduct(UUID productTypePriceId) {
-        Optional<ProductTypePrice> optionalProductTypePrice = productTypePriceRepository.findById(productTypePriceId);
-        if (!optionalProductTypePrice.isPresent()) {
-            return new ApiResponse("Product type price not found", false);
-        }
-        ProductTypePrice productTypePrice = optionalProductTypePrice.get();
-        productTypePrice.setActive(false);
-        productTypePriceRepository.save(productTypePrice);
-        return new ApiResponse("Product type price deactivated", true);
-    }
 }

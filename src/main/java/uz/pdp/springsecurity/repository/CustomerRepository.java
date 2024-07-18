@@ -20,6 +20,8 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     List<Customer> findAllByCustomerGroupIdAndActiveIsTrueOrCustomerGroupIdAndActiveIsNull(UUID customerGroup_id, UUID customerGroup_id2);
 
+    Page<Customer> findAllByCustomerGroupIdAndActiveIsTrue(UUID customerGroup_id, Pageable pageable);
+
     List<Customer> findAllByBusiness_IdAndBirthdayBetweenAndActiveIsTrueOrBusiness_IdAndBirthdayBetweenAndActiveIsNull(UUID business_id, Date birthday, Date birthday2, UUID business_id2, Date birthday3, Date birthday4);
 
     List<Customer> findAllByBusiness_IdAndDebtIsNotOrderByPayDateAsc(UUID business_id, Double debt);
@@ -47,6 +49,8 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     List<Customer> findAllByBusinessId(UUID business_id);
 
+    Page<Customer> findAllByBusiness_Id(UUID business_id, Pageable pageable);
+
     Page<InActiveUserProjection> findAllByBranchIdAndPayDateNotNullOrderByPayDateAsc(UUID branch_id, Pageable pageable);
 
     int countAllByCustomerGroupId(UUID customerGroup_id);
@@ -60,6 +64,8 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
     Integer countAllByBusiness_IdAndCreatedAtBetween(UUID businessId, Timestamp createdAt, Timestamp createdAt2);
 
     List<Customer> findAllByBranchIdAndNameContainingIgnoreCase(UUID branch_id, String name);
+
+    Page<Customer> findAllByBusinessIdAndNameContainingIgnoreCase(UUID businessId, String name, Pageable pageable);
 
     List<Customer> findAllByBusiness_IdAndCreatedAtBetween(UUID businessId, Timestamp start, Timestamp end);
 

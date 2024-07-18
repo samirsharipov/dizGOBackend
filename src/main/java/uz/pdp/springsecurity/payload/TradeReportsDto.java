@@ -13,16 +13,13 @@ public class TradeReportsDto {
     private UUID tradeProductId;
     private String name;
     private String barcode;
-    private Double salePrice;
     private String customerName;
-    private String payMethod;
-    private Double amount;
-    private Double discount;
-    private Double totalSum;
-    private Double profit;
     private Date tradedDate;
-    private String invoice;
-    private String traderName;
+    private double amount;
+    private double salePrice;
+    private double discount;
+    private double totalSum;
+    private String payMethod;
+    private Double profit;
 
-    // getters and setters
 }
