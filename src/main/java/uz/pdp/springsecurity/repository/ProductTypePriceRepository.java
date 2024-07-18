@@ -1,5 +1,7 @@
 package uz.pdp.springsecurity.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import uz.pdp.springsecurity.entity.ProductTypePrice;
 
@@ -13,7 +15,6 @@ public interface ProductTypePriceRepository extends JpaRepository<ProductTypePri
     List<ProductTypePrice> findAllByProduct_BusinessIdAndActiveTrue(UUID businessId);
     List<ProductTypePrice> findAllByProduct_CategoryIdAndProduct_BranchIdAndProduct_ActiveTrue(UUID product_category_id, UUID product_branch_id);
     List<ProductTypePrice> findAllByProduct_BranchIdAndProduct_ActiveIsTrue(UUID product_branch_id);
-
     List<ProductTypePrice> findAllByProduct_Category_IdAndProduct_Branch_IdAndProduct_ActiveIsTrue(UUID product_category_id, UUID product_branch_id);
     List<ProductTypePrice> findAllByProduct_Brand_IdAndProduct_Branch_IdAndProduct_ActiveIsTrue(UUID product_brand_id, UUID product_branch_id);
     List<ProductTypePrice> findAllByProduct_BrandIdAndProduct_CategoryIdAndProduct_Branch_IdAndProduct_ActiveIsTrue(UUID product_brandId, UUID product_category_id, UUID product_branch_id);
