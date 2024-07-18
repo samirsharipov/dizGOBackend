@@ -186,7 +186,7 @@ public class ProductService {
         product.setShippingClass(productDto.getShippingClass());
         product.setAttributes(productDto.getAttributes());
         product.setSoldIndividualy(productDto.getSoldIndividualy());
-        product.setIsGlobal(productDto.isGlobal());
+        product.setIsGlobal(productDto.getGlobal());
 
 
         if (productDto.getCategoryId() != null) {
