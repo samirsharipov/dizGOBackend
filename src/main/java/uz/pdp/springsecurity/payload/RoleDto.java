@@ -17,6 +17,7 @@ public class RoleDto {
     private UUID id;
     @NotBlank
     private String name;
+
     private Boolean isOffice;
 
     @NotEmpty
@@ -27,5 +28,6 @@ public class RoleDto {
     private UUID businessId;
 
     private UUID parentRole;
+
     private List<UserDataByRoleDto> users;
 }
