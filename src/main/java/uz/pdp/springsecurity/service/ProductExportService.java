@@ -73,11 +73,10 @@ public class ProductExportService {
                 attachment.setName(fileName);
                 attachment.setFileOriginalName(fileName);
                 attachment.setContentType("text/csv");
-                Attachment savedAttachment = attachmentRepository.save(attachment);
 
                 AttachmentContent attachmentContent = new AttachmentContent();
                 attachmentContent.setMainContent(fileContent);
-                attachmentContent.setAttachment(savedAttachment);
+                attachmentContent.setAttachment(attachmentRepository.save(attachment));
 
                 attachmentContentRepository.save(attachmentContent);
             }
