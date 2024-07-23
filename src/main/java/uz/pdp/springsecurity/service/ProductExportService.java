@@ -46,12 +46,12 @@ public class ProductExportService {
         }
         writeProductsToCSV(products);
 
-        Optional<Attachment> optionalAttachment = attachmentRepository.findByName("products.csv");
-        if (optionalAttachment.isPresent()) {
-            Optional<AttachmentContent> optionalAttachmentContent = attachmentContentRepository.findByAttachmentId(optionalAttachment.get().getId());
-            if (optionalAttachmentContent.isPresent()) {
+        List<Attachment> allAttachment = attachmentRepository.findAllByName("products.csv");
+        if (!allAttachment.isEmpty()) {
+            for (Attachment attachment : allAttachment) {
+                Optional<AttachmentContent> optionalAttachmentContent = attachmentContentRepository.findByAttachmentId(attachment.getId());
                 attachmentContentRepository.delete(optionalAttachmentContent.get());
-                attachmentRepository.delete(optionalAttachment.get());
+                attachmentRepository.delete(attachment);
             }
         }
 
