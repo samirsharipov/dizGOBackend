@@ -22,6 +22,12 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     Page<Customer> findAllByCustomerGroupIdAndActiveIsTrue(UUID customerGroup_id, Pageable pageable);
 
+    Page<Customer> findAllByCustomerGroupIdAndActiveIsTrueAndDebtGreaterThan(UUID customerGroup_id, double debt, Pageable pageable);
+
+    Page<Customer> findAllByCustomerGroupIdAndActiveIsTrueAndDebtLessThan(UUID customerGroup_id, double debt, Pageable pageable);
+
+    Page<Customer> findAllByCustomerGroupIdAndActiveIsTrueAndDebt(UUID customerGroup_id, double debt, Pageable pageable);
+
     List<Customer> findAllByBusiness_IdAndBirthdayBetweenAndActiveIsTrueOrBusiness_IdAndBirthdayBetweenAndActiveIsNull(UUID business_id, Date birthday, Date birthday2, UUID business_id2, Date birthday3, Date birthday4);
 
     List<Customer> findAllByBusiness_IdAndDebtIsNotOrderByPayDateAsc(UUID business_id, Double debt);
@@ -51,6 +57,12 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     Page<Customer> findAllByBusiness_Id(UUID business_id, Pageable pageable);
 
+    Page<Customer> findAllByBusiness_IdAndDebtGreaterThan(UUID business_id, double debt, Pageable pageable);
+
+    Page<Customer> findAllByBusiness_IdAndDebtLessThan(UUID business_id, double debt, Pageable pageable);
+
+    Page<Customer> findAllByBusiness_IdAndDebt(UUID business_id, double debt, Pageable pageable);
+
     Page<InActiveUserProjection> findAllByBranchIdAndPayDateNotNullOrderByPayDateAsc(UUID branch_id, Pageable pageable);
 
     int countAllByCustomerGroupId(UUID customerGroup_id);
@@ -61,11 +73,23 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     Page<Customer> findAllByBranch_IdAndActiveIsTrue(Pageable pageable, UUID branch_id);
 
+    Page<Customer> findAllByBranch_IdAndActiveIsTrueAndDebtGreaterThan(UUID branch_id, double debt, Pageable pageable);
+
+    Page<Customer> findAllByBranch_IdAndActiveIsTrueAndDebtLessThan(UUID branch_id, double debt, Pageable pageable);
+
+    Page<Customer> findAllByBranch_IdAndActiveIsTrueAndDebt(UUID branch_id, double debt, Pageable pageable);
+
     Integer countAllByBusiness_IdAndCreatedAtBetween(UUID businessId, Timestamp createdAt, Timestamp createdAt2);
 
     List<Customer> findAllByBranchIdAndNameContainingIgnoreCase(UUID branch_id, String name);
 
     Page<Customer> findAllByBusinessIdAndNameContainingIgnoreCase(UUID businessId, String name, Pageable pageable);
+
+    Page<Customer> findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtGreaterThan(UUID business_id, String name, double debt, Pageable pageable);
+
+    Page<Customer> findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtLessThan(UUID business_id, String name, double debt, Pageable pageable);
+
+    Page<Customer> findAllByBusinessIdAndNameContainingIgnoreCaseAndDebt(UUID business_id, String name, double debt, Pageable pageable);
 
     List<Customer> findAllByBusiness_IdAndCreatedAtBetween(UUID businessId, Timestamp start, Timestamp end);
 

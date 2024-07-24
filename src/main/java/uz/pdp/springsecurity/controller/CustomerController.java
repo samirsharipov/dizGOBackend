@@ -96,8 +96,12 @@ public class CustomerController {
                                         @RequestParam(required = false) UUID groupId,
                                         @RequestParam(required = false) String name,
                                         @RequestParam int size,
-                                        @RequestParam int page) {
-        ApiResponse apiResponse = customerService.getAllPageAble(businessId,branchId,groupId,size,page,name);
+                                        @RequestParam int page,
+                                        @RequestParam Boolean isName,
+                                        @RequestParam Boolean isDebt,
+                                        @RequestParam String balanceFilter
+    ) {
+        ApiResponse apiResponse = customerService.getAllPageAble(businessId, branchId, groupId, size, page, name,isName,isDebt,balanceFilter);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
@@ -667,18 +668,65 @@ public class CustomerService {
         return new ApiResponse(true, filteredMonths);
     }
 
-    public ApiResponse getAllPageAble(UUID businessId, UUID branchId, UUID groupId, int size, int page, String name) {
+    public ApiResponse getAllPageAble(UUID businessId, UUID branchId, UUID groupId, int size, int page, String name, Boolean isName, Boolean isDebt, String balanceFilter) {
         Pageable pageable = PageRequest.of(page, size);
+
+        if (isName) {
+            pageable = PageRequest.of(page, size, Sort.Direction.ASC, "name");
+        } else {
+            pageable = PageRequest.of(page, size, Sort.Direction.DESC, "name");
+        }
+        if (isDebt) {
+            pageable = PageRequest.of(page, size, Sort.Direction.ASC, "debt");
+        } else {
+            pageable = PageRequest.of(page, size, Sort.Direction.DESC, "debt");
+        }
+
         Page<Customer> all;
 
         if (name != null) {
-            all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCase(businessId, name, pageable);
+            switch (balanceFilter) {
+                case "haqdor" ->
+                        all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtGreaterThan(businessId, name, 0, pageable);
+                case "balance" ->
+                        all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndDebt(businessId, name, 0, pageable);
+                case "qarzdor" ->
+                        all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtLessThan(businessId, name, 0, pageable);
+                default ->
+                        all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCase(businessId, name, pageable);
+            }
         } else if (branchId != null) {
-            all = customerRepository.findAllByBranch_IdAndActiveIsTrue(pageable, branchId);
+            switch (balanceFilter) {
+                case "haqdor" ->
+                        all = customerRepository.findAllByBranch_IdAndActiveIsTrueAndDebtGreaterThan(branchId, 0, pageable);
+                case "balance" ->
+                        all = customerRepository.findAllByBranch_IdAndActiveIsTrueAndDebt(branchId, 0, pageable);
+                case "qarzdor" ->
+                        all = customerRepository.findAllByBranch_IdAndActiveIsTrueAndDebtLessThan(branchId, 0, pageable);
+                default -> all = customerRepository.findAllByBranch_IdAndActiveIsTrue(pageable, branchId);
+            }
         } else if (groupId != null) {
-            all = customerRepository.findAllByCustomerGroupIdAndActiveIsTrue(groupId, pageable);
+            switch (balanceFilter) {
+                case "haqdor" ->
+                    all = customerRepository.findAllByCustomerGroupIdAndActiveIsTrueAndDebtGreaterThan(groupId, 0, pageable);
+                case "balance" ->
+                    all = customerRepository.findAllByCustomerGroupIdAndActiveIsTrueAndDebt(groupId, 0, pageable);
+                case "qarzdor" ->
+                    all = customerRepository.findAllByCustomerGroupIdAndActiveIsTrueAndDebtLessThan(groupId, 0, pageable);
+                default ->
+                        all = customerRepository.findAllByCustomerGroupIdAndActiveIsTrue(groupId, pageable);
+            }
         } else {
-            all = customerRepository.findAllByBusiness_Id(businessId, pageable);
+            switch (balanceFilter) {
+                case "haqdor" ->
+                    all= customerRepository.findAllByBusiness_IdAndDebtGreaterThan(businessId, 0, pageable);
+                case "balance" ->
+                    all= customerRepository.findAllByBusiness_IdAndDebt(businessId, 0, pageable);
+                case "qarzdor" ->
+                    all = customerRepository.findAllByBusiness_IdAndDebtLessThan(businessId, 0, pageable);
+                default ->
+                        all = customerRepository.findAllByBusiness_Id(businessId, pageable);
+            }
         }
 
         if (all.isEmpty()) {
