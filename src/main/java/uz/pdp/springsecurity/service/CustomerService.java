@@ -204,9 +204,12 @@ public class CustomerService {
             customer.setPayDate(repaymentDto.getPayDate());
             customerRepository.save(customer);
             try {
+
                 repaymentHelper(repaymentDto.getRepayment(), customer, repaymentDto.getPaymentMethodId(), repaymentDto.getPayDate(), repaymentDto.getRepaymentDollar(), repaymentDto.getIsDollar()
                         , repaymentDto.getDescription());
+
                 balanceService.edit(customer.getBranch().getId(), repaymentDto.getRepayment(), true, repaymentDto.getPaymentMethodId());
+
                 UUID paymentMethodId = repaymentDto.getPaymentMethodId();
                 Optional<PaymentMethod> optionalPaymentMethod = payMethodRepository.findById(paymentMethodId);
                 optionalPaymentMethod.ifPresent(paymentMethod ->
@@ -220,25 +223,31 @@ public class CustomerService {
                                         repaymentDto.getDescription(),
                                         false,
                                         repaymentDto.getPayDate())));
-                if (customer.getChatId() != null) {
-                    String text = "<b>#YANGI_TOLOV</b>\n\n" +
-                            "<b>MIJOZ: </b>" + customer.getName() + "\n" +
-                            "<b>TO'LOV SUMMASI: </b>" + repaymentDto.getRepayment() + "UZS" + "\n" +
-                            "<b>TO'LOV TURI: </b>" + optionalPaymentMethod.get().getType() + "\n\n" +
-                            "<b>HOZIRGI " + (customer.getDebt() < 0 ? "HAQINGIZ" : "QARZINGIZ") + "</b>: " + (customer.getDebt() < 0 ? Math.abs(customer.getDebt()) : customer.getDebt());
-                    SendMessage sendMessage = SendMessage
-                            .builder()
-                            .chatId(customer.getChatId())
-                            .text(text)
-                            .parseMode(ParseMode.HTML)
-                            .build();
-                    RestTemplate restTemplate = new RestTemplate();
-                    restTemplate.postForObject("https://api.telegram.org/bot" + Constants.CUSTOMER_BOT_TOKEN + "/sendMessage", sendMessage, Object.class);
+
+                try {
+                    if (customer.getChatId() != null) {
+                        String text = "<b>#YANGI_TOLOV</b>\n\n" +
+                                "<b>MIJOZ: </b>" + customer.getName() + "\n" +
+                                "<b>TO'LOV SUMMASI: </b>" + repaymentDto.getRepayment() + "UZS" + "\n" +
+                                "<b>TO'LOV TURI: </b>" + optionalPaymentMethod.get().getType() + "\n\n" +
+                                "<b>HOZIRGI " + (customer.getDebt() < 0 ? "HAQINGIZ" : "QARZINGIZ") + "</b>: " + (customer.getDebt() < 0 ? Math.abs(customer.getDebt()) : customer.getDebt());
+                        SendMessage sendMessage = SendMessage
+                                .builder()
+                                .chatId(customer.getChatId())
+                                .text(text)
+                                .parseMode(ParseMode.HTML)
+                                .build();
+                        RestTemplate restTemplate = new RestTemplate();
+                        restTemplate.postForObject("https://api.telegram.org/bot" + Constants.CUSTOMER_BOT_TOKEN + "/sendMessage", sendMessage, Object.class);
+                    }
+                } catch (Exception e) {
+                    return new ApiResponse("telegram bot send message error", true);
                 }
+
                 return new ApiResponse("Repayment Customer !", true);
 
             } catch (Exception e) {
-                return new ApiResponse("ERROR", false);
+                return new ApiResponse(e.getMessage(), false);
             }
         } else {
             return new ApiResponse("brat qarzingiz null kelyabdi !", false);
@@ -288,7 +297,6 @@ public class CustomerService {
             }
 
         }
-
         tradeRepository.saveAll(tradeList);
     }
 
