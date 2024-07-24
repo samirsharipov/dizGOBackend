@@ -24,7 +24,7 @@ public abstract class AbsEntity  implements Serializable{
     @Column(nullable = false, updatable = false)
     private Timestamp createdAt;
 
-    @Column(updatable = false)
+
     @UpdateTimestamp
     private Timestamp updateAt;
 }
