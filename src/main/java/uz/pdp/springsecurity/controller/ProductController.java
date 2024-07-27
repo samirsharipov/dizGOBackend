@@ -23,9 +23,8 @@ import java.util.UUID;
 @RequestMapping("/api/product")
 @RequiredArgsConstructor
 public class ProductController {
-    private final ProductService productService;
-    private ProductTypeService productTypePriceService;
 
+    private final ProductService productService;
 
     @CheckPermission("ADD_PRODUCT")
     @PostMapping()

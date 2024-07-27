@@ -28,9 +28,6 @@ import java.util.*;
 public class CustomerService {
     private final CustomerGroupRepository customerGroupRepository;
     private final CustomerRepository customerRepository;
-    private final BusinessRepository businessRepository;
-    private final RoleRepository roleRepository;
-    private final UserRepository userRepository;
     private final BranchRepository branchRepository;
     private final CustomerMapper mapper;
     private final TradeRepository tradeRepository;
@@ -495,7 +492,7 @@ public class CustomerService {
     }
 
     public ApiResponse search(UUID branchId, String name) {
-        List<Customer> all = customerRepository.findAllByBranchIdAndNameContainingIgnoreCase(branchId, name);
+        List<Customer> all = customerRepository.findAllByBranchIdAndNameContainingIgnoreCaseAndActiveTrue(branchId, name);
         Set<Customer> allCustomer = new HashSet<>(all);
         all = new ArrayList<>(allCustomer);
 
@@ -687,13 +684,13 @@ public class CustomerService {
         if (name != null) {
             switch (balanceFilter) {
                 case "haqdor" ->
-                        all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtGreaterThan(businessId, name, 0, pageable);
+                        all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtGreaterThanAndActiveTrue(businessId, name, 0, pageable);
                 case "balance" ->
-                        all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndDebt(businessId, name, 0, pageable);
+                        all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtAndActiveTrue(businessId, name, 0, pageable);
                 case "qarzdor" ->
-                        all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtLessThan(businessId, name, 0, pageable);
+                        all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtLessThanAndActiveTrue(businessId, name, 0, pageable);
                 default ->
-                        all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCase(businessId, name, pageable);
+                        all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndActiveTrue(businessId, name, pageable);
             }
         } else if (branchId != null) {
             switch (balanceFilter) {
@@ -719,13 +716,13 @@ public class CustomerService {
         } else {
             switch (balanceFilter) {
                 case "haqdor" ->
-                    all= customerRepository.findAllByBusiness_IdAndDebtGreaterThan(businessId, 0, pageable);
+                    all= customerRepository.findAllByBusiness_IdAndDebtGreaterThanAndActiveTrue(businessId, 0, pageable);
                 case "balance" ->
-                    all= customerRepository.findAllByBusiness_IdAndDebt(businessId, 0, pageable);
+                    all= customerRepository.findAllByBusiness_IdAndDebtAndActiveTrue(businessId, 0, pageable);
                 case "qarzdor" ->
-                    all = customerRepository.findAllByBusiness_IdAndDebtLessThan(businessId, 0, pageable);
+                    all = customerRepository.findAllByBusiness_IdAndDebtLessThanAndActiveTrue(businessId, 0, pageable);
                 default ->
-                        all = customerRepository.findAllByBusiness_Id(businessId, pageable);
+                        all = customerRepository.findAllByBusiness_IdAndActiveTrue(businessId, pageable);
             }
         }
 
