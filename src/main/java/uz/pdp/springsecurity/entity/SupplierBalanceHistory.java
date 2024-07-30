@@ -18,6 +18,7 @@ public class SupplierBalanceHistory extends AbsEntity {
     private PaymentMethod paymentMethod;
     @ManyToOne
     private Supplier supplier;
+
     private String description;
     @ManyToOne
     private User user;

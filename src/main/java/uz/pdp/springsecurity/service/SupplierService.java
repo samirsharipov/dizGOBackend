@@ -21,19 +21,16 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class SupplierService {
-    @Autowired
-    SupplierRepository supplierRepository;
-
-    @Autowired
-    BranchRepository branchRepository;
-
-    @Autowired
-    BusinessRepository businessRepository;
+    private final SupplierRepository supplierRepository;
+    private final BranchRepository branchRepository;
+    private final BusinessRepository businessRepository;
     private final PurchaseRepository purchaseRepository;
     private final PaymentStatusRepository paymentStatusRepository;
     private final PayMethodRepository payMethodRepository;
     private final BalanceService balanceService;
     private final SupplierBalanceHistoryRepository supplierBalanceHistoryRepository;
+    private final CustomerSupplierRepository customerSupplierRepository;
+    private final CustomerSupplierService customerSupplierService;
 
     public ApiResponse add(SupplierDto supplierDto) {
         Optional<Business> optionalBusiness = businessRepository.findById(supplierDto.getBusinessId());
@@ -108,6 +105,8 @@ public class SupplierService {
         if (repaymentDto.getRepayment() != null) {
             supplier.setDebt(supplier.getDebt() - repaymentDto.getRepayment());
             Supplier save = supplierRepository.save(supplier);
+            Optional<CustomerSupplier> optionalCustomerSupplier = customerSupplierRepository.findBySupplierId(supplier.getId());
+            optionalCustomerSupplier.ifPresent(customerSupplierService::calculation);
             try {
                 storeRepaymentHelper(repaymentDto.getRepayment(), supplier);
                 balanceService.edit(repaymentDto.getBranchId(), repaymentDto.getRepayment(), false, repaymentDto.getPaymentMethodId());
@@ -152,6 +151,7 @@ public class SupplierService {
         }
         purchaseRepository.saveAll(purchaseList);
     }
+
     public ApiResponse supplierHistory(UUID id) {
         List<SupplierHistory> histories = new LinkedList<>();
         for (SupplierBalanceHistory supplierBalanceHistory : supplierBalanceHistoryRepository.findAllBySupplierIdOrderByCreatedAtDesc(id)) {
@@ -167,7 +167,7 @@ public class SupplierService {
             ));
         }
         return new ApiResponse("Taminotchi istoriyasi", true, histories);
-        }
+    }
 
     public ApiResponse ourMoney(UUID businessId) {
         Double allOurMoney = supplierRepository.allOurMoney(businessId);
