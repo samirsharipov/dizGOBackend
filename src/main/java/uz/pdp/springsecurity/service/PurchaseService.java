@@ -41,6 +41,8 @@ public class PurchaseService {
     private final PayMethodRepository payMethodRepository;
     private final FifoCalculationRepository fifoCalculationRepository;
     private final HistoryRepository historyRepository;
+    private final CustomerSupplierRepository customerSupplierRepository;
+    private final CustomerSupplierService customerSupplierService;
 
     public ApiResponse add(PurchaseDto purchaseDto) {
         Optional<Purchase> optionalPurchase = purchaseRepository.findFirstByBranchIdOrderByCreatedAtDesc(purchaseDto.getBranchId());
@@ -118,6 +120,8 @@ public class PurchaseService {
         if (purchaseDto.getDebtSum() > 0 || debtSum != purchaseDto.getDebtSum()) {
             supplier.setDebt(supplier.getDebt() - debtSum + purchaseDto.getDebtSum());
             supplierRepository.save(supplier);
+            Optional<CustomerSupplier> optionalCustomerSupplier = customerSupplierRepository.findBySupplierId(supplier.getId());
+            optionalCustomerSupplier.ifPresent(customerSupplierService::calculation);
         }
 
         purchase.setTotalSum(purchaseDto.getTotalSum());

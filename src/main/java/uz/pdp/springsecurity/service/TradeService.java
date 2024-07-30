@@ -31,7 +31,6 @@ import uz.pdp.springsecurity.utils.ConstantProduct;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
@@ -41,30 +40,18 @@ public class TradeService {
     private final TradeRepository tradeRepository;
     private final ProductAboutRepository productAboutRepository;
     private final RepaymentDebtRepository repaymentDebtRepository;
-
     private final CustomerRepository customerRepository;
     private final DebtCanculsRepository debtCanculsRepository;
-
     private final CustomerDebtRepository customerDebtRepository;
-
     private final BranchRepository branchRepository;
-
     private final PaymentStatusRepository paymentStatusRepository;
-
     private final PayMethodRepository payMethodRepository;
-
     private final UserRepository userRepository;
-
     private final TradeProductRepository tradeProductRepository;
-
     private final CurrencyRepository currencyRepository;
-
     private final WarehouseService warehouseService;
-
     private final FifoCalculationService fifoCalculationService;
-
     private final WarehouseRepository warehouseRepository;
-
     private final PaymentMapper paymentMapper;
     private final SubscriptionRepository subscriptionRepository;
     private final ProductTypeComboRepository productTypeComboRepository;
@@ -75,8 +62,9 @@ public class TradeService {
     private final BusinessRepository businessRepository;
     private final ProductRepository productRepository;
     private final HistoryRepository historyRepository;
-
     private final BusinessService businessService;
+    private final CustomerSupplierRepository customerSupplierRepository;
+    private final CustomerSupplierService customerSupplierService;
 
 
     @SneakyThrows
@@ -217,6 +205,7 @@ public class TradeService {
                 customer.setPayDate(tradeDTO.getPayDate());
                 customerRepository.save(customer);
 
+
                 if (isEdit) {
                     Optional<CustomerDebt> optionalCustomerDebt = customerDebtRepository.findByTrade_Id(trade.getId());
                     if (optionalCustomerDebt.isPresent()) {
@@ -228,6 +217,7 @@ public class TradeService {
                     customerDebt.setCustomer(customer);
                     customerDebt.setDebtSum(newDebt - debt);
                 }
+
             } else if (tradeDTO.getCustomerId() != null) {
                 Optional<Customer> optionalCustomer = customerRepository.findById(tradeDTO.getCustomerId());
                 if (optionalCustomer.isEmpty()) return new ApiResponse("CUSTOMER NOT FOUND", false);
@@ -429,6 +419,8 @@ public class TradeService {
         if (customerDebt.getDebtSum() != null) {
             customerDebt.setTrade(trade);
             customerDebtRepository.save(customerDebt);
+            Optional<CustomerSupplier> optionalCustomerSupplier = customerSupplierRepository.findByCustomerId(customerDebt.getCustomer().getId());
+            optionalCustomerSupplier.ifPresent(customerSupplierService::calculation);
         }
 
         try {
@@ -620,6 +612,8 @@ public class TradeService {
             Customer customer = trade.getCustomer();
             customer.setDebt(customer.getDebt() - trade.getTotalSum());
             customerRepository.save(customer);
+            Optional<CustomerSupplier> optionalCustomerSupplier = customerSupplierRepository.findByCustomerId(customer.getId());
+            optionalCustomerSupplier.ifPresent(customerSupplierService::calculation);
         }
 
         if (trade.getKpi() != null) {
@@ -656,7 +650,6 @@ public class TradeService {
         }
 
         customerDebtRepository.deleteAllByTradeId(tradeId);
-
         tradeRepository.deleteById(tradeId);
 
         return new ApiResponse("SUCCESS", true);

@@ -39,6 +39,8 @@ public class CustomerService {
     private final PayMethodRepository payMethodRepository;
     private final TradeProductRepository tradeProductRepository;
     private final CustomerDebtRepaymentRepository customerDebtRepaymentRepository;
+    private final CustomerSupplierRepository customerSupplierRepository;
+    private final CustomerSupplierService customerSupplierService;
 
     public ApiResponse add(CustomerDto customerDto) {
         return createEdit(new Customer(), customerDto);
@@ -201,6 +203,8 @@ public class CustomerService {
             customer.setDebt(customer.getDebt() - repaymentDto.getRepayment());
             customer.setPayDate(repaymentDto.getPayDate());
             customerRepository.save(customer);
+            Optional<CustomerSupplier> optionalCustomerSupplier = customerSupplierRepository.findByCustomerId(customer.getId());
+            optionalCustomerSupplier.ifPresent(customerSupplierService::calculation);
             try {
 
                 repaymentHelper(repaymentDto.getRepayment(), customer, repaymentDto.getPaymentMethodId(), repaymentDto.getPayDate(), repaymentDto.getRepaymentDollar(), repaymentDto.getIsDollar()

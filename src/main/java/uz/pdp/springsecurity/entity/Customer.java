@@ -52,6 +52,7 @@ public class Customer extends AbsEntity {
     private Boolean lidCustomer;
 
     private Boolean active = true;
+
     private Long chatId;
 
     public Customer(String name, String phoneNumber, String telegram, Business business) {
