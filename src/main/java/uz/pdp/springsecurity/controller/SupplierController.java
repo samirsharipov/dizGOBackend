@@ -1,7 +1,6 @@
 package uz.pdp.springsecurity.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +10,6 @@ import uz.pdp.springsecurity.entity.User;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.RepaymentDto;
 import uz.pdp.springsecurity.payload.SupplierDto;
-import uz.pdp.springsecurity.repository.SupplierRepository;
 import uz.pdp.springsecurity.service.SupplierService;
 
 import javax.validation.Valid;

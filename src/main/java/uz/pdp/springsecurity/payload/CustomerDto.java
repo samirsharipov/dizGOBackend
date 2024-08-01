@@ -15,13 +15,10 @@ import java.util.UUID;
 public class CustomerDto {
     private UUID id;
 
-    @NotNull(message = "required line")
     private String name;
 
-    @NotNull(message = "required line")
     private String phoneNumber;
 
-    @NotNull(message = "enter your telegram username")
     private String telegram;
 
     private String description;
