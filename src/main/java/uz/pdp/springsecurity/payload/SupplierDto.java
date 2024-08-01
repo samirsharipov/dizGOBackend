@@ -29,4 +29,6 @@ public class SupplierDto {
 
     private double debt;
 
+    private CustomerDto customerDto;
+
 }

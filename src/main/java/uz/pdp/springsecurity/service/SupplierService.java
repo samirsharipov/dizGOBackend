@@ -1,14 +1,10 @@
 package uz.pdp.springsecurity.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.enums.StatusName;
-import uz.pdp.springsecurity.payload.ApiResponse;
-import uz.pdp.springsecurity.payload.RepaymentDto;
-import uz.pdp.springsecurity.payload.SupplierDto;
-import uz.pdp.springsecurity.payload.SupplierHistory;
+import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
 
 import javax.transaction.Transactional;
@@ -31,6 +27,7 @@ public class SupplierService {
     private final SupplierBalanceHistoryRepository supplierBalanceHistoryRepository;
     private final CustomerSupplierRepository customerSupplierRepository;
     private final CustomerSupplierService customerSupplierService;
+    private final CustomerService customerService;
 
     public ApiResponse add(SupplierDto supplierDto) {
         Optional<Business> optionalBusiness = businessRepository.findById(supplierDto.getBusinessId());
@@ -50,8 +47,20 @@ public class SupplierService {
             supplier.setCompanyName(supplierDto.getCompanyName());
         }
         supplier.setDebt(supplierDto.getDebt());
-
         supplierRepository.save(supplier);
+
+        if (supplierDto.getCustomerDto()!=null) {
+            CustomerDto customerDto = supplierDto.getCustomerDto();
+            customerDto.setName(supplierDto.getName());
+            customerDto.setPhoneNumber(supplierDto.getPhoneNumber());
+            customerDto.setTelegram(supplierDto.getTelegram());
+            ApiResponse apiResponse = customerService.add(customerDto);
+            CustomerSupplier customerSupplier = new CustomerSupplier();
+            customerSupplier.setSupplier(supplier);
+            customerSupplier.setCustomer((Customer) apiResponse.getObject());
+            customerSupplierRepository.save(customerSupplier);
+        }
+
         return new ApiResponse("ADDED", true);
     }
 

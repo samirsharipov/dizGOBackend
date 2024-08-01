@@ -78,7 +78,7 @@ public class CustomerService {
         customer.setBranch(branches.get(0)); // TODO: 6/6/2023  delete
 
         Customer save = customerRepository.save(customer);
-        return new ApiResponse("SUCCESS", true);
+        return new ApiResponse("SUCCESS", true,save);
     }
 
     public ApiResponse get(UUID id) {
