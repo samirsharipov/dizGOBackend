@@ -12,4 +12,6 @@ import java.util.UUID;
 public class BalancePostDto {
     private Double summa;
     private UUID payMethodId;
+    private boolean dollar;
+    private String description;
 }

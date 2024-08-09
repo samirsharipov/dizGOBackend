@@ -31,4 +31,8 @@ public class BalanceHistoryDto {
 
     private String payMethodType;
 
+    private String currency;
+
+    private String description;
+
 }

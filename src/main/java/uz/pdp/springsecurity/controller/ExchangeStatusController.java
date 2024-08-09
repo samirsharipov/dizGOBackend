@@ -1,5 +1,6 @@
 package uz.pdp.springsecurity.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
@@ -12,17 +13,14 @@ import uz.pdp.springsecurity.service.ExchangeStatusService;
 
 @RequestMapping("/api/exchange/status")
 @RestController
+@RequiredArgsConstructor
 public class ExchangeStatusController {
 
-    @Autowired
-    ExchangeStatusService exchangeStatusService;
-
+    private final ExchangeStatusService exchangeStatusService;
 
     @GetMapping("/getAllStatus")
     public HttpEntity<?> getAllStatus() {
         ApiResponse apiResponse = exchangeStatusService.getAllStatus();
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
-
-
     }
 }

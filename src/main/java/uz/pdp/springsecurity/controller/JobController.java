@@ -16,6 +16,7 @@ import java.util.UUID;
 @RequestMapping(value = "/api/job")
 @RequiredArgsConstructor
 public class JobController {
+
     private final JobService service;
 
     @CheckPermission("VIEW_JOB")

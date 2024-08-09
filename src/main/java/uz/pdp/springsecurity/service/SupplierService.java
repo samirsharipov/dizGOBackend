@@ -118,7 +118,7 @@ public class SupplierService {
             optionalCustomerSupplier.ifPresent(customerSupplierService::calculation);
             try {
                 storeRepaymentHelper(repaymentDto.getRepayment(), supplier);
-                balanceService.edit(repaymentDto.getBranchId(), repaymentDto.getRepayment(), false, repaymentDto.getPaymentMethodId());
+                balanceService.edit(repaymentDto.getBranchId(), repaymentDto.getRepayment(), false, repaymentDto.getPaymentMethodId(), repaymentDto.getIsDollar(),"supplier");
                 supplierBalanceHistoryRepository.save(new SupplierBalanceHistory(
                         repaymentDto.getRepayment(),
                         payMethodRepository.findById(repaymentDto.getPaymentMethodId()).orElseThrow(),

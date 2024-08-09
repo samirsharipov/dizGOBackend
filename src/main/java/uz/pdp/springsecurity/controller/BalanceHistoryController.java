@@ -44,4 +44,5 @@ public class BalanceHistoryController {
         ApiResponse apiResponse = service.getByBranchId(branchId, page, size, startDate, endDate);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
+
 }

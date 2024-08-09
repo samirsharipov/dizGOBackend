@@ -4,13 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import uz.pdp.springsecurity.entity.BalanceHistory;
 import uz.pdp.springsecurity.mapper.BalanceMapper;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.BalanceHistoryDto;
 import uz.pdp.springsecurity.repository.BalanceHistoryRepository;
-import uz.pdp.springsecurity.repository.BalanceRepository;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -35,7 +35,7 @@ public class BalanceHistoryService {
             return new ApiResponse("branch id is null", false);
         }
 
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
         Map<String, Object> response = new HashMap<>();
 
         Timestamp startTimestamp = null;
@@ -59,7 +59,7 @@ public class BalanceHistoryService {
             return new ApiResponse("branch id is null", false);
         }
 
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
         Map<String, Object> response = new HashMap<>();
 
         Timestamp startTimestamp = null;

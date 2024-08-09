@@ -18,7 +18,6 @@ public class FormController {
 
     private final FormService service;
 
-
     @GetMapping("/getByBusinessId/{businessId}")
     public HttpEntity<?> getAll(@PathVariable UUID businessId) {
         ApiResponse apiResponse = service.getAll(businessId);
@@ -30,7 +29,6 @@ public class FormController {
         ApiResponse apiResponse = service.getById(id);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
-
 
     @CheckPermission("ADD_FORM_LID")
     @PostMapping
@@ -45,7 +43,6 @@ public class FormController {
         ApiResponse apiResponse = service.delete(id);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
-
 
     @GetMapping("/getFormLidHistory/{businessId}")
     public HttpEntity<?> getFormLidHistory(@PathVariable UUID businessId) {

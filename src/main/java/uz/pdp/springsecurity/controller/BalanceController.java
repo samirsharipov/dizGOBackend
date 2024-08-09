@@ -20,7 +20,7 @@ public class BalanceController {
     @CheckPermission("EDIT_BALANCE")
     @PutMapping("/{branchId}")
     public HttpEntity<?> edit(@PathVariable UUID branchId, @RequestBody BalancePostDto balancePostDto) {
-        ApiResponse apiResponse = balanceService.edit(branchId, balancePostDto.getSumma(), true, balancePostDto.getPayMethodId());
+        ApiResponse apiResponse = balanceService.edit(branchId, balancePostDto.getSumma(), true, balancePostDto.getPayMethodId(), balancePostDto.isDollar(), balancePostDto.getDescription());
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
@@ -35,6 +35,13 @@ public class BalanceController {
     @GetMapping("/business/{businessId}")
     public HttpEntity<?> getAllByBusinessId(@PathVariable UUID businessId) {
         ApiResponse apiResponse = balanceService.getAllByBusinessId(businessId);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
+
+    @CheckPermission("VIEW_BALANCE")
+    @GetMapping("/get-balance/{businessId}")
+    public HttpEntity<?> getBalance(@PathVariable UUID businessId, @RequestParam(required = false) UUID branchId) {
+        ApiResponse apiResponse = balanceService.getBalance(businessId,branchId);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 }

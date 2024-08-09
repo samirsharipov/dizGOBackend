@@ -22,8 +22,13 @@ public class BalanceService {
     private final BalanceHistoryRepository balanceHistoryRepository;
     private final PayMethodRepository payMethodRepository;
 
-    public ApiResponse edit(UUID branchId, Double summa, Boolean isPlus, UUID payMethodId) {
-        Optional<Balance> optionalBalance = repository.findByPaymentMethod_IdAndBranchId(payMethodId, branchId);
+    public ApiResponse edit(UUID branchId, Double summa, Boolean isPlus, UUID payMethodId, boolean dollar, String description) {
+        Optional<Balance> optionalBalance;
+        if (dollar) {
+            optionalBalance = repository.findByPaymentMethod_IdAndBranchIdAndCurrencyIgnoreCase(payMethodId, branchId, "DOLLAR");
+        } else {
+            optionalBalance = repository.findByPaymentMethod_IdAndBranchIdAndCurrencyIgnoreCase(payMethodId, branchId, "SOM");
+        }
 
         if (optionalBalance.isPresent()) {
             Balance balance = optionalBalance.get();
@@ -33,7 +38,7 @@ public class BalanceService {
                 newBalanceHistory.setAccountSumma(balance.getAccountSumma());
 
                 double totalSumma;
-                if (Boolean.TRUE.equals( isPlus)) {
+                if (Boolean.TRUE.equals(isPlus)) {
                     totalSumma = balance.getAccountSumma() + summa;
                 } else {
                     totalSumma = balance.getAccountSumma() - summa;
@@ -42,6 +47,8 @@ public class BalanceService {
                 newBalanceHistory.setTotalSumma(totalSumma);
                 newBalanceHistory.setPlus(isPlus);
                 newBalanceHistory.setSumma(summa);
+                newBalanceHistory.setDescription(description);
+                newBalanceHistory.setCurrency(optionalBalance.get().getCurrency());
 
                 balanceHistoryRepository.save(newBalanceHistory);
                 repository.save(balance);
@@ -66,17 +73,19 @@ public class BalanceService {
             balanceDto.setBranchId(balance.getBranch().getId());
             balanceDto.setPayMethodName(balance.getPaymentMethod().getType());
             balanceDto.setPaymentMethodId(balance.getPaymentMethod().getId());
+            balanceDto.setCurrency(balance.getCurrency());
             balanceDtoList.add(balanceDto);
         }
 
-        balanceDtoList.sort(Comparator.comparing(BalanceDto::getPaymentMethodId));
+        balanceDtoList.sort(Comparator.comparing(BalanceDto::getCurrency));
 
         return new ApiResponse("found", true, balanceDtoList);
     }
 
-    public ApiResponse edit(UUID branchId, boolean isPlus, List<PaymentDto> paymentDtoList) {
+    public ApiResponse edit(UUID branchId, boolean isPlus, List<PaymentDto> paymentDtoList, String dollar, String description) {
         for (PaymentDto paymentMethod : paymentDtoList) {
-            Optional<Balance> optionalBalance = repository.findByPaymentMethod_IdAndBranchId(paymentMethod.getPaymentMethodId(), branchId);
+            Optional<Balance> optionalBalance = repository.findByPaymentMethod_IdAndBranchIdAndCurrencyIgnoreCase(paymentMethod.getPaymentMethodId(), branchId, dollar);
+
             if (optionalBalance.isPresent()) {
                 Balance balance = optionalBalance.get();
                 if ((paymentMethod.getIsDollar() != null && paymentMethod.getIsDollar() ? paymentMethod.getPaidSumDollar() : paymentMethod.getPaidSum()) > 0) {
@@ -95,7 +104,9 @@ public class BalanceService {
                     balance.setAccountSumma(totalSumma);
                     newBalanceHistory.setTotalSumma(totalSumma);
                     newBalanceHistory.setPlus(isPlus);
+                    newBalanceHistory.setDescription(description);
                     newBalanceHistory.setSumma((paymentMethod.getIsDollar() != null && paymentMethod.getIsDollar() ? paymentMethod.getPaidSumDollar() : paymentMethod.getPaidSum()));
+                    newBalanceHistory.setCurrency(optionalBalance.get().getCurrency());
 
                     balanceHistoryRepository.save(newBalanceHistory);
                     repository.save(balance);
@@ -110,20 +121,44 @@ public class BalanceService {
     }
 
     public ApiResponse getAllByBusinessId(UUID businessId) {
-        List<PaymentMethod> allPaymentMethod = payMethodRepository.findAllByBusiness_Id(businessId);
 
+        List<PaymentMethod> allPaymentMethod = payMethodRepository.findAllByBusiness_Id(businessId);
         List<BalanceGetDto> balanceGetDtoList = new ArrayList<>();
+
         for (PaymentMethod paymentMethod : allPaymentMethod) {
-            List<Balance> all = repository.findAllByPaymentMethodId(paymentMethod.getId());
+            List<Balance> all = repository.findAllByPaymentMethodIdAndCurrencyIgnoreCase(paymentMethod.getId(), "DOLLAR");
+            getDtoList(balanceGetDtoList, all);
+        }
+        for (PaymentMethod paymentMethod : allPaymentMethod) {
+            List<Balance> all = repository.findAllByPaymentMethodIdAndCurrencyIgnoreCase(paymentMethod.getId(), "SOM");
+            getDtoList(balanceGetDtoList, all);
+        }
+
+        return new ApiResponse("all", true, balanceGetDtoList);
+    }
+
+    private void getDtoList(List<BalanceGetDto> balanceGetDtoList, List<Balance> all) {
+        double totalSumma = 0;
+        for (Balance balance : all) {
             BalanceGetDto balanceGetDto = new BalanceGetDto();
-            double totalSumma = 0;
-            for (Balance balance : all) {
-                totalSumma = totalSumma + balance.getAccountSumma();
-                balanceGetDto.setPaymentMethodId(balance.getPaymentMethod().getId());
-                balanceGetDto.setPayMethodName(balance.getPaymentMethod().getType());
-                balanceGetDto.setBalanceSumma(totalSumma);
-            }
+            totalSumma = totalSumma + balance.getAccountSumma();
+            balanceGetDto.setPaymentMethodId(balance.getPaymentMethod().getId());
+            balanceGetDto.setPayMethodName(balance.getPaymentMethod().getType());
+            balanceGetDto.setBalanceSumma(totalSumma);
+            balanceGetDto.setCurrency(balance.getCurrency());
             balanceGetDtoList.add(balanceGetDto);
+        }
+    }
+
+    public ApiResponse getBalance(UUID businessId, UUID branchId) {
+        List<BalanceGetDto> balanceGetDtoList = new ArrayList<>();
+
+        if (branchId != null) {
+            getDtoList(balanceGetDtoList, repository.findAllByBranchIdAndCurrencyIgnoreCaseAndPaymentMethod_TypeIgnoreCase(branchId, "DOLLAR", "Naqd"));
+            getDtoList(balanceGetDtoList, repository.findAllByBranchIdAndCurrencyIgnoreCaseAndPaymentMethod_TypeIgnoreCase(branchId, "SOM", "Naqd"));
+        } else {
+            getDtoList(balanceGetDtoList, repository.findAllByBranch_Business_idAndCurrencyIgnoreCaseAndPaymentMethod_TypeIgnoreCase(businessId, "DOLLAR", "Naqd"));
+            getDtoList(balanceGetDtoList, repository.findAllByBranch_Business_idAndCurrencyIgnoreCaseAndPaymentMethod_TypeIgnoreCase(businessId, "SOM", "Naqd"));
         }
 
         return new ApiResponse("all", true, balanceGetDtoList);

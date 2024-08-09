@@ -210,7 +210,7 @@ public class CustomerService {
                 repaymentHelper(repaymentDto.getRepayment(), customer, repaymentDto.getPaymentMethodId(), repaymentDto.getPayDate(), repaymentDto.getRepaymentDollar(), repaymentDto.getIsDollar()
                         , repaymentDto.getDescription());
 
-                balanceService.edit(customer.getBranch().getId(), repaymentDto.getRepayment(), true, repaymentDto.getPaymentMethodId());
+                balanceService.edit(customer.getBranch().getId(), repaymentDto.getRepayment(), true, repaymentDto.getPaymentMethodId(), repaymentDto.getIsDollar(),"customer");
 
                 UUID paymentMethodId = repaymentDto.getPaymentMethodId();
                 Optional<PaymentMethod> optionalPaymentMethod = payMethodRepository.findById(paymentMethodId);
