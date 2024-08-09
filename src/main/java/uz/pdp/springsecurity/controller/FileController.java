@@ -1,5 +1,6 @@
 package uz.pdp.springsecurity.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -23,13 +24,11 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class FileController {
 
-    @Autowired
-    private FileService fileService;
-
-    @Autowired
-    private FileDateRepository fileDateRepository;
+    private final FileService fileService;
+    private final FileDateRepository fileDateRepository;
 
     @PostMapping("/files")
     public HttpEntity<?> uploadFile(@RequestParam("file") MultipartFile file) {

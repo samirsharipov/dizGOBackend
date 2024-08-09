@@ -1,6 +1,6 @@
 package uz.pdp.springsecurity.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,17 +19,11 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/outlay")
+@RequiredArgsConstructor
 public class OutlayController {
 
-    @Autowired
-    OutlayService outlayService;
+    private final OutlayService outlayService;
 
-    /**
-     * YANGI CHIQIM QO'SHISH
-     *
-     * @param outlayDto
-     * @return ApiResponse(success - > true message - > ADDED)
-     */
     @CheckPermission("ADD_OUTLAY")
     @PostMapping
     public HttpEntity<?> add(@Valid @RequestBody OutlayDto outlayDto) {
@@ -37,13 +31,6 @@ public class OutlayController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    /**
-     * CHIQIMNI MALUMOTLARNI TAXRIRILASH
-     *
-     * @param id
-     * @param outlayDto
-     * @return ApiResponse(success - > true message - > EDITED)
-     */
     @CheckPermission("EDIT_OUTLAY")
     @PutMapping("/{id}")
     public HttpEntity<?> edit(@PathVariable UUID id, @RequestBody OutlayDto outlayDto) {
@@ -51,12 +38,6 @@ public class OutlayController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    /**
-     * BITTA IDGA TEGISHLI CHIQIMNI OLIB CHIQISH
-     *
-     * @param id
-     * @return ApiResponse(success - > true object - > value)
-     */
     @CheckPermission("VIEW_OUTLAY")
     @GetMapping("/{id}")
     public HttpEntity<?> get(@PathVariable UUID id) {
@@ -64,12 +45,6 @@ public class OutlayController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    /**
-     * ID ORQALI BITTA CHIQIMNI DELETE QILISH
-     *
-     * @param id
-     * @return ApiResponse(success - > true message - > DELETED)
-     */
     @CheckPermission("DELETE_OUTLAY")
     @DeleteMapping("/{id}")
     public HttpEntity<?> delete(@PathVariable UUID id) {
@@ -77,13 +52,6 @@ public class OutlayController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    /**
-     * KIRITLGAN SANADAGI VA BRANCHGA TEGISHLI CHIQIMNI OLIB CHIQISH
-     *
-     * @param date
-     * @param branch_id
-     * @return ApiResponse(success - > true message - > VALUE)
-     */
     @CheckPermission("VIEW_OUTLAY")
     @GetMapping("/get-by-date/{date}/{branch_id}")
     public HttpEntity<?> getByDate(@PathVariable Date date, @PathVariable UUID branch_id) {
@@ -91,13 +59,7 @@ public class OutlayController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    /**
-     * KIRITLGAN SANADAGI VA BUSINESSGA TEGISHLI CHIQIMNI OLIB CHIQISH
-     *
-     * @param date
-     * @param
-     * @return ApiResponse(success - > true message - > VALUE)
-     */
+
     @CheckPermission("VIEW_OUTLAY")
     @GetMapping("/get-all-by-date/{business_id}/{date}")
     public HttpEntity<?> getByAllDate(@PathVariable UUID business_id, @PathVariable Date date) {
@@ -105,12 +67,6 @@ public class OutlayController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    /**
-     * BRANCHGA TEGISHLI CHIQMLARNI OLIB CHIQISH
-     *
-     * @param branch_id
-     * @return ApiResponse(success - > true message - > VALUE)
-     */
     @CheckPermission("VIEW_OUTLAY")
     @GetMapping("/get-by-branchId/{branch_id}")
     public HttpEntity<?> getAllByBranchId(@PathVariable UUID branch_id) {
@@ -118,12 +74,6 @@ public class OutlayController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    /**
-     * BUSINESSGA TEGISHLI BARCHA CHIQIMLARNI OLIB CHQISH
-     *
-     * @param businessId
-     * @return ApiResponse(success - > true message - > VALUE)
-     */
     @CheckPermission("VIEW_OUTLAY_ADMIN")
     @GetMapping("/get-by-businessId/{businessId}")
     public HttpEntity<?> getAllByBusinessId(@PathVariable UUID businessId) {
@@ -161,5 +111,4 @@ public class OutlayController {
         ApiResponse apiResponse = outlayService.getOutlayProducts(outlayId);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
-
 }

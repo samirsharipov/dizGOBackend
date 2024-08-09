@@ -14,6 +14,7 @@ import java.util.UUID;
 @RequestMapping("/api/history")
 @RequiredArgsConstructor
 public class HistoryController {
+
     private final HistoryService historyService;
 
     @GetMapping("/{id}")

@@ -5,10 +5,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uz.pdp.springsecurity.annotations.CheckPermission;
-import uz.pdp.springsecurity.entity.LidStatus;
 import uz.pdp.springsecurity.payload.ApiResponse;
-import uz.pdp.springsecurity.payload.LidFieldDto;
-import uz.pdp.springsecurity.payload.LidStatusDto;
 import uz.pdp.springsecurity.payload.LidStatusPostDto;
 import uz.pdp.springsecurity.service.LidStatusService;
 
@@ -18,8 +15,8 @@ import java.util.UUID;
 @RequestMapping("/api/lid-status")
 @RequiredArgsConstructor
 public class LidStatusController {
-    private final LidStatusService service;
 
+    private final LidStatusService service;
 
     @CheckPermission("VIEW_LID_STATUS")
     @GetMapping("/getByBusinessId/{businessId}")

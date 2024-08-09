@@ -1,5 +1,6 @@
 package uz.pdp.springsecurity.shoxjaxon.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,12 +8,13 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import uz.pdp.springsecurity.shoxjaxon.repository.SotuvRepositiry;
+import uz.pdp.springsecurity.payload.ApiResponse;
+import uz.pdp.springsecurity.shoxjaxon.repository.SotuvRepository;
+import uz.pdp.springsecurity.shoxjaxon.service.SotuvService;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -22,15 +24,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/businessTotalSums")
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class SotuvController {
 
-    private final SotuvRepositiry sotuvRepositiry;
-
-    @Autowired
-    public SotuvController(SotuvRepositiry sotuvRepositiry) {
-        this.sotuvRepositiry = sotuvRepositiry;
-    }
-
+    private final SotuvRepository sotuvRepositiry;
+    private final SotuvService sotuvService;
 
 
     private static final Logger logger = LoggerFactory.getLogger(SotuvController.class);
@@ -40,40 +38,9 @@ public class SotuvController {
             @RequestParam(name = "businessId", required = true) UUID businessId,
             @RequestParam(name = "startDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
             @RequestParam(name = "endDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
-        try {
-            BigDecimal[] totalSumsPaid, totalSumsDebt;
-            if (startDate == null && endDate == null) {
-                totalSumsPaid = sotuvRepositiry.calculateTotalSumForBranchWithDateRange(businessId);
-                totalSumsDebt = sotuvRepositiry.calculateTotalDebtSumForBranchWithDateRange(businessId);
-            } else {
-                totalSumsPaid = sotuvRepositiry.calculateTotalSumForBranchWithDateRangeFiltered(businessId, startDate, endDate);
-                totalSumsDebt = sotuvRepositiry.calculateTotalDebtSumForBranchWithDateRangeFiltered(businessId, startDate, endDate);
-            }
 
-            if (totalSumsPaid == null || totalSumsPaid.length < 2 || totalSumsDebt == null || totalSumsDebt.length < 2) {
-                logger.error("Unexpected error calculating total sum for businessId: " + businessId);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("Unexpected error calculating total sum for businessId: " + businessId);
-            }
-
-            BigDecimal totalSumPaidSum = totalSumsPaid[0] != null ? totalSumsPaid[0] : BigDecimal.ZERO;
-            BigDecimal totalSumPaidSumDollar = totalSumsPaid[1] != null ? totalSumsPaid[1] : BigDecimal.ZERO;
-            BigDecimal totalSumDebtSum = totalSumsDebt[0] != null ? totalSumsDebt[0] : BigDecimal.ZERO;
-            BigDecimal totalSumDebtSumDollar = totalSumsDebt[1] != null ? totalSumsDebt[1] : BigDecimal.ZERO;
-
-            Map<String, BigDecimal> result = Map.of(
-                    "totalSumPaidSum", totalSumPaidSum,
-                    "totalSumPaidSumDollar", totalSumPaidSumDollar,
-                    "totalSumDebtSum", totalSumDebtSum,
-                    "totalSumDebtSumDollar", totalSumDebtSumDollar
-            );
-
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            logger.error("Unexpected error calculating total sum for businessId: " + businessId, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Unexpected error calculating total sum for businessId: " + businessId);
-        }
+        ApiResponse apiResponse = sotuvService.getTotalSum(businessId, startDate, endDate);
+        return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(apiResponse);
     }
 
     @GetMapping("/businessTotalFoyda")
@@ -301,7 +268,6 @@ public class SotuvController {
                     .body("Unexpected error retrieving repayment debt sums by payment method for businessId: " + businessId + ", branchId: " + branchId);
         }
     }
-
 
 
     @GetMapping("/debtCanculsByPaymentMethod")

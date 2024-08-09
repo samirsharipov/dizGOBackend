@@ -15,6 +15,7 @@ import java.util.UUID;
 @RequestMapping(value = "/api/info")
 @RequiredArgsConstructor
 public class InfoController {
+
     private final InfoService infoService;
 
     @CheckPermission("VIEW_INFO_ADMIN")
@@ -26,6 +27,7 @@ public class InfoController {
         ApiResponse apiResponse = infoService.getInfoByBusiness(businessId,date,startDate,endDate);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
+
     @CheckPermission("VIEW_INFO")
     @GetMapping("/get-info-by-branch/{branchId}")
     public HttpEntity<?> getInfoByBranch(@PathVariable UUID branchId,

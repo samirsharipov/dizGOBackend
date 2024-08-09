@@ -15,4 +15,5 @@ public class BalanceDto {
     private String payMethodName;
     private UUID branchId;
     private String branchName;
+    private String currency;
 }

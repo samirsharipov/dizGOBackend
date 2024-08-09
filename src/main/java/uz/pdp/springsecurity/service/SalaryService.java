@@ -85,7 +85,8 @@ public class SalaryService {
             salaryRepository.save(salary);
             salaryRepository.save(newSalary);
 
-            balanceService.edit(salary.getBranch().getId(), salaryDto.getSalary(), false, salaryDto.getPaymentMethodId());
+            //todo dollar sum joyini korib chqish
+            balanceService.edit(salary.getBranch().getId(), salaryDto.getSalary(), false, salaryDto.getPaymentMethodId(), false,"salary");
 
             return new ApiResponse("SUCCESS", true);
         } catch (Exception e) {
@@ -103,7 +104,8 @@ public class SalaryService {
         salary.setEndDate(new Date());
         salaryRepository.save(salary);
 
-        balanceService.edit(salary.getBranch().getId(), salaryDto.getSalary(), false, salaryDto.getPaymentMethodId());
+        //todo dollar sum joyini korib chqish
+        balanceService.edit(salary.getBranch().getId(), salaryDto.getSalary(), false, salaryDto.getPaymentMethodId(), false,"salary");
 
         return new ApiResponse("SUCCESS", true);
     }

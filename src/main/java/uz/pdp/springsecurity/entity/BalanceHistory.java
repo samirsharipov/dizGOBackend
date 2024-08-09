@@ -27,4 +27,8 @@ public class BalanceHistory extends AbsEntity {
 
     @ManyToOne
     private Balance balance;
+
+    private String description;
+
+    private String currency;
 }

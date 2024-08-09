@@ -912,53 +912,33 @@ public class DataLoader implements CommandLineRunner {
         } else if (initMode.equals("never")) {
             List<Business> businessRepositoryAll1 = businessRepository.findAll();
             for (Business business2 : businessRepositoryAll1) {
-                List<Shablon> all1 = shablonRepository.findAllByBusiness_Id(business2.getId());
-                if (all1.isEmpty()) {
-                    Shablon shablon = new Shablon();
-                    shablon.setName("Tug'ilgan kun uchun");
-                    shablon.setOriginalName("bithday");
-                    shablon.setMessage("Hurmatli {ism} tugilgan kuningiz bilan");
-                    shablon.setBusiness(business2);
-                    shablonRepository.save(shablon);
+                boolean existsSom = balanceRepository.existsAllByBranch_Business_IdAndCurrencyIgnoreCase(business2.getId(), "SOM");
+                boolean existsDollar = balanceRepository.existsAllByBranch_Business_IdAndCurrencyIgnoreCase(business2.getId(), "DOLLAR");
+                if (!existsSom && !existsDollar) {
+                    List<Balance> allBalance
+                            = balanceRepository.findAllByBranch_BusinessId(business2.getId());
 
-                    Shablon shablon2 = new Shablon();
-                    shablon2.setName("Mijozlar qarzi");
-                    shablon2.setOriginalName("debtCustomer");
-                    shablon2.setMessage("Hurmatli mijoz qarzingiz bor");
-                    shablon2.setBusiness(business2);
-                    shablonRepository.save(shablon2);
+                    for (Balance balance : allBalance) {
+                        balance.setCurrency("SOM");
+                        balanceRepository.save(balance);
+                    }
 
-                    Shablon shablon3 = new Shablon();
-                    shablon3.setName("Task qo'shilganda");
-                    shablon3.setOriginalName("newTask");
-                    shablon3.setMessage("yangi task qoshildi");
-                    shablon3.setBusiness(business2);
-                    shablonRepository.save(shablon3);
-                }
-                List<LidStatus> rejection = lidStatusRepository.
-                        findAllByBusinessIdAndOrginalName(business2.getId(), "Rejection");
+                    List<Branch> branches = branchRepository.findAllByBusiness_Id(business2.getId());
+                    List<PaymentMethod> newAll = payMethodRepository.findAllByBusiness_Id(business2.getId());
+                    for (PaymentMethod paymentMethod : newAll) {
+                        Balance balance = new Balance();
+                        balance.setAccountSumma(0);
+                        balance.setPaymentMethod(paymentMethod);
+                        balance.setCurrency("DOLLAR");
+                        for (Branch branch1 : branches) {
+                            balance.setBranch(branch1);
+                        }
+                        balanceRepository.save(balance);
+                    }
 
-                if (rejection.isEmpty()) {
-                    LidStatus rejectionStatus = new LidStatus();
-                    rejectionStatus.setName("Rejection");
-                    rejectionStatus.setIncrease(true);
-                    rejectionStatus.setOrginalName("Rejection");
-                    rejectionStatus.setColor("rang");
-                    Integer maxSort = lidStatusRepository.getMaxSort(business2.getId());
-                    rejectionStatus.setSort(maxSort + 1);
-                    rejectionStatus.setBusiness(business2);
-                    lidStatusRepository.save(rejectionStatus);
                 }
             }
 //            updatePermission(); // TODO: 5/29/2023 if you add new permission
-
-            /*List<User> allByRoleId = userRepository.findAllByRole_Id(roleRepository.findByName("Super Admin").get().getId());
-            for (User user : allByRoleId) {
-                if (user.getUsername().equals("superadmin")) {
-                    user.setPassword(passwordEncoder.encode("dexqonchilik"));
-                    userRepository.save(user);
-                }
-            }*/
         }
     }
 

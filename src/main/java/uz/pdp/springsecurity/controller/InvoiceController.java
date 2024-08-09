@@ -16,6 +16,7 @@ import java.util.UUID;
 @RequestMapping(value = "/api/invoice")
 @RequiredArgsConstructor
 public class InvoiceController {
+
     private final InvoiceService invoiceService;
 
     @CheckPermission("EDIT_INVOICE")

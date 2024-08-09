@@ -1,6 +1,6 @@
 package uz.pdp.springsecurity.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,9 +9,7 @@ import uz.pdp.springsecurity.annotations.CheckPermission;
 import uz.pdp.springsecurity.configuration.ExcelGenerator;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.ProductViewDtos;
-import uz.pdp.springsecurity.repository.ProductRepository;
 import uz.pdp.springsecurity.service.ExcelService;
-import uz.pdp.springsecurity.service.ProductService;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -23,16 +21,10 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/excel")
+@RequiredArgsConstructor
 public class ExcelController {
 
-    @Autowired
-    ProductRepository productRepository;
-
-    @Autowired
-    ProductService productService;
-
-    @Autowired
-    ExcelService excelService;
+    private final ExcelService excelService;
 
     @CheckPermission("GET_EXCEL")
     @GetMapping("/export-to-excel/{uuid}")
@@ -47,7 +39,6 @@ public class ExcelController {
         List<ProductViewDtos> productViewDtos = excelService.getByBusiness(uuid);
         ExcelGenerator generator = new ExcelGenerator(productViewDtos);
         generator.generateExcelFile(response);
-
         return ResponseEntity.ok(response);
     }
 
@@ -67,16 +58,18 @@ public class ExcelController {
     @PostMapping("/upload")
     public ApiResponse uploadFileExcel(@RequestParam MultipartFile file,
                                        @RequestParam UUID branchId) {
-        ApiResponse apiResponse = excelService.saveExcel(file,branchId);
+        ApiResponse apiResponse = excelService.saveExcel(file, branchId);
         ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse).getBody();
     }
+
     @GetMapping("/customer-trade-history/{customerID}/{startDate}/{endDate}")
-    public ResponseEntity<?> getCustomerTradeHistory(@PathVariable String customerID, @PathVariable Date startDate, @PathVariable Date endDate){
-        return excelService.getCustomerTradeHistory(customerID,startDate,endDate);
+    public ResponseEntity<?> getCustomerTradeHistory(@PathVariable String customerID, @PathVariable Date startDate, @PathVariable Date endDate) {
+        return excelService.getCustomerTradeHistory(customerID, startDate, endDate);
     }
+
     @GetMapping("/car/invoice/{carId}")
-    public HttpEntity<?> getCarInvoiceHistory(@PathVariable UUID carId){
+    public HttpEntity<?> getCarInvoiceHistory(@PathVariable UUID carId) {
         return excelService.getCarInvoiceHistory(carId);
     }
 }

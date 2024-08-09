@@ -23,4 +23,6 @@ public class Balance extends AbsEntity {
 
     @ManyToOne
     private Branch branch;
+
+    private String currency;
 }

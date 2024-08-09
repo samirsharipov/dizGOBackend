@@ -76,7 +76,7 @@ public class OutlayService {
         PaymentMethod paymentMethod = optionalPaymentMethod.get();
         outlay.setPaymentMethod(paymentMethod);
 
-        balanceService.edit(optionalBranch.get().getId(), outlayDto.getTotalSum(), false, outlayDto.getPaymentMethodId());
+        balanceService.edit(optionalBranch.get().getId(), outlayDto.getTotalSum(), false, outlayDto.getPaymentMethodId(), outlayDto.getDollarOutlay(),"");
 
         Outlay save = outlayRepository.save(outlay);
 //        HISTORY
@@ -142,10 +142,10 @@ public class OutlayService {
         outlay.setDate(outlayDto.getDate());
 
         //eski summani balance ga qaytarish
-        balanceService.edit(outlay.getBranch().getId(), totalSum, true, paymentMethod.getId());
+        balanceService.edit(outlay.getBranch().getId(), totalSum, true, paymentMethod.getId(), outlay.isDollarOutlay(),"outlay");
 
         //yangi summa kiritish
-        balanceService.edit(outlay.getBranch().getId(), outlayDto.getTotalSum(), false, outlayDto.getPaymentMethodId());
+        balanceService.edit(outlay.getBranch().getId(), outlayDto.getTotalSum(), false, outlayDto.getPaymentMethodId(), outlay.isDollarOutlay(),"outlay");
 
         outlayRepository.save(outlay);
 

@@ -15,6 +15,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class NavigationProcessController {
     private final NavigationProcessService navigationProcessService;
+
     @CheckPermission("VIEW_NAVIGATION")
     @GetMapping("/{branchId}")
     public HttpEntity<?> get(@PathVariable UUID branchId,
@@ -23,6 +24,7 @@ public class NavigationProcessController {
         ApiResponse apiResponse = navigationProcessService.get(branchId, year, month);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
+
     @CheckPermission("VIEW_NAVIGATION")
     @GetMapping("/update/{branchId}")
     public HttpEntity<?> update(@PathVariable UUID branchId) {

@@ -354,7 +354,7 @@ public class TradeService {
 
                         double tradedQuantity = tradeProductDto.getTradedQuantity(); // to send fifo calculation
                         tradeProductDto.setTradedQuantity(0);//  to make sold quantity 0
-                        TradeProduct savedTradeProduct = warehouseService.createOrEditTrade(tp.getTrade().getBranch(), tp, tradeProductDto,trade.getId());
+                        TradeProduct savedTradeProduct = warehouseService.createOrEditTrade(tp.getTrade().getBranch(), tp, tradeProductDto, trade.getId());
                         fifoCalculationService.returnedTrade(branch, savedTradeProduct, tradedQuantity);
                         tradeProductRepository.deleteById(tradeProductDto.getTradeProductId());
                     }
@@ -384,7 +384,7 @@ public class TradeService {
                         continue;
                     }
                     double difference = tradeProductDto.getTradedQuantity() - tradeProduct.getTradedQuantity();
-                    tradeProduct = warehouseService.createOrEditTrade(branch, tradeProduct, tradeProductDto,trade.getId());
+                    tradeProduct = warehouseService.createOrEditTrade(branch, tradeProduct, tradeProductDto, trade.getId());
                     if (tradeProduct != null) {
                         if (difference > 0) {
                             fifoCalculationService.createOrEditTradeProduct(branch, tradeProduct, difference);
@@ -424,7 +424,7 @@ public class TradeService {
         }
 
         try {
-            balanceService.edit(branch.getId(), true, tradeDTO.getPaymentDtoList());
+            balanceService.edit(branch.getId(), true, tradeDTO.getPaymentDtoList(), tradeDTO.getDollar(), "trade");
         } catch (Exception e) {
             return new ApiResponse("BALANCE SERVICE ERROR", false);
         }
@@ -477,7 +477,7 @@ public class TradeService {
     private boolean repaymentIsDollar(TradeDTO tradeDTO, PaymentDto paymentDto) {
         if (paymentDto.getIsDollar() != null && paymentDto.getIsDollar()) {
             return true;
-        }else if (paymentDto.getIsDollar() == null){
+        } else if (paymentDto.getIsDollar() == null) {
             return tradeDTO.getFirstPaymentIsDollar();
         }
         return false;
@@ -486,7 +486,7 @@ public class TradeService {
     private Double sumOrDollar2(PaymentDto paymentDto, TradeDTO tradeDTO) {
         if (paymentDto.getIsDollar() != null && paymentDto.getIsDollar()) {
             return paymentDto.getPaidSum();
-        }else if (paymentDto.getIsDollar() == null){
+        } else if (paymentDto.getIsDollar() == null) {
             return tradeDTO.getPaidSumDollar();
         }
         return paymentDto.getPaidSumDollar();
@@ -504,23 +504,23 @@ public class TradeService {
         String sendText = "";
         if (trade.getCustomer() != null) {
             sendText = "<b>#YANGI_SAVDO \uD83D\uDECD \n\n</b>" +
-                       "<b>Filial: </b>" + trade.getBranch().getName() + "\n" +
-                       "<b>Mijoz: </b>" + trade.getCustomer().getName() + "\n" +
-                       "<b>Sotuvchi: </b>" + trade.getTrader().getFirstName() + "\n" +
-                       "<b>To'lov usuli: </b>" + trade.getPayMethod().getType() + "\n\n" +
-                       "<b>To'lov statusi: </b>" + trade.getPaymentStatus().getStatus() + "\n\n" +
-                       "<b><i>MAHSULOTLAR \uD83D\uDCD1</i></b>\n\n" + products + "\n\n" +
-                       "<b>Qolgan " + (trade.getCustomer().getDebt() < 0 ? "haqingiz" : "qarzingiz") + ": </b>" + Math.abs(trade.getCustomer().getDebt()) + "\n\n" +
-                       "SAVDO SANASI: " + trade.getCreatedAt();
+                    "<b>Filial: </b>" + trade.getBranch().getName() + "\n" +
+                    "<b>Mijoz: </b>" + trade.getCustomer().getName() + "\n" +
+                    "<b>Sotuvchi: </b>" + trade.getTrader().getFirstName() + "\n" +
+                    "<b>To'lov usuli: </b>" + trade.getPayMethod().getType() + "\n\n" +
+                    "<b>To'lov statusi: </b>" + trade.getPaymentStatus().getStatus() + "\n\n" +
+                    "<b><i>MAHSULOTLAR \uD83D\uDCD1</i></b>\n\n" + products + "\n\n" +
+                    "<b>Qolgan " + (trade.getCustomer().getDebt() < 0 ? "haqingiz" : "qarzingiz") + ": </b>" + Math.abs(trade.getCustomer().getDebt()) + "\n\n" +
+                    "SAVDO SANASI: " + trade.getCreatedAt();
         } else {
             sendText = "<b>#YANGI_SAVDO \uD83D\uDECD \n\n</b>" +
-                       "<b>Filial: </b>" + trade.getBranch().getName() + "\n" +
-                       "<b>Mijoz: </b> Nomalum\n" +
-                       "<b>Sotuvchi: </b>" + trade.getTrader().getFirstName() + "\n" +
-                       "<b>To'lov usuli: </b>" + trade.getPayMethod().getType() + "\n\n" +
-                       "<b>To'lov statusi: </b>" + trade.getPaymentStatus().getStatus() + "\n\n" +
-                       "<b><i>MAHSULOTLAR \uD83D\uDCD1</i></b>\n\n" + products + "\n\n" +
-                       "SAVDO SANASI: " + trade.getCreatedAt();
+                    "<b>Filial: </b>" + trade.getBranch().getName() + "\n" +
+                    "<b>Mijoz: </b> Nomalum\n" +
+                    "<b>Sotuvchi: </b>" + trade.getTrader().getFirstName() + "\n" +
+                    "<b>To'lov usuli: </b>" + trade.getPayMethod().getType() + "\n\n" +
+                    "<b>To'lov statusi: </b>" + trade.getPaymentStatus().getStatus() + "\n\n" +
+                    "<b><i>MAHSULOTLAR \uD83D\uDCD1</i></b>\n\n" + products + "\n\n" +
+                    "SAVDO SANASI: " + trade.getCreatedAt();
         }
         return sendText;
     }
@@ -640,7 +640,7 @@ public class TradeService {
         ));
 
         for (Payment payment : paymentRepository.findAllByTradeId(tradeId)) {
-            balanceService.edit(trade.getBranch().getId(), payment.getPaidSum(), Boolean.FALSE, payment.getPayMethod().getId());
+            balanceService.edit(trade.getBranch().getId(), payment.getPaidSum(), Boolean.FALSE, payment.getPayMethod().getId(), trade.getDollar().equals("DOLLAR"),"trade");
         }
         List<ProductAbout> productAbouts = productAboutRepository.findAllByTradeId(tradeId);
         for (ProductAbout productAbout : productAbouts) {
@@ -689,21 +689,21 @@ public class TradeService {
                 if (invoice != null && backing != null) {
                     tradePage = tradeRepository.findAllByBranch_BusinessIdAndInvoiceContainingAndBackingOrBranch_BusinessIdAndCustomer_NameContainingIgnoreCaseAndBackingAndCreatedAtBetween(id, invoice, backing, id, invoice, backing, startDate, endDate, pageable);
                 } else if (invoice != null) {
-                    tradePage = tradeRepository.findAllByBranch_BusinessIdAndInvoiceContainingOrBranch_BusinessIdAndCustomer_NameContainingIgnoreCaseAndCreatedAtBetween(id, invoice, id, invoice,startDate,endDate, pageable);
+                    tradePage = tradeRepository.findAllByBranch_BusinessIdAndInvoiceContainingOrBranch_BusinessIdAndCustomer_NameContainingIgnoreCaseAndCreatedAtBetween(id, invoice, id, invoice, startDate, endDate, pageable);
                 } else if (backing != null) {
-                    tradePage = tradeRepository.findAllByBranch_BusinessIdAndBackingAndCreatedAtBetween(id, backing,startDate,endDate, pageable);
+                    tradePage = tradeRepository.findAllByBranch_BusinessIdAndBackingAndCreatedAtBetween(id, backing, startDate, endDate, pageable);
                 } else {
-                    tradePage = tradeRepository.findAllByBranch_BusinessIdAndCreatedAtBetween(id,startDate,endDate, pageable);
+                    tradePage = tradeRepository.findAllByBranch_BusinessIdAndCreatedAtBetween(id, startDate, endDate, pageable);
                 }
             } else if (branchRepository.existsById(id)) {
                 if (invoice != null && backing != null) {
-                    tradePage = tradeRepository.findAllByBranchIdAndInvoiceContainingAndBackingOrBranchIdAndCustomer_NameContainingIgnoreCaseAndBackingAndCreatedAtBetween(id, invoice, backing, id, invoice, backing,startDate,endDate, pageable);
+                    tradePage = tradeRepository.findAllByBranchIdAndInvoiceContainingAndBackingOrBranchIdAndCustomer_NameContainingIgnoreCaseAndBackingAndCreatedAtBetween(id, invoice, backing, id, invoice, backing, startDate, endDate, pageable);
                 } else if (invoice != null) {
-                    tradePage = tradeRepository.findAllByBranchIdAndInvoiceContainingOrBranchIdAndCustomer_NameContainingIgnoreCaseAndCreatedAtBetween(id, invoice, id, invoice,startDate,endDate, pageable);
+                    tradePage = tradeRepository.findAllByBranchIdAndInvoiceContainingOrBranchIdAndCustomer_NameContainingIgnoreCaseAndCreatedAtBetween(id, invoice, id, invoice, startDate, endDate, pageable);
                 } else if (backing != null) {
-                    tradePage = tradeRepository.findAllByBranchIdAndBackingAndCreatedAtBetween(id, backing,startDate,endDate, pageable);
+                    tradePage = tradeRepository.findAllByBranchIdAndBackingAndCreatedAtBetween(id, backing, startDate, endDate, pageable);
                 } else {
-                    tradePage = tradeRepository.findAllByBranchIdAndCreatedAtBetween(id,startDate,endDate, pageable);
+                    tradePage = tradeRepository.findAllByBranchIdAndCreatedAtBetween(id, startDate, endDate, pageable);
                 }
             } else {
                 return new ApiResponse("ID ERROR", false);

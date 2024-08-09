@@ -196,11 +196,13 @@ public class PurchaseService {
 
         if (isEdit) {
             if (purchaseDto.getPaidSum() > 0) {
-                balanceService.edit(branch.getId(), oldSumma, true, payMethodId);
+                // todo dollar sum joyini korib chiqish
+                balanceService.edit(branch.getId(), oldSumma, true, purchaseDto.getPaymentMethodId(), false,"purchase");
             }
         }
         if (purchaseDto.getPaidSum() > 0) {
-            balanceService.edit(branch.getId(), purchaseDto.getPaidSum(), false, payMethodId);
+            // todo dollar sum joyini korib chiqish
+            balanceService.edit(branch.getId(), purchaseDto.getPaidSum(), false, purchaseDto.getPaymentMethodId(), false,"purchase");
         }
         if (!isEdit) {
             Purchase save = purchaseRepository.findByBranchIdAndInvoiceContainingIgnoreCase(purchaseDto.getBranchId(), purchase.getInvoice());
