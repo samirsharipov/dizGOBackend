@@ -286,7 +286,6 @@ public class TradeService {
                         branch,
                         trade.getInvoice() + AppConstant.BACKING_TRADE
                 ));
-
             } else {
                 historyRepository.save(new History(
                         HistoryName.SAVDO,
@@ -334,11 +333,17 @@ public class TradeService {
             debtCanculs.setDollarPrice(tradeDTO.getDollarPrice());
             debtCanculs.setDebtPrice(tradeDTO.getDebdSum());
             debtCanculsRepository.save(debtCanculs);
-            Optional<PaymentMethod> optional = payMethodRepository.findByTypeAndBusiness_id("naqd", branch.getBusiness().getId());
+            Optional<PaymentMethod> optional = payMethodRepository.findByTypeAndBusiness_id("Naqd", branch.getBusiness().getId());
             optional.ifPresent(paymentMethod -> balanceService.edit(tradeDTO.getBranchId(), tradeDTO.getDollarPrice(), true, paymentMethod.getId(), true, "Savdo so'mda bo'ldi tulov dollarda!"));
 
             if (tradeDTO.getDebdSum() > 0)
                 optional.ifPresent(paymentMethod -> balanceService.edit(tradeDTO.getBranchId(), Double.valueOf(tradeDTO.getDebdSum()), false, paymentMethod.getId(), false, "Savdo so'mda bo'ldi tulov dollarda " + tradeDTO.getDebdSum() + " so'm qaytim sifatida berildi!"));
+        }else {
+            try {
+                balanceService.edit(branch.getId(), true, tradeDTO.getPaymentDtoList(), tradeDTO.getDollar(), "trade");
+            } catch (Exception e) {
+                return new ApiResponse("BALANCE SERVICE ERROR", false);
+            }
         }
 
         try {
@@ -356,7 +361,6 @@ public class TradeService {
                                 tp.setBacking(tp.getTradedQuantity());
                             }
                         }
-
                         double tradedQuantity = tradeProductDto.getTradedQuantity(); // to send fifo calculation
                         tradeProductDto.setTradedQuantity(0);//  to make sold quantity 0
                         TradeProduct savedTradeProduct = warehouseService.createOrEditTrade(tp.getTrade().getBranch(), tp, tradeProductDto, trade.getId());
@@ -428,11 +432,6 @@ public class TradeService {
             optionalCustomerSupplier.ifPresent(customerSupplierService::calculation);
         }
 
-        try {
-            balanceService.edit(branch.getId(), true, tradeDTO.getPaymentDtoList(), tradeDTO.getDollar(), "trade");
-        } catch (Exception e) {
-            return new ApiResponse("BALANCE SERVICE ERROR", false);
-        }
         if (!isEdit) {
             UUID uuid = tradeRepository.findTradeIdByBranchIdAndInvoice(branch.getId(), trade.getInvoice());
             ApiResponse res = getOne(uuid);

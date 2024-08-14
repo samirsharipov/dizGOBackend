@@ -26,71 +26,37 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ReportsService {
 
-    @Autowired
-    BusinessRepository businessRepository;
-
-    @Autowired
-    ProductionRepository productionRepository;
-    @Autowired
-    CustomerDebtRepaymentRepository customerDebtRepaymentRepository;
-    @Autowired
-    DebtCanculsRepository debtCanculsRepository;
-
-    @Autowired
-    SupplierRepository supplierRepository;
-
-    @Autowired
-    ProductRepository productRepository;
-
-    @Autowired
-    WarehouseRepository warehouseRepository;
-    @Autowired
-    BranchRepository branchRepository;
-    @Autowired
-    TradeProductRepository tradeProductRepository;
-    @Autowired
-    PurchaseRepository purchaseRepository;
-    @Autowired
-    PurchaseProductRepository purchaseProductRepository;
-    @Autowired
-    OutlayRepository outlayRepository;
-
-    @Autowired
-    CategoryRepository categoryRepository;
-
+    private final BusinessRepository businessRepository;
+    private final ProductionRepository productionRepository;
+    private final DebtCanculsRepository debtCanculsRepository;
+    private final ProductRepository productRepository;
+    private final WarehouseRepository warehouseRepository;
+    private final BranchRepository branchRepository;
+    private final TradeProductRepository tradeProductRepository;
+    private final PurchaseRepository purchaseRepository;
+    private final PurchaseProductRepository purchaseProductRepository;
+    private final OutlayRepository outlayRepository;
+    private final CategoryRepository categoryRepository;
     private final CustomerDebtRepository customerDebtRepository;
-
-    @Autowired
-    BrandRepository brandRepository;
-
-    @Autowired
-    TradeRepository tradeRepository;
-
-    @Autowired
-    CustomerRepository customerRepository;
-
-    @Autowired
-    PaymentRepository paymentRepository;
-    @Autowired
-    OutlayCategoryRepository outlayCategoryRepository;
-
-    @Autowired
-    ProductTypePriceRepository productTypePriceRepository;
-
-    @Autowired
-    ProjectRepository projectRepository;
-
-    @Autowired
-    TaskRepository taskRepository;
-
-    @Autowired
-    FifoCalculationService fifoCalculationService;
-
-    @Autowired
-    MeasurementRepository measurementRepository;
-
+    private final BrandRepository brandRepository;
+    private final TradeRepository tradeRepository;
+    private final CustomerRepository customerRepository;
+    private final OutlayCategoryRepository outlayCategoryRepository;
+    private final ProductTypePriceRepository productTypePriceRepository;
+    private final ProjectRepository projectRepository;
+    private final TaskRepository taskRepository;
+    private final FifoCalculationService fifoCalculationService;
+    private final MeasurementRepository measurementRepository;
     private final PayMethodRepository payMethodRepository;
     private final CarInvoiceRepository carInvoiceRepository;
+    private final LidRepository lidRepository;
+    private final LidStatusRepository lidStatusRepository;
+    private final SourceRepository sourceRepository;
+    private final UserRepository userRepository;
+    private final TradeLidMapper tradeLidMapper;
+    private final RepaymentDebtRepository repaymentDebtRepository;
+    private final FifoCalculationRepository fifoCalculationRepository;
+
     private final static Date date = new Date();
     private final static Timestamp currentDay = new Timestamp(System.currentTimeMillis());
     private final static Timestamp enDate = new Timestamp(date.getTime());
@@ -98,10 +64,8 @@ public class ReportsService {
     private final static LocalDateTime LAST_MONTH = dateTime.minusMonths(1);
     private final static LocalDate localDate = LocalDate.now();
     private final static LocalDateTime THIS_MONTH = localDate.withDayOfMonth(1).atStartOfDay();
-
     private final static LocalDate WEEK_START_DAY = localDate.minusDays(7 + localDate.getDayOfWeek().getValue() - 1);
     private final static LocalDate WEEK_END_DAY = localDate.minusDays(7 + localDate.getDayOfWeek().getValue() - 7);
-
     private final static LocalDate TEMP_START_OF_YEAR = LocalDate.of(localDate.getYear() - 1, 1, 1);
     private final static LocalDate TEMP_FOR_THIS_START_OF_YEAR = LocalDate.of(localDate.getYear(), 1, 1);
     private final static LocalDate TEMP_START_OF_DAY = localDate.minusDays(1);
@@ -120,21 +84,6 @@ public class ReportsService {
     private final static LocalDateTime TODAY_START = LocalDate.now().atStartOfDay();
     private final static LocalDateTime TODAY_END = LocalDateTime.of(TODAY_START.getYear(), TODAY_START.getMonth(), TODAY_START.getDayOfMonth(), 23, 59, 59);
 
-    @Autowired
-    private LidRepository lidRepository;
-    @Autowired
-    private LidStatusRepository lidStatusRepository;
-    @Autowired
-    private SourceRepository sourceRepository;
-    @Autowired
-    private UserRepository userRepository;
-
-    private final TradeLidMapper tradeLidMapper;
-
-    @Autowired
-    private RepaymentDebtRepository repaymentDebtRepository;
-    @Autowired
-    private FifoCalculationRepository fifoCalculationRepository;
 
     public ApiResponse allProductAmount(UUID branchId, UUID brandId, UUID categoryId, String production) {
 
@@ -367,7 +316,6 @@ public class ReportsService {
                 return new ApiResponse("Trade Not Found", false);
             }
         }
-
 
 
         List<TradeReportsDto> tradeReportsDtoList = new ArrayList<>();
@@ -3162,10 +3110,10 @@ public class ReportsService {
 
                     if (tradeProduct.getProduct() == null) {
                         ProductTypePrice productTypePrice = tradeProduct.getProductTypePrice();
-                        v =  totalSalePrice-(productTypePrice.getBuyPrice() * tradedQuantity);
+                        v = totalSalePrice - (productTypePrice.getBuyPrice() * tradedQuantity);
                     } else {
                         Product product = tradeProduct.getProduct();
-                        v =  totalSalePrice-(product.getBuyPrice() * tradedQuantity) ;
+                        v = totalSalePrice - (product.getBuyPrice() * tradedQuantity);
                     }
 
                     return v;
@@ -3176,7 +3124,7 @@ public class ReportsService {
         Map<String, Object> data = new HashMap<>();
         data.put("trade_count", tradeCount);
         data.put("trade_product_count", uniqueResults);
-        data.put("benefit",sum);
+        data.put("benefit", sum);
         return new ApiResponse("Xaridlar soni hisoboti", true, data);
     }
 }
