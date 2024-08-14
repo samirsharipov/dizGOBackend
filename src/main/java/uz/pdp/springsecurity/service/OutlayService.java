@@ -264,6 +264,7 @@ public class OutlayService {
                 Map<String, Object> data = new HashMap<>();
                 data.put("totalPages", outlayPage.getTotalPages());
                 data.put("list", outlayPage.getContent());
+                data.put("totalElements", outlayPage.getTotalElements());
                 return new ApiResponse("Xarajatlar ro'yxati", true, data);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -275,6 +276,7 @@ public class OutlayService {
                 Map<String, Object> data = new HashMap<>();
                 data.put("totalPages", outlayPage.getTotalPages());
                 data.put("list", outlayPage.getContent());
+                data.put("totalElements", outlayPage.getTotalElements());
                 return new ApiResponse("Xarajatlar ro'yxati", true, data);
             } catch (Exception e) {
                 e.printStackTrace();
