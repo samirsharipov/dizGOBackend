@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class GrupoResponse {
+public class  GrupoResponse {
     // Getters and Setters
     private boolean success;
     private String autoLoginUrl;
