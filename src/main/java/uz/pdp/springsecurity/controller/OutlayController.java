@@ -101,7 +101,7 @@ public class OutlayController {
     }
 
     @GetMapping("/type")
-    public HttpEntity<?> getOutlaysListByType(@RequestParam OUTLAY_STATUS type, @RequestParam UUID branchId, @RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "15") Integer limit, @RequestParam(required = false) java.util.Date startDate, @RequestParam(required = false)java.util.Date endDate) {
+    public HttpEntity<?> getOutlaysListByType(@RequestParam OUTLAY_STATUS type, @RequestParam UUID branchId, @RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "20") Integer limit, @RequestParam(required = false) java.util.Date startDate, @RequestParam(required = false)java.util.Date endDate) {
         ApiResponse apiResponse = outlayService.getOutlaysListByType(type, branchId, page, limit,startDate,endDate);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }

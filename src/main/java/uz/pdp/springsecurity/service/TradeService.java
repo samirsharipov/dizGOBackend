@@ -334,6 +334,11 @@ public class TradeService {
             debtCanculs.setDollarPrice(tradeDTO.getDollarPrice());
             debtCanculs.setDebtPrice(tradeDTO.getDebdSum());
             debtCanculsRepository.save(debtCanculs);
+            Optional<PaymentMethod> optional = payMethodRepository.findByTypeAndBusiness_id("naqd", branch.getBusiness().getId());
+            optional.ifPresent(paymentMethod -> balanceService.edit(tradeDTO.getBranchId(), tradeDTO.getDollarPrice(), true, paymentMethod.getId(), true, "Savdo so'mda bo'ldi tulov dollarda!"));
+
+            if (tradeDTO.getDebdSum() > 0)
+                optional.ifPresent(paymentMethod -> balanceService.edit(tradeDTO.getBranchId(), Double.valueOf(tradeDTO.getDebdSum()), false, paymentMethod.getId(), false, "Savdo so'mda bo'ldi tulov dollarda " + tradeDTO.getDebdSum() + " so'm qaytim sifatida berildi!"));
         }
 
         try {
@@ -640,7 +645,7 @@ public class TradeService {
         ));
 
         for (Payment payment : paymentRepository.findAllByTradeId(tradeId)) {
-            balanceService.edit(trade.getBranch().getId(), payment.getPaidSum(), Boolean.FALSE, payment.getPayMethod().getId(), trade.getDollar().equals("DOLLAR"),"trade");
+            balanceService.edit(trade.getBranch().getId(), payment.getPaidSum(), Boolean.FALSE, payment.getPayMethod().getId(), trade.getDollar().equals("DOLLAR"), "trade");
         }
         List<ProductAbout> productAbouts = productAboutRepository.findAllByTradeId(tradeId);
         for (ProductAbout productAbout : productAbouts) {
