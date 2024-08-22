@@ -63,8 +63,6 @@ public class User extends AbsEntity implements UserDetails {
     private Attachment photo;
 
 
-
-
     private boolean active;
 
     private String address;
@@ -84,7 +82,6 @@ public class User extends AbsEntity implements UserDetails {
 
     private String leaveTime = "16:00";
 
-
     //yoqilgan
     private boolean enabled = false;
     //muddati tugamagan
@@ -93,9 +90,11 @@ public class User extends AbsEntity implements UserDetails {
     private boolean accountNonLocked = true;
     //Foydalanuvchining hisob ma'lumotlari (parol) muddati tugaganligini ko'rsatadi.
     private boolean credentialsNonExpired = true;
+
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private boolean grossPriceControlOneUser;
     private Long chatId;
+
     public User(String firstName, String lastName, String username, String password, Role role, boolean enabled, Business business, Attachment photo) {
         this.firstName = firstName;
         this.lastName = lastName;
