@@ -4,7 +4,6 @@ import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.UUID;
 
 @Data

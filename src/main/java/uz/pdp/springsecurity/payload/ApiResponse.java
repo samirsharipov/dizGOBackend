@@ -19,6 +19,10 @@ public class ApiResponse {
         this.success = success;
     }
 
+    public ApiResponse(String message) {
+        this.message = message;
+    }
+
     // Constructor with success
     public ApiResponse(boolean success) {
         this.success = success;

@@ -243,10 +243,10 @@ public class ProductService {
         if (productDto.getBarcode() != null && !productDto.getBarcode().isBlank()) {
             if (isUpdate) {
                 if (productRepository.existsByBarcodeAndBusinessIdAndIdIsNotAndActiveTrue(productDto.getBarcode(), product.getBusiness().getId(), product.getId()))
-                    return new ApiResponse("product with the barcode is already exist");
+                    return new ApiResponse("product with the barcode is already exist",false);
             } else {
                 if (productRepository.existsByBarcodeAndBusinessIdAndActiveTrue(productDto.getBarcode(), product.getBusiness().getId()))
-                    return new ApiResponse("product with the barcode is already exist");
+                    return new ApiResponse("product with the barcode is already exist",false);
             }
             product.setBarcode(productDto.getBarcode());
         } else {
@@ -307,11 +307,11 @@ public class ProductService {
             if (isUpdate) {
                 if (productRepository.existsByBarcodeAndBusinessIdAndIdIsNotAndActiveTrue(productDto.getBarcode(), product.getBusiness().getId(), product.getId())
                         || productTypePriceRepository.existsByBarcodeAndProduct_BusinessIdAndActiveTrue(productDto.getBarcode(), product.getBusiness().getId()))
-                    return new ApiResponse("product with the barcode is already exist");
+                    return new ApiResponse("product with the barcode is already exist",false);
             } else {
                 if (productRepository.existsByBarcodeAndBusinessIdAndActiveTrue(productDto.getBarcode(), product.getBusiness().getId())
                         || productTypePriceRepository.existsByBarcodeAndProduct_BusinessIdAndActiveTrue(productDto.getBarcode(), product.getBusiness().getId()))
-                    return new ApiResponse("product with the barcode is already exist");
+                    return new ApiResponse("product with the barcode is already exist",false);
             }
             product.setBarcode(productDto.getBarcode());
         } else {
