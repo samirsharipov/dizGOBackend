@@ -19,4 +19,5 @@ public interface BalanceRepository extends JpaRepository<Balance, UUID> {
     List<Balance> findAllByPaymentMethodId(UUID paymentMethod_id);
     List<Balance> findAllByPaymentMethodIdAndCurrencyIgnoreCase(UUID paymentMethod_id, String currency);
     boolean existsAllByBranch_Business_IdAndCurrencyIgnoreCase(UUID branch_business_id, String currency);
+    boolean existsAllByBranchIdAndCurrencyIgnoreCase(UUID branch_id, String currency);
 }
