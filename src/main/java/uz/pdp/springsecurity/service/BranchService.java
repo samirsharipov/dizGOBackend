@@ -66,6 +66,7 @@ public class BranchService {
 
         createProjectStatus(branch);
 
+
         return new ApiResponse("Added", true);
     }
 
@@ -97,11 +98,18 @@ public class BranchService {
         List<PaymentMethod> allByBusinessId = payMethodRepository.findAllByBusiness_Id(branch.getBusiness().getId());
 
         for (PaymentMethod paymentMethod : allByBusinessId) {
-            Balance balance = new Balance();
-            balance.setAccountSumma(0);
-            balance.setBranch(branch);
-            balance.setPaymentMethod(paymentMethod);
-            balanceRepository.save(balance);
+            Balance balanceSum = new Balance();
+            Balance balanceDollar = new Balance();
+            balanceSum.setAccountSumma(0);
+            balanceDollar.setAccountSumma(0);
+            balanceSum.setBranch(branch);
+            balanceDollar.setBranch(branch);
+            balanceSum.setPaymentMethod(paymentMethod);
+            balanceDollar.setPaymentMethod(paymentMethod);
+            balanceDollar.setCurrency("DOLLAR");
+            balanceSum.setCurrency("SOM");
+            balanceRepository.save(balanceSum);
+            balanceRepository.save(balanceDollar);
         }
     }
 
