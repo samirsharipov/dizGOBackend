@@ -45,7 +45,4 @@ public class ResourceController {
         ApiResponse apiResponse = resourceService.refreshByBusiness(businessId);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
-
-
-
 }

@@ -12,7 +12,7 @@ import uz.pdp.springsecurity.payload.BalanceHistoryDto;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-08-09T15:35:04+0500",
+    date = "2024-08-26T11:55:54+0500",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.12 (Amazon.com Inc.)"
 )
 @Component
