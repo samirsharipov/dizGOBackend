@@ -63,7 +63,7 @@ public class ProductController {
     }
 
     @CheckPermission("DELETE_PRODUCT")
-    @PutMapping("/deactivate/{id}")
+    @DeleteMapping("/deactivate/{id}")
     public ResponseEntity<String> deactivateProduct(@PathVariable UUID id) {
         System.out.println("Deactivating product with ID: " + id); // Tekshiruv
         productService.deactivateProduct(id);

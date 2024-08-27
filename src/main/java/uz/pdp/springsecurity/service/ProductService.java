@@ -887,7 +887,6 @@ public class ProductService {
             product.setActive(false);
             productTypePriceRepository.save(product);
         }
-
     }
 
     private ApiResponse getProductByBranch(UUID branchId) {

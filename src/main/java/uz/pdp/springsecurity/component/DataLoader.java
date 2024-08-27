@@ -910,6 +910,19 @@ public class DataLoader implements CommandLineRunner {
                     QABUL_QILINGAN.name()
             ));
         } else if (initMode.equals("never")) {
+
+//            List<LossProduct> all = lossProductRepository.findAll();
+//            for (LossProduct lossProduct : all) {
+//                if (lossProduct.getQuantity() > 0) {
+//                    lossProduct.setStatus("BENEFIT");
+//                } else if (lossProduct.getQuantity() == 0) {
+//                    lossProduct.setStatus("EQUAL");
+//                } else {
+//                    lossProduct.setStatus("HARM");
+//                }
+//                lossProductRepository.save(lossProduct);
+//            }
+
             List<Business> businessRepositoryAll1 = businessRepository.findAll();
             for (Business business2 : businessRepositoryAll1) {
                 boolean existsSom = balanceRepository.existsAllByBranch_Business_IdAndCurrencyIgnoreCase(business2.getId(), "SOM");
@@ -917,12 +930,10 @@ public class DataLoader implements CommandLineRunner {
                 if (!existsSom && !existsDollar) {
                     List<Balance> allBalance
                             = balanceRepository.findAllByBranch_BusinessId(business2.getId());
-
                     for (Balance balance : allBalance) {
                         balance.setCurrency("SOM");
                         balanceRepository.save(balance);
                     }
-
                     List<Branch> branches = branchRepository.findAllByBusiness_Id(business2.getId());
                     List<PaymentMethod> newAll = payMethodRepository.findAllByBusiness_Id(business2.getId());
                     for (PaymentMethod paymentMethod : newAll) {
