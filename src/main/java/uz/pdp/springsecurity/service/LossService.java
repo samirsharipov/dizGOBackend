@@ -9,6 +9,7 @@ import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
 import uz.pdp.springsecurity.utils.ConstantProduct;
 import org.springframework.data.domain.Pageable;
+
 import java.util.*;
 
 @Service
@@ -98,9 +99,12 @@ public class LossService {
     }
 
     private String findStatus(double quantity) {
-        if (quantity < 0) {
+        if (quantity > 0)
             return "BENEFIT";
-        }
+
+        if (quantity == 0)
+            return "EQUAL";
+
         return "HARM";
     }
 

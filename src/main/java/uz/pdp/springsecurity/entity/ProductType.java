@@ -19,4 +19,5 @@ public class ProductType extends AbsEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Business business;
+
 }
