@@ -62,7 +62,6 @@ public class Task extends AbsEntity {
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "task")
     @JsonIgnore
     private List<FileData> fileDataList;
-
 }
 
 

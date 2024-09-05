@@ -59,4 +59,10 @@ public class TariffController {
         ApiResponse apiResponse = service.delete(id);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
+
+    @GetMapping("/businessInfo/{businessId}")
+    public HttpEntity<?> businessInfo(@PathVariable UUID businessId) {
+        ApiResponse apiResponse = service.businessInfo(businessId);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
 }

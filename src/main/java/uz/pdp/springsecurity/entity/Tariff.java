@@ -9,7 +9,6 @@ import uz.pdp.springsecurity.enums.Lifetime;
 import uz.pdp.springsecurity.enums.Permissions;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
@@ -42,7 +41,7 @@ public class Tariff extends AbsEntity {
 
     private int testDay;
 
-    private int interval;
+    private int interval;//1 oy 6 oy
 
     @Column(nullable = false)
     private double price;
@@ -53,5 +52,3 @@ public class Tariff extends AbsEntity {
 
     private boolean isDelete;
 }
-
-
