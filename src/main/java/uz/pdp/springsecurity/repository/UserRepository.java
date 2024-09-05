@@ -50,6 +50,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     int countAllByBranchesId(UUID branchId);
 
+    int countAllByBranches_Business_IdAndActiveIsTrue(UUID branches_business_id);
+
     List<User> findAllByUsernameContainingIgnoreCase(String username);
     @Query(value = "SELECT * from users u WHERE u.business_id = :businessId AND u.id <> :id ORDER BY created_at", nativeQuery = true)
     List<User> findAllByBusiness_IdAndId(UUID businessId, UUID id);
