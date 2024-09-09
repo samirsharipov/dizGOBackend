@@ -43,6 +43,8 @@ public class PurchaseService {
     private final HistoryRepository historyRepository;
     private final CustomerSupplierRepository customerSupplierRepository;
     private final CustomerSupplierService customerSupplierService;
+    private final PurchaseOutlayCategoryRepository purchaseOutlayCategoryRepository;
+    private final PurchaseOutlayRepository purchaseOutlayRepository;
 
     public ApiResponse add(PurchaseDto purchaseDto) {
         Optional<Purchase> optionalPurchase = purchaseRepository.findFirstByBranchIdOrderByCreatedAtDesc(purchaseDto.getBranchId());
@@ -191,18 +193,34 @@ public class PurchaseService {
                 warehouseService.createOrEditWareHouse(purchaseProduct, amount);
             }
         }
+
+        // purchase outlay create
+        List<PurchaseOutlayDto> purchaseOutlayDtoList = purchaseDto.getPurchaseOutlayDtoList();
+        if (!purchaseOutlayDtoList.isEmpty()) {
+            for (PurchaseOutlayDto purchaseOutlayDto : purchaseOutlayDtoList) {
+                PurchaseOutlay purchaseOutlay = new PurchaseOutlay();
+                purchaseOutlay.setPurchase(purchase);
+                purchaseOutlay.setBusiness(purchase.getBranch().getBusiness());
+                Optional<PurchaseOutlayCategory> optionalPurchaseOutlayCategory = purchaseOutlayCategoryRepository.findById(purchaseOutlayDto.getCategoryId());
+                optionalPurchaseOutlayCategory.ifPresent(purchaseOutlay::setCategory);
+                purchaseOutlay.setTotalPrice(purchaseOutlayDto.getTotalPrice());
+                purchaseOutlayRepository.save(purchaseOutlay);
+            }
+        }
+
+
         purchaseProductRepository.saveAll(purchaseProductList);
 
 
         if (isEdit) {
             if (purchaseDto.getPaidSum() > 0) {
                 // todo dollar sum joyini korib chiqish
-                balanceService.edit(branch.getId(), oldSumma, true, purchaseDto.getPaymentMethodId(), false,"purchase");
+                balanceService.edit(branch.getId(), oldSumma, true, purchaseDto.getPaymentMethodId(), false, "purchase");
             }
         }
         if (purchaseDto.getPaidSum() > 0) {
             // todo dollar sum joyini korib chiqish
-            balanceService.edit(branch.getId(), purchaseDto.getPaidSum(), false, purchaseDto.getPaymentMethodId(), false,"purchase");
+            balanceService.edit(branch.getId(), purchaseDto.getPaidSum(), false, purchaseDto.getPaymentMethodId(), false, "purchase");
         }
         if (!isEdit) {
             Purchase save = purchaseRepository.findByBranchIdAndInvoiceContainingIgnoreCase(purchaseDto.getBranchId(), purchase.getInvoice());
@@ -217,14 +235,14 @@ public class PurchaseService {
                 }
                 List<User> admins = userRepository.findAllByBusiness_IdAndRoleName(purchase1.getSeller().getBusiness().getId(), Constants.ADMIN);
                 String sendText = "<b>#YANGI_XARID \uD83D\uDCD1 \n\n</b>" +
-                                  "<b>Sotuvchi: </b>" + purchase1.getSeller().getFirstName() + "\n" +
-                                  "<b>Diller: </b>" + purchase1.getSupplier().getName() + "\n" +
-                                  "<b>To'lov usuli: </b>" + purchase1.getPaymentMethod().getType() + "\n" +
-                                  "<b>To'lov statusi: </b>" + purchase1.getPaymentStatus().getStatus() + "\n" +
-                                  "<b>Xarid holati: </b>" + purchase1.getPurchaseStatus().getStatus() + "\n\n" +
-                                  "<b><i>MAHSULOTLAR \uD83D\uDCD1</i></b> \n\n" + products;
+                        "<b>Sotuvchi: </b>" + purchase1.getSeller().getFirstName() + "\n" +
+                        "<b>Diller: </b>" + purchase1.getSupplier().getName() + "\n" +
+                        "<b>To'lov usuli: </b>" + purchase1.getPaymentMethod().getType() + "\n" +
+                        "<b>To'lov statusi: </b>" + purchase1.getPaymentStatus().getStatus() + "\n" +
+                        "<b>Xarid holati: </b>" + purchase1.getPurchaseStatus().getStatus() + "\n\n" +
+                        "<b><i>MAHSULOTLAR \uD83D\uDCD1</i></b> \n\n" + products;
                 for (User admin : admins) {
-                    if (admin.getChatId()!=null){
+                    if (admin.getChatId() != null) {
                         SendMessage sendMessage = SendMessage
                                 .builder()
                                 .text(sendText)
