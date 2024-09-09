@@ -39,4 +39,6 @@ public class PurchaseDto {
 
     @NotNull(message = "required line")
     private List<PurchaseProductDto> purchaseProductsDto;
+
+    private List<PurchaseOutlayDto> purchaseOutlayDtoList;
 }
