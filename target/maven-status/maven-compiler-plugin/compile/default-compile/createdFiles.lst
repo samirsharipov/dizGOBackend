@@ -1,0 +1,10 @@
+uz/pdp/springsecurity/entity/PurchaseOutlayCategory.class
+uz/pdp/springsecurity/service/PurchaseOutlayService.class
+uz/pdp/springsecurity/entity/PurchaseOutlay.class
+uz/pdp/springsecurity/payload/PurchaseOutlayDto.class
+uz/pdp/springsecurity/payload/PurchaseOutlayCategoryDto.class
+uz/pdp/springsecurity/controller/PurchaseOutlayCategoryController.class
+uz/pdp/springsecurity/service/PurchaseOutlayCategoryService.class
+uz/pdp/springsecurity/repository/PurchaseOutlayCategoryRepository.class
+uz/pdp/springsecurity/repository/PurchaseOutlayRepository.class
+uz/pdp/springsecurity/controller/PurchaseOutlayController.class
