@@ -196,15 +196,17 @@ public class PurchaseService {
 
         // purchase outlay create
         List<PurchaseOutlayDto> purchaseOutlayDtoList = purchaseDto.getPurchaseOutlayDtoList();
-        if (!purchaseOutlayDtoList.isEmpty()) {
-            for (PurchaseOutlayDto purchaseOutlayDto : purchaseOutlayDtoList) {
-                PurchaseOutlay purchaseOutlay = new PurchaseOutlay();
-                purchaseOutlay.setPurchase(purchase);
-                purchaseOutlay.setBusiness(purchase.getBranch().getBusiness());
-                Optional<PurchaseOutlayCategory> optionalPurchaseOutlayCategory = purchaseOutlayCategoryRepository.findById(purchaseOutlayDto.getCategoryId());
-                optionalPurchaseOutlayCategory.ifPresent(purchaseOutlay::setCategory);
-                purchaseOutlay.setTotalPrice(purchaseOutlayDto.getTotalPrice());
-                purchaseOutlayRepository.save(purchaseOutlay);
+        if (purchaseOutlayDtoList !=null) {
+            if (!purchaseOutlayDtoList.isEmpty()) {
+                for (PurchaseOutlayDto purchaseOutlayDto : purchaseOutlayDtoList) {
+                    PurchaseOutlay purchaseOutlay = new PurchaseOutlay();
+                    purchaseOutlay.setPurchase(purchase);
+                    purchaseOutlay.setBusiness(purchase.getBranch().getBusiness());
+                    Optional<PurchaseOutlayCategory> optionalPurchaseOutlayCategory = purchaseOutlayCategoryRepository.findById(purchaseOutlayDto.getCategoryId());
+                    optionalPurchaseOutlayCategory.ifPresent(purchaseOutlay::setCategory);
+                    purchaseOutlay.setTotalPrice(purchaseOutlayDto.getTotalPrice());
+                    purchaseOutlayRepository.save(purchaseOutlay);
+                }
             }
         }
 

@@ -13,6 +13,7 @@ public class PurchaseOutlayDto {
     private UUID id;
 
     private UUID categoryId;
+
     private String categoryName;
 
     private UUID purchaseId;
