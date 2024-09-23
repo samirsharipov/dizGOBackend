@@ -195,21 +195,13 @@ public class PurchaseService {
         }
 
         // purchase outlay create
-        List<PurchaseOutlayDto> purchaseOutlayDtoList = purchaseDto.getPurchaseOutlayDtoList();
-        if (purchaseOutlayDtoList !=null) {
-            if (!purchaseOutlayDtoList.isEmpty()) {
-                for (PurchaseOutlayDto purchaseOutlayDto : purchaseOutlayDtoList) {
-                    PurchaseOutlay purchaseOutlay = new PurchaseOutlay();
-                    purchaseOutlay.setPurchase(purchase);
-                    purchaseOutlay.setBusiness(purchase.getBranch().getBusiness());
-                    Optional<PurchaseOutlayCategory> optionalPurchaseOutlayCategory = purchaseOutlayCategoryRepository.findById(purchaseOutlayDto.getCategoryId());
-                    optionalPurchaseOutlayCategory.ifPresent(purchaseOutlay::setCategory);
-                    purchaseOutlay.setTotalPrice(purchaseOutlayDto.getTotalPrice());
-                    purchaseOutlayRepository.save(purchaseOutlay);
-                }
-            }
+        if (!isEdit) {
+            createOrEditPurchaseOutlay(purchase, purchaseDto);
+        } else {
+            List<PurchaseOutlay> all = purchaseOutlayRepository.findAllByPurchaseId(purchase.getId());
+            purchaseOutlayRepository.deleteAll(all);
+            createOrEditPurchaseOutlay(purchase, purchaseDto);
         }
-
 
         purchaseProductRepository.saveAll(purchaseProductList);
 
@@ -260,6 +252,25 @@ public class PurchaseService {
             }
         }
         return new ApiResponse("SUCCESS", true);
+    }
+
+    private void createOrEditPurchaseOutlay(Purchase purchase, PurchaseDto purchaseDto) {
+        List<PurchaseOutlayDto> purchaseOutlayDtoList = purchaseDto.getPurchaseOutlayDtoList();
+        if (purchaseOutlayDtoList != null) {
+            if (!purchaseOutlayDtoList.isEmpty()) {
+                for (PurchaseOutlayDto purchaseOutlayDto : purchaseOutlayDtoList) {
+                    PurchaseOutlay purchaseOutlay = new PurchaseOutlay();
+                    purchaseOutlay.setPurchase(purchase);
+                    purchaseOutlay.setBusiness(purchase.getBranch().getBusiness());
+
+                    Optional<PurchaseOutlayCategory> optionalPurchaseOutlayCategory = purchaseOutlayCategoryRepository.findById(purchaseOutlayDto.getCategoryId());
+                    optionalPurchaseOutlayCategory.ifPresent(purchaseOutlay::setCategory);
+
+                    purchaseOutlay.setTotalPrice(purchaseOutlayDto.getTotalPrice());
+                    purchaseOutlayRepository.save(purchaseOutlay);
+                }
+            }
+        }
     }
 
     private PurchaseProduct createOrEditPurchaseProduct(PurchaseProduct purchaseProduct, PurchaseProductDto purchaseProductDto, double course) {

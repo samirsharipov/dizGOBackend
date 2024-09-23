@@ -32,6 +32,7 @@ public class PurchaseOutlayService {
         dto.setCategoryId(purchaseOutlay.getCategory().getId());
         dto.setCategoryName(purchaseOutlay.getCategory().getName());
         dto.setBusinessId(purchaseOutlay.getBusiness().getId());
+        dto.setTotalPrice(purchaseOutlay.getTotalPrice());
         return dto;
     }
 
