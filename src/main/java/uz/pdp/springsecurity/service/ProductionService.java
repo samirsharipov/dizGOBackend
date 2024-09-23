@@ -37,10 +37,14 @@ public class ProductionService {
 
         Optional<Branch> optionalBranch = branchRepository.findById(productionDto.getBranchId());
         if (optionalBranch.isEmpty()) return new ApiResponse("NOT FOUND BRANCH", false);
+
         Branch branch = optionalBranch.get();
+
         if (productionDto.getInvalid() >= productionDto.getTotalQuantity())
             return new ApiResponse("WRONG QUANTITY", false);
-        if (productionDto.getDate() == null) return new ApiResponse("NOT FOUND DATE", false);
+
+        if (productionDto.getDate() == null)
+            return new ApiResponse("NOT FOUND DATE", false);
 
         ApiResponse apiResponse = checkBeforeProduction(branch, productionDto.getContentProductDtoList());
         if (!apiResponse.isSuccess()) return apiResponse;
@@ -180,10 +184,8 @@ public class ProductionService {
                 taskDto.getCost() * cost,
                 taskDto.isCostEachOne()
         );
-
-        // commit
-
         production.setDone(false);
+
         if (task.getContent().getProduct() != null) {
             production.setProduct(task.getContent().getProduct());
         } else {
