@@ -58,4 +58,17 @@ public class SubscriptionController {
         ApiResponse apiResponse = subscriptionService.getByBusinessId(id);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
+
+    @PostMapping("create-subscription-in-business")
+    public HttpEntity<?> createSubscriptionInBusiness(@RequestBody SubscriptionPostDto subscriptionPostDto) {
+        ApiResponse apiResponse = subscriptionService.create(subscriptionPostDto);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
+
+    @CheckPermission("VIEW_SUBSCRIPTION")
+    @GetMapping("get-by-confirm-false")
+    public HttpEntity<?> getByConfirmFalse() {
+        ApiResponse apiResponse = subscriptionService.getByConfirmFalse();
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
 }

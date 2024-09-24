@@ -31,6 +31,7 @@ public class SubscriptionService {
     private final SubscriptionRepository repository;
     private final SubscriptionMapper mapper;
     private final RoleRepository roleRepository;
+    private final BusinessRepository businessRepository;
 
     public ApiResponse create(SubscriptionPostDto subscriptionPostDto) {
         UUID businessId = subscriptionPostDto.getBusinessId();
@@ -40,8 +41,10 @@ public class SubscriptionService {
         if (size >= 2) {
             return new ApiResponse("subscription exceeded the limit", false);
         }
+        Optional<Business> optionalBusiness = businessRepository.findById(businessId);
+        if (optionalBusiness.isEmpty())
+            return new ApiResponse("business does not exist", false);
 
-        //business va tariff id xatosiz berilishi kerak chunki tekshirilib ketmad
         Subscription subscription = mapper.toEntity(subscriptionPostDto);
         subscription.setActive(false);
         subscription.setActiveNewTariff(subscriptionPostDto.isActiveNewTariff());
@@ -258,5 +261,13 @@ public class SubscriptionService {
             all.add(subscriptionGetDto);
         }
         return new ApiResponse("all subscription", true, all);
+    }
+
+    public ApiResponse getByConfirmFalse() {
+        List<Subscription> all = repository.findAllByActiveFalseAndDeleteIsFalse();
+        if (all.isEmpty())
+            return new ApiResponse("not found subscription", false);
+
+        return new ApiResponse("all subscription", true, mapper.toDtoList(all));
     }
 }
