@@ -30,4 +30,6 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, UUID
 
     List<Subscription> findAllByActiveFalseAndDeleteIsFalse();
 
+    List<Subscription> findAllByCheckTestDayIsTrueAndTestDayFinishIsFalse();
+
 }

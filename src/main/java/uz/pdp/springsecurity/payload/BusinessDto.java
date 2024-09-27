@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uz.pdp.springsecurity.enums.Permissions;
-import uz.pdp.springsecurity.service.LidService;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -28,5 +27,6 @@ public class BusinessDto {
 
     private AddressDto addressDto;
 
+    @NotNull(message = "required permissions")
     private List<Permissions> permissionsList;
 }
