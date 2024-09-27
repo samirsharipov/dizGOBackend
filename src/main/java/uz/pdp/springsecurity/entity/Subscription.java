@@ -46,4 +46,16 @@ public class Subscription extends AbsEntity {
     private Boolean testDayFinish;
 
     private Boolean checkTestDay;
+
+    public Subscription(Business business, Tariff tariff, Timestamp startDay, Timestamp endDay, StatusTariff statusTariff, PayType payType, boolean activeNewTariff, boolean active, boolean delete) {
+        this.business = business;
+        this.tariff = tariff;
+        this.startDay = startDay;
+        this.endDay = endDay;
+        this.statusTariff = statusTariff;
+        this.payType = payType;
+        this.activeNewTariff = activeNewTariff;
+        this.active = active;
+        this.delete = delete;
+    }
 }
