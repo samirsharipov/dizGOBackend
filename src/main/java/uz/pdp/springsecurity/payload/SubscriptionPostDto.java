@@ -18,4 +18,6 @@ public class SubscriptionPostDto {
     private String payType;
 
     private boolean activeNewTariff;
+
+    private boolean checkTestDay;
 }

@@ -13,6 +13,7 @@ import uz.pdp.springsecurity.payload.BusinessEditDto;
 import uz.pdp.springsecurity.payload.CheckDto;
 import uz.pdp.springsecurity.service.BusinessService;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
 @RestController
@@ -23,7 +24,7 @@ public class BusinessController {
     private final BusinessService businessService;
 
     @PostMapping("/create")
-    public HttpEntity<?> add(@RequestBody BusinessDto businessDto) {
+    public HttpEntity<?> add(@Valid @RequestBody BusinessDto businessDto) {
         ApiResponse apiResponse = businessService.add(businessDto);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }

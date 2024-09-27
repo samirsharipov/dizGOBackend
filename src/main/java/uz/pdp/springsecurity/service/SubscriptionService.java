@@ -47,6 +47,10 @@ public class SubscriptionService {
 
         Subscription subscription = mapper.toEntity(subscriptionPostDto);
         subscription.setActive(false);
+
+        subscription.setCheckTestDay(subscriptionPostDto.isCheckTestDay());
+        subscription.setTestDayFinish(false);
+
         subscription.setActiveNewTariff(subscriptionPostDto.isActiveNewTariff());
         repository.save(subscription);
         return new ApiResponse("Added", true);

@@ -1,6 +1,7 @@
 package uz.pdp.springsecurity.service;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import uz.pdp.springsecurity.entity.*;
@@ -52,24 +53,53 @@ public class ScheduleTaskService {
                     .findByStartDayBetweenAndBusinessIdAndDeleteIsFalse(Timestamp.valueOf(TODAY), Timestamp.valueOf(END_TODAY)
                             , businessId);
 
-            Subscription newSubscription;
-
-            if (optionalSubscription.isPresent()) {
-                newSubscription = optionalSubscription.get();
-                newSubscription.setActive(true);
-            } else {
-                newSubscription = new Subscription();
-                newSubscription.setStatusTariff(StatusTariff.WAITING);
-                newSubscription.setBusiness(business);
-                newSubscription.setTariff(tariff);
-                newSubscription.setActive(false);
-                newSubscription.setDelete(false);
-                newSubscription.setActiveNewTariff(false);
-            }
+            Subscription newSubscription = getSubscription(optionalSubscription, business, tariff);
             subscriptionRepository.save(newSubscription);
         }
     }
 
+    @Scheduled(cron = "0 0/46 00 * * *")
+    public void testDaySubscription() {
+        List<Subscription> all =
+                subscriptionRepository.findAllByCheckTestDayIsTrueAndTestDayFinishIsFalse();
+        for (Subscription subscription : all) {
+            Timestamp createdAt = subscription.getCreatedAt();
+            int testDay = subscription.getTariff().getTestDay();
+            Timestamp currentDay = new Timestamp(System.currentTimeMillis());
+
+
+            LocalDate dayOfUse = createdAt.toLocalDateTime().toLocalDate().plusDays(testDay);
+            LocalDate currentDate = currentDay.toLocalDateTime().toLocalDate();
+
+            if (dayOfUse.isAfter(currentDate)) {
+                subscription.setTestDayFinish(true);
+                subscription.setCheckTestDay(false);
+                subscription.setActive(false);
+                subscriptionRepository.save(subscription);
+            }
+        }
+    }
+
+
+
+    @NotNull
+    private static Subscription getSubscription(Optional<Subscription> optionalSubscription, Business business, Tariff tariff) {
+        Subscription newSubscription;
+
+        if (optionalSubscription.isPresent()) {
+            newSubscription = optionalSubscription.get();
+            newSubscription.setActive(true);
+        } else {
+            newSubscription = new Subscription();
+            newSubscription.setStatusTariff(StatusTariff.WAITING);
+            newSubscription.setBusiness(business);
+            newSubscription.setTariff(tariff);
+            newSubscription.setActive(false);
+            newSubscription.setDelete(false);
+            newSubscription.setActiveNewTariff(false);
+        }
+        return newSubscription;
+    }
 
     @Scheduled(cron = "0 0/31 12 * * *")
     public void notification() {
