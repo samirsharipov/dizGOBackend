@@ -87,6 +87,8 @@ public class TradeService {
             invoice = invoiceStr != null ? Integer.parseInt(invoiceStr) : 0;
         }
 
+
+
         Trade trade = new Trade();
         trade.setBranch(optionalBranch.get());
         trade.setLid(tradeDTO.isLid());
