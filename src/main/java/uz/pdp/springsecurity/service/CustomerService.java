@@ -73,6 +73,9 @@ public class CustomerService {
         customer.setPayDate(customerDto.getPayDate());
         customer.setLidCustomer(customerDto.getLidCustomer());
         customer.setDescription(customerDto.getDescription());
+        customer.setAddress(customerDto.getAddress()); // Yangi maydon
+        customer.setLatitude(customerDto.getLatitude());
+        customer.setLongitude(customerDto.getLongitude());
 
         customer.setBusiness(branches.get(0).getBusiness()); // TODO: 6/6/2023  delete
         customer.setBranch(branches.get(0)); // TODO: 6/6/2023  delete
@@ -353,7 +356,8 @@ public class CustomerService {
         Double totalProfitByCustomer = tradeRepository.totalProfitByCustomer(customerId);
         customerInfoDto.setTotalTradeSum(totalSumByCustomer != null ? totalSumByCustomer : 0);
         customerInfoDto.setTotalProfitSum(totalProfitByCustomer != null ? totalProfitByCustomer : 0);
-
+        customerDto.setLatitude(customer.getLatitude());
+        customerDto.setLongitude(customer.getLongitude());
         return new ApiResponse("data", true, customerInfoDto);
     }
 
@@ -392,6 +396,7 @@ public class CustomerService {
                         productCustomerDto.setAttachmentId(tradeProduct.getProductTypePrice().getPhoto().getId());
                     }
                 }
+
 
                 productCustomerDto.setProductName(tradeProduct.getProductTypePrice() != null ?
                         tradeProduct.getProductTypePrice().getName() : tradeProduct.getProduct().getName());

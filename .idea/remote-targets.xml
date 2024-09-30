@@ -5,14 +5,27 @@
       <target name="root@176.99.4.134:22" type="ssh/sftp" uuid="0ca841aa-6d68-4196-a769-fb376f02cac4">
         <config>
           <option name="projectRootOnTarget" value="/root/opymitbakendmaaaniki" />
-          <option name="serverName" value="root@176.99.4.134:22 password" />
-          <option name="useRsync" value="true" />
+          <option name="serverName" value="root@46.4.18.116:22 password" />
         </config>
         <ContributedStateBase type="JavaLanguageRuntime">
           <config>
             <option name="homePath" value="/usr/lib/jvm/java-1.17.0-openjdk-amd64" />
             <option name="javaVersionString" value="17.0.9" />
           </config>
+        </ContributedStateBase>
+      </target>
+      <target name="root@46.4.18.116:22" type="ssh/sftp" uuid="d73828f9-8c60-4132-9a61-1669f215fab1">
+        <config>
+          <option name="projectRootOnTarget" value="/root/opymitbakendmaaaniki" />
+          <option name="serverName" value="root@46.4.18.116:22 password" />
+        </config>
+        <ContributedStateBase type="MavenRuntime">
+          <config>
+            <option name="homePath" value="/usr/share/maven" />
+          </config>
+        </ContributedStateBase>
+        <ContributedStateBase type="MavenRuntime">
+          <config />
         </ContributedStateBase>
       </target>
     </targets>

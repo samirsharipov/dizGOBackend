@@ -425,6 +425,7 @@ public class TradeService {
         tradeRepository.save(trade);
         tradeProductRepository.saveAll(tradeProductList);
 
+
         if (customerDebt.getDebtSum() != null) {
             customerDebt.setTrade(trade);
             customerDebtRepository.save(customerDebt);
@@ -473,6 +474,8 @@ public class TradeService {
         }
         Map<String, Object> response = new HashMap<>();
         response.put("invoice", trade.getInvoice());
+        response.put("tradeId", trade.getId());  // Savdo ID raqamini qo'shish
+        response.put("message", "Savdo muvaffaqiyatli amalga oshirildi");
         if (trade.getCustomer() != null)
             response.put("customerDebt", trade.getCustomer().getDebt());
         return new ApiResponse("SUCCESS", true, response);

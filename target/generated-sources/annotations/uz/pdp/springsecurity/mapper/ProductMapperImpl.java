@@ -11,8 +11,8 @@ import uz.pdp.springsecurity.payload.ProductGetForPurchaseDto;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-08-26T11:55:54+0500",
-    comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.12 (Amazon.com Inc.)"
+    date = "2024-09-30T00:25:19+0500",
+    comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.10 (Amazon.com Inc.)"
 )
 @Component
 public class ProductMapperImpl implements ProductMapper {

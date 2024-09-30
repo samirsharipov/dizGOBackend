@@ -29,6 +29,7 @@ public class Customer extends AbsEntity {
     private String phoneNumber;
     private String telegram;
     private String description;
+    private String address;
 
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -50,6 +51,10 @@ public class Customer extends AbsEntity {
     private Date payDate = new Date();
 
     private Boolean lidCustomer;
+
+    private Double latitude;  // Yangi maydon
+    private Double longitude; // Yangi maydon
+
 
     private Boolean active = true;
 

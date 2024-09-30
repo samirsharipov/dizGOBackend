@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import static org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers.data;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -38,4 +40,5 @@ public class ApiResponse {
     public ApiResponse(Object object) {
         this.object = object;
     }
+
 }

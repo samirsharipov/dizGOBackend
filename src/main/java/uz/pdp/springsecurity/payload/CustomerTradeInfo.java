@@ -16,4 +16,5 @@ public class CustomerTradeInfo {
     private Double totalSumma;
     private boolean isTrade;
     private boolean isPaid;
+
 }

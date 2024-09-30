@@ -557,6 +557,7 @@
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/controller/ProductHistoryController.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/payload/ProjectDto.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/payload/projections/MonthProjection.java
+/Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/exeptions/GlobalExceptionsHandler.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/payload/MessageDto.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/entity/template/AbsEntity.java
 /Users/admin/Documents/opymitbakendmaaaniki/src/main/java/uz/pdp/springsecurity/entity/WarehouseBuilding.java

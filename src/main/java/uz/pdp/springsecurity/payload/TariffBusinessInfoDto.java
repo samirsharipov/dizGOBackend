@@ -1,13 +1,18 @@
 package uz.pdp.springsecurity.payload;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class TariffBusinessInfoDto {
+
+    // Getter va setter larini qo'shish
+    @Setter
+    @Getter
+    private String tariffName;  // Tarif nomi qo'shiladi
+
+
     private long tradeAmount;
     private long yourTradeAmount;
 

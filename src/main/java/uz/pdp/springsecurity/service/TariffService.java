@@ -107,7 +107,13 @@ public class TariffService {
         TariffBusinessInfoDto businessInfoDto = new TariffBusinessInfoDto();
         Subscription subscription = optionalSubscription.get();
         Timestamp subscriptionDate = subscription.getCreatedAt();
-        Tariff tariff = subscription.getTariff();
+        Tariff tariff = subscription.getTariff();  // Tarif obyektini olish
+        String tariffName = tariff.getName();  // Tarif nomini olish
+
+        // Tariff ma'lumotlarini DTO ga qo'shish
+        businessInfoDto.setTariffName(tariffName);  // Tarif nomini qo'shish
+
+        // ... boshqa ma'lumotlarni hisoblash (testDay, tradeAmount va boshqalar)
         int testDay = tariff.getTestDay();
         LocalDate today = LocalDate.now();
 
@@ -144,6 +150,7 @@ public class TariffService {
 
         return new ApiResponse("success", true, businessInfoDto);
     }
+
 
 
 }
