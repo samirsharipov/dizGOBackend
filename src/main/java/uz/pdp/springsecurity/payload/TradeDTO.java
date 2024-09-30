@@ -59,4 +59,6 @@ public class TradeDTO {
     private Boolean firstPaymentIsDollar;
     private String tradeDescription;
     private Boolean differentPayment;
+
+    private CustomerCreditDto customerCreditDto;
 }

@@ -65,6 +65,7 @@ public class TradeService {
     private final BusinessService businessService;
     private final CustomerSupplierRepository customerSupplierRepository;
     private final CustomerSupplierService customerSupplierService;
+    private final CustomerCreditRepository customerCreditRepository;
 
 
     @SneakyThrows
@@ -338,7 +339,7 @@ public class TradeService {
 
             if (tradeDTO.getDebdSum() > 0)
                 optional.ifPresent(paymentMethod -> balanceService.edit(tradeDTO.getBranchId(), Double.valueOf(tradeDTO.getDebdSum()), false, paymentMethod.getId(), false, "Savdo so'mda bo'ldi tulov dollarda " + tradeDTO.getDebdSum() + " so'm qaytim sifatida berildi!"));
-        }else {
+        } else {
             try {
                 balanceService.edit(branch.getId(), true, tradeDTO.getPaymentDtoList(), tradeDTO.getDollar(), "trade");
             } catch (Exception e) {
@@ -430,6 +431,10 @@ public class TradeService {
             customerDebtRepository.save(customerDebt);
             Optional<CustomerSupplier> optionalCustomerSupplier = customerSupplierRepository.findByCustomerId(customerDebt.getCustomer().getId());
             optionalCustomerSupplier.ifPresent(customerSupplierService::calculation);
+
+            if (tradeDTO.getCustomerCreditDto() != null) {
+                setCustomerCredit(tradeDTO);
+            }
         }
 
         if (!isEdit) {
@@ -476,6 +481,21 @@ public class TradeService {
         if (trade.getCustomer() != null)
             response.put("customerDebt", trade.getCustomer().getDebt());
         return new ApiResponse("SUCCESS", true, response);
+    }
+
+    private void setCustomerCredit(TradeDTO tradeDTO) {
+        CustomerCreditDto customerCreditDto = tradeDTO.getCustomerCreditDto();
+        double paymentAmount = tradeDTO.getCustomerCreditDto().getTotalAmount() / tradeDTO.getCustomerCreditDto().getMonth();
+        for (int i = 1; i <= customerCreditDto.getMonth(); i++) {
+            CustomerCredit customerCredit = new CustomerCredit();
+            customerCredit.setAmount(paymentAmount);
+            customerCredit.setComment(tradeDTO.getCustomerCreditDto().getComment() != null ? tradeDTO.getCustomerCreditDto().getComment() : "");
+            customerCredit.setPaymentDate(tradeDTO.getCustomerCreditDto().getPaymentDate().plusMonths(i));
+            Optional<Customer> optionalCustomer =
+                    customerRepository.findById(customerCreditDto.getCustomerId());
+            optionalCustomer.ifPresent(customerCredit::setCustomer);
+            customerCreditRepository.save(customerCredit);
+        }
     }
 
     private boolean repaymentIsDollar(TradeDTO tradeDTO, PaymentDto paymentDto) {
@@ -843,7 +863,7 @@ public class TradeService {
         return list;
     }
 
-    ///new function
+    /// new function
     public ApiResponse getAllTreade(UUID userId) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
