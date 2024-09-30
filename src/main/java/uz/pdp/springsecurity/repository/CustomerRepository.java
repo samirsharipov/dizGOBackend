@@ -83,13 +83,18 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     List<Customer> findAllByBranchIdAndNameContainingIgnoreCaseAndActiveTrue(UUID branch_id, String name);
 
-    Page<Customer> findAllByBusinessIdAndNameContainingIgnoreCaseAndActiveTrue(UUID businessId, String name, Pageable pageable);
 
-    Page<Customer> findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtGreaterThanAndActiveTrue(UUID business_id, String name, double debt, Pageable pageable);
+    Page<Customer> findAllByBusinessIdAndNameContainingIgnoreCaseAndActiveTrueOrBusinessIdAndPhoneNumberNotContainingIgnoreCaseAndActiveTrue(UUID business_id, String name, UUID business_id2, String phoneNumber, Pageable pageable);
 
-    Page<Customer> findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtLessThanAndActiveTrue(UUID business_id, String name, double debt, Pageable pageable);
+    Page<Customer> findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtGreaterThanAndActiveTrueOrBusinessIdAndPhoneNumberContainingIgnoreCaseAndDebtGreaterThanAndActiveTrue(UUID business_id, String name, double debt, UUID business_id2, String phoneNumber, double debt2, Pageable pageable);
 
-    Page<Customer> findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtAndActiveTrue(UUID business_id, String name, double debt, Pageable pageable);
+    Page<Customer> findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtLessThanAndActiveTrueOrBusinessIdAndPhoneNumberContainingIgnoreCaseAndDebtLessThanAndActiveTrue(UUID business_id, String name, double debt, UUID business_id2, String phoneNumber, double debt2, Pageable pageable);
+
+    Page<Customer> findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtAndActiveTrueOrBusinessIdAndPhoneNumberContainingIgnoreCaseAndDebtAndActiveTrue(UUID business_id, String name, double debt, UUID business_id2, String phoneNumber, double debt2, Pageable pageable);
+
+
+
+
 
     List<Customer> findAllByBusiness_IdAndCreatedAtBetween(UUID businessId, Timestamp start, Timestamp end);
 

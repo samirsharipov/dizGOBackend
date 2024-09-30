@@ -81,7 +81,7 @@ public class CustomerService {
         customer.setBranch(branches.get(0)); // TODO: 6/6/2023  delete
 
         Customer save = customerRepository.save(customer);
-        return new ApiResponse("SUCCESS", true,save);
+        return new ApiResponse("SUCCESS", true, save);
     }
 
     public ApiResponse get(UUID id) {
@@ -213,7 +213,7 @@ public class CustomerService {
                 repaymentHelper(repaymentDto.getRepayment(), customer, repaymentDto.getPaymentMethodId(), repaymentDto.getPayDate(), repaymentDto.getRepaymentDollar(), repaymentDto.getIsDollar()
                         , repaymentDto.getDescription());
 
-                balanceService.edit(customer.getBranch().getId(), repaymentDto.getRepayment(), true, repaymentDto.getPaymentMethodId(), repaymentDto.getIsDollar(),"customer");
+                balanceService.edit(customer.getBranch().getId(), repaymentDto.getRepayment(), true, repaymentDto.getPaymentMethodId(), repaymentDto.getIsDollar(), "customer");
 
                 UUID paymentMethodId = repaymentDto.getPaymentMethodId();
                 Optional<PaymentMethod> optionalPaymentMethod = payMethodRepository.findById(paymentMethodId);
@@ -693,13 +693,13 @@ public class CustomerService {
         if (name != null) {
             switch (balanceFilter) {
                 case "haqdor" ->
-                        all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtGreaterThanAndActiveTrue(businessId, name, 0, pageable);
+                        all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtGreaterThanAndActiveTrueOrBusinessIdAndPhoneNumberContainingIgnoreCaseAndDebtGreaterThanAndActiveTrue(businessId, name, 0, businessId, name, 0, pageable);
                 case "balance" ->
-                        all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtAndActiveTrue(businessId, name, 0, pageable);
+                        all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtAndActiveTrueOrBusinessIdAndPhoneNumberContainingIgnoreCaseAndDebtAndActiveTrue(businessId, name, 0, businessId, name, 0, pageable);
                 case "qarzdor" ->
-                        all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtLessThanAndActiveTrue(businessId, name, 0, pageable);
+                        all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtLessThanAndActiveTrueOrBusinessIdAndPhoneNumberContainingIgnoreCaseAndDebtLessThanAndActiveTrue(businessId, name, 0, businessId, name, 0, pageable);
                 default ->
-                        all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndActiveTrue(businessId, name, pageable);
+                        all = customerRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndActiveTrueOrBusinessIdAndPhoneNumberNotContainingIgnoreCaseAndActiveTrue(businessId, name, businessId, name, pageable);
             }
         } else if (branchId != null) {
             switch (balanceFilter) {
@@ -714,24 +714,22 @@ public class CustomerService {
         } else if (groupId != null) {
             switch (balanceFilter) {
                 case "haqdor" ->
-                    all = customerRepository.findAllByCustomerGroupIdAndActiveIsTrueAndDebtGreaterThan(groupId, 0, pageable);
+                        all = customerRepository.findAllByCustomerGroupIdAndActiveIsTrueAndDebtGreaterThan(groupId, 0, pageable);
                 case "balance" ->
-                    all = customerRepository.findAllByCustomerGroupIdAndActiveIsTrueAndDebt(groupId, 0, pageable);
+                        all = customerRepository.findAllByCustomerGroupIdAndActiveIsTrueAndDebt(groupId, 0, pageable);
                 case "qarzdor" ->
-                    all = customerRepository.findAllByCustomerGroupIdAndActiveIsTrueAndDebtLessThan(groupId, 0, pageable);
-                default ->
-                        all = customerRepository.findAllByCustomerGroupIdAndActiveIsTrue(groupId, pageable);
+                        all = customerRepository.findAllByCustomerGroupIdAndActiveIsTrueAndDebtLessThan(groupId, 0, pageable);
+                default -> all = customerRepository.findAllByCustomerGroupIdAndActiveIsTrue(groupId, pageable);
             }
         } else {
             switch (balanceFilter) {
                 case "haqdor" ->
-                    all= customerRepository.findAllByBusiness_IdAndDebtGreaterThanAndActiveTrue(businessId, 0, pageable);
+                        all = customerRepository.findAllByBusiness_IdAndDebtGreaterThanAndActiveTrue(businessId, 0, pageable);
                 case "balance" ->
-                    all= customerRepository.findAllByBusiness_IdAndDebtAndActiveTrue(businessId, 0, pageable);
+                        all = customerRepository.findAllByBusiness_IdAndDebtAndActiveTrue(businessId, 0, pageable);
                 case "qarzdor" ->
-                    all = customerRepository.findAllByBusiness_IdAndDebtLessThanAndActiveTrue(businessId, 0, pageable);
-                default ->
-                        all = customerRepository.findAllByBusiness_IdAndActiveTrue(businessId, pageable);
+                        all = customerRepository.findAllByBusiness_IdAndDebtLessThanAndActiveTrue(businessId, 0, pageable);
+                default -> all = customerRepository.findAllByBusiness_IdAndActiveTrue(businessId, pageable);
             }
         }
 
