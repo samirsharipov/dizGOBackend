@@ -923,32 +923,32 @@ public class DataLoader implements CommandLineRunner {
 //                lossProductRepository.save(lossProduct);
 //            }
 
-            List<Business> businessRepositoryAll1 = businessRepository.findAll();
-            for (Business business2 : businessRepositoryAll1) {
-                boolean existsSom = balanceRepository.existsAllByBranch_Business_IdAndCurrencyIgnoreCase(business2.getId(), "SOM");
-                boolean existsDollar = balanceRepository.existsAllByBranch_Business_IdAndCurrencyIgnoreCase(business2.getId(), "DOLLAR");
-                if (!existsSom && !existsDollar) {
-                    List<Balance> allBalance
-                            = balanceRepository.findAllByBranch_BusinessId(business2.getId());
-                    for (Balance balance : allBalance) {
-                        balance.setCurrency("SOM");
-                        balanceRepository.save(balance);
-                    }
-                    List<Branch> branches = branchRepository.findAllByBusiness_Id(business2.getId());
-                    List<PaymentMethod> newAll = payMethodRepository.findAllByBusiness_Id(business2.getId());
-                    for (PaymentMethod paymentMethod : newAll) {
-                        Balance balance = new Balance();
-                        balance.setAccountSumma(0);
-                        balance.setPaymentMethod(paymentMethod);
-                        balance.setCurrency("DOLLAR");
-                        for (Branch branch1 : branches) {
-                            balance.setBranch(branch1);
-                        }
-                        balanceRepository.save(balance);
-                    }
-
-                }
-            }
+//            List<Business> businessRepositoryAll1 = businessRepository.findAll();
+//            for (Business business2 : businessRepositoryAll1) {
+//                boolean existsSom = balanceRepository.existsAllByBranch_Business_IdAndCurrencyIgnoreCase(business2.getId(), "SOM");
+//                boolean existsDollar = balanceRepository.existsAllByBranch_Business_IdAndCurrencyIgnoreCase(business2.getId(), "DOLLAR");
+//                if (!existsSom && !existsDollar) {
+//                    List<Balance> allBalance
+//                            = balanceRepository.findAllByBranch_BusinessId(business2.getId());
+//                    for (Balance balance : allBalance) {
+//                        balance.setCurrency("SOM");
+//                        balanceRepository.save(balance);
+//                    }
+//                    List<Branch> branches = branchRepository.findAllByBusiness_Id(business2.getId());
+//                    List<PaymentMethod> newAll = payMethodRepository.findAllByBusiness_Id(business2.getId());
+//                    for (PaymentMethod paymentMethod : newAll) {
+//                        Balance balance = new Balance();
+//                        balance.setAccountSumma(0);
+//                        balance.setPaymentMethod(paymentMethod);
+//                        balance.setCurrency("DOLLAR");
+//                        for (Branch branch1 : branches) {
+//                            balance.setBranch(branch1);
+//                        }
+//                        balanceRepository.save(balance);
+//                    }
+//
+//                }
+//            }
 //            updatePermission(); // TODO: 5/29/2023 if you add new permission
         }
     }
