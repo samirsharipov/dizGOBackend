@@ -1,19 +1,11 @@
 package uz.pdp.springsecurity.service;
 
 import lombok.RequiredArgsConstructor;
-import org.hibernate.collection.internal.PersistentList;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uz.pdp.springsecurity.entity.Business;
-import uz.pdp.springsecurity.entity.Role;
-import uz.pdp.springsecurity.entity.Tariff;
-import uz.pdp.springsecurity.entity.User;
+import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.exeptions.RescuersNotFoundEx;
 import uz.pdp.springsecurity.payload.*;
-import uz.pdp.springsecurity.repository.BusinessRepository;
-import uz.pdp.springsecurity.repository.RoleRepository;
-import uz.pdp.springsecurity.repository.TariffRepository;
-import uz.pdp.springsecurity.repository.UserRepository;
+import uz.pdp.springsecurity.repository.*;
 import uz.pdp.springsecurity.util.Constants;
 
 import javax.validation.constraints.NotNull;
@@ -21,7 +13,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class RoleService  {
+public class RoleService {
     private final RoleRepository roleRepository;
     private final BusinessRepository businessRepository;
     private final UserRepository userRepository;
@@ -36,52 +28,30 @@ public class RoleService  {
             return new ApiResponse("ROLE ALREADY EXISTS", false);
 
         Role role = new Role();
-        role.setName(roleDto.getName());
-        role.setPermissions(roleDto.getPermissions());
-        role.setDescription(roleDto.getDescription());
-        role.setBusiness(optionalBusiness.get());
-
-        if (roleDto.getIsOffice() != null) {
-            role.setOffice(roleDto.getIsOffice());
-        }
-
-        if (roleDto.getParentRole() != null) {
-            Optional<Role> optionalRole = roleRepository.findById(roleDto.getParentRole());
-            optionalRole.ifPresent(role::setParentRole);
-        }
+        setRole(roleDto, optionalBusiness.get(), role);
 
         roleRepository.save(role);
         return new ApiResponse("ADDED", true);
     }
 
+
     public ApiResponse edit(UUID id, RoleDto roleDto) {
 
         Optional<Business> optionalBusiness = businessRepository.findById(roleDto.getBusinessId());
-        if (optionalBusiness.isEmpty()) return new ApiResponse("BUSINESS NOT FOUND", false);
+        if (optionalBusiness.isEmpty())
+            return new ApiResponse("BUSINESS NOT FOUND", false);
 
         Optional<Role> optionalRole = roleRepository.findById(id);
-        if (optionalRole.isEmpty()) return new ApiResponse("ROLE NOT FOUND", false);
+        if (optionalRole.isEmpty())
+            return new ApiResponse("ROLE NOT FOUND", false);
 
         boolean exist = roleRepository.existsByNameIgnoreCaseAndBusinessIdAndIdIsNot(roleDto.getName(), roleDto.getBusinessId(), id);
+
         if (exist || roleDto.getName().equalsIgnoreCase(Constants.SUPERADMIN) || roleDto.getName().equalsIgnoreCase(Constants.ADMIN))
             return new ApiResponse("ROLE ALREADY EXISTS", false);
 
-        List<Role> allByBusinessId = roleRepository.findAllByBusinessId(roleDto.getBusinessId());
-        System.out.println(allByBusinessId);
         Role role = optionalRole.get();
-        role.setName(roleDto.getName());
-        role.setPermissions(roleDto.getPermissions());
-        role.setDescription(roleDto.getDescription());
-        role.setBusiness(optionalBusiness.get());
-
-        if (roleDto.getIsOffice() != null) {
-            role.setOffice(roleDto.getIsOffice());
-        }
-
-        if (roleDto.getParentRole() != null) {
-            Optional<Role> optionalParent = roleRepository.findById(roleDto.getParentRole());
-            optionalParent.ifPresent(role::setParentRole);
-        }
+        setRole(roleDto, optionalBusiness.get(), role);
 
         roleRepository.save(role);
         return new ApiResponse("EDITED", true);
@@ -133,26 +103,32 @@ public class RoleService  {
         for (Role role : allByBusiness_id) {
             List<User> allByRoleId = userRepository.findAllByRole_Id(role.getId());
 
-            RoleGetMetDto roleGetMetDto = new RoleGetMetDto();
-            roleGetMetDto.setRoleName(role.getName());
-
-            List<UserGetMetDto> userGetMetDtoList = new ArrayList<>();
-
-            for (User user : allByRoleId) {
-                UserGetMetDto userGetMetDto = new UserGetMetDto();
-                userGetMetDto.setId(user.getId());
-                userGetMetDto.setFio(user.getFirstName() + " " + user.getLastName());
-                if (user.getPhoto() != null) {
-                    userGetMetDto.setAttachmentId(user.getPhoto().getId());
-                }
-                userGetMetDtoList.add(userGetMetDto);
-            }
-            roleGetMetDto.setList(userGetMetDtoList);
+            RoleGetMetDto roleGetMetDto = getRoleGetMetDto(role, allByRoleId);
             roleGetMetDtoList.add(roleGetMetDto);
         }
 
         if (roleGetMetDtoList.isEmpty()) return new ApiResponse("NOT FOUND", false);
         return new ApiResponse("FOUND", true, roleGetMetDtoList);
+    }
+
+    @org.jetbrains.annotations.NotNull
+    private static RoleGetMetDto getRoleGetMetDto(Role role, List<User> allByRoleId) {
+        RoleGetMetDto roleGetMetDto = new RoleGetMetDto();
+        roleGetMetDto.setRoleName(role.getName());
+
+        List<UserGetMetDto> userGetMetDtoList = new ArrayList<>();
+
+        for (User user : allByRoleId) {
+            UserGetMetDto userGetMetDto = new UserGetMetDto();
+            userGetMetDto.setId(user.getId());
+            userGetMetDto.setFio(user.getFirstName() + " " + user.getLastName());
+            if (user.getPhoto() != null) {
+                userGetMetDto.setAttachmentId(user.getPhoto().getId());
+            }
+            userGetMetDtoList.add(userGetMetDto);
+        }
+        roleGetMetDto.setList(userGetMetDtoList);
+        return roleGetMetDto;
     }
 
     public ApiResponse getRolePermissions(UUID businessId) {
@@ -171,5 +147,49 @@ public class RoleService  {
         }
         Tariff tariff = optionalTariff.get();
         return new ApiResponse("found", true, tariff.getPermissions());
+    }
+
+    public ApiResponse getRoleByRoleCategory(UUID roleCategoryId) {
+        List<Role> all =
+                roleRepository.findAllByRoleCategoryId(roleCategoryId);
+
+        if (all.isEmpty())
+            return new ApiResponse("not found role by role category", false);
+
+        return new ApiResponse("found", true, toDto(all));
+    }
+
+    private void setRole(RoleDto roleDto, Business business, Role role) {
+        role.setName(roleDto.getName());
+        role.setPermissions(roleDto.getPermissions());
+        role.setDescription(roleDto.getDescription());
+        role.setBusiness(business);
+
+        if (roleDto.getIsOffice() != null) {
+            role.setOffice(roleDto.getIsOffice());
+        }
+
+        if (roleDto.getParentRole() != null) {
+            Optional<Role> optionalRole = roleRepository.findById(roleDto.getParentRole());
+            optionalRole.ifPresent(role::setParentRole);
+        }
+    }
+
+    public RoleGetDto toDto(Role role) {
+        RoleGetDto roleGetDto = new RoleGetDto();
+        roleGetDto.setId(role.getId());
+        roleGetDto.setName(role.getName());
+        roleGetDto.setDescription(role.getDescription());
+        roleGetDto.setBusinessId(role.getBusiness().getId());
+        roleGetDto.setParentRoleId(role.getParentRole().getId());
+        roleGetDto.setRoleCategoryId(role.getRoleCategory().getId());
+        roleGetDto.setIsOffice(role.isOffice());
+        return roleGetDto;
+    }
+
+    public List<RoleGetDto> toDto(List<Role> roles) {
+        return roles.stream()
+                .map(this::toDto)
+                .toList();
     }
 }

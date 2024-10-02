@@ -41,6 +41,8 @@ public class Role extends AbsEntity {
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private boolean isOffice;
 
+    @ManyToOne
+    private RoleCategory roleCategory;
 
     public Role(String name, List<Permissions> permissions, Business business) {
         this.name = name;

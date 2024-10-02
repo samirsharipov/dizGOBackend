@@ -47,7 +47,6 @@ public class User extends AbsEntity implements UserDetails {
 
     private Date birthday;
 
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Role role;
 
@@ -94,6 +93,11 @@ public class User extends AbsEntity implements UserDetails {
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private boolean grossPriceControlOneUser;
     private Long chatId;
+
+    // new fields
+    private String passportNumber;
+    private Date dateOfEmployment;
+
 
     public User(String firstName, String lastName, String username, String password, Role role, boolean enabled, Business business, Attachment photo) {
         this.firstName = firstName;
