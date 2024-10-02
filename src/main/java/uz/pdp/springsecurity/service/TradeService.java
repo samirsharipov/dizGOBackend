@@ -65,6 +65,7 @@ public class TradeService {
     private final BusinessService businessService;
     private final CustomerSupplierRepository customerSupplierRepository;
     private final CustomerSupplierService customerSupplierService;
+    private final CustomerCreditRepository customerCreditRepository;
 
 
     @SneakyThrows
@@ -431,6 +432,10 @@ public class TradeService {
             customerDebtRepository.save(customerDebt);
             Optional<CustomerSupplier> optionalCustomerSupplier = customerSupplierRepository.findByCustomerId(customerDebt.getCustomer().getId());
             optionalCustomerSupplier.ifPresent(customerSupplierService::calculation);
+
+            if (tradeDTO.getCustomerCreditDto() != null) {
+                setCustomerCredit(tradeDTO);
+            }
         }
 
         if (!isEdit) {
@@ -1007,6 +1012,21 @@ public class TradeService {
                 data.put("nationTradeTotalSum", nationSum == null ? 0 : nationSum);
             }
             return ResponseEntity.ok(data);
+        }
+    }
+
+    private void setCustomerCredit(TradeDTO tradeDTO) {
+        CustomerCreditDto customerCreditDto = tradeDTO.getCustomerCreditDto();
+        double paymentAmount = tradeDTO.getCustomerCreditDto().getTotalAmount() / tradeDTO.getCustomerCreditDto().getMonth();
+        for (int i = 1; i <= customerCreditDto.getMonth(); i++) {
+            CustomerCredit customerCredit = new CustomerCredit();
+            customerCredit.setAmount(paymentAmount);
+            customerCredit.setComment(tradeDTO.getCustomerCreditDto().getComment() != null ? tradeDTO.getCustomerCreditDto().getComment() : "");
+            customerCredit.setPaymentDate(tradeDTO.getCustomerCreditDto().getPaymentDate().plusMonths(i));
+            Optional<Customer> optionalCustomer =
+                    customerRepository.findById(customerCreditDto.getCustomerId());
+            optionalCustomer.ifPresent(customerCredit::setCustomer);
+            customerCreditRepository.save(customerCredit);
         }
     }
 }
