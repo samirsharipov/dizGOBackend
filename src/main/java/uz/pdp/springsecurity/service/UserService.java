@@ -92,6 +92,8 @@ public class UserService {
         user.setActive(true);
         user.setBranches(branches);
         user.setBirthday(userDto.getBirthday());
+        user.setPassportNumber(userDto.getPassportNumber() != null ? userDto.getPassportNumber() : "");
+        user.setDateOfEmployment(userDto.getDateOfEmployment() != null ? userDto.getDateOfEmployment() : new Date());
         if (userDto.getPhotoId() != null) {
             user.setPhoto(attachmentRepository.findById(userDto.getPhotoId()).orElseThrow());
         }
@@ -157,15 +159,22 @@ public class UserService {
             user.setPhoto(optionalPhoto.get());
         }
 
+        if (userDto.getDateOfEmployment() != null) {
+            user.setDateOfEmployment(userDto.getDateOfEmployment());
+        }
+        user.setPassportNumber(userDto.getPassportNumber());
+
         userRepository.save(user);
         return new ApiResponse("EDITED", true);
     }
 
     public ApiResponse get(UUID id) {
-        User user = userRepository.findById(id).orElse(null);
-        if (user == null) {
-            return new ApiResponse("not found", false);
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty()) {
+            return new ApiResponse("NOT FOUND", false);
         }
+
+        User user = optionalUser.get();
         UserDto dto = userMapper.toDto(user);
         if (user.getPhoto() != null) {
             dto.setPhotoId(user.getPhoto().getId());
@@ -183,9 +192,11 @@ public class UserService {
     }
 
     public ApiResponse delete(UUID id) {
-        Optional<User> byId = userRepository.findById(id);
-        if (byId.isEmpty()) return new ApiResponse("USER NOT FOUND", false);
-        User user = byId.get();
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty())
+            return new ApiResponse("USER NOT FOUND", false);
+
+        User user = optionalUser.get();
         if (user.getRole().getName().equals(Constants.ADMIN) || user.getRole().getName().equals(Constants.SUPERADMIN))
             return new ApiResponse("ADMINNI O'CHIRIB BO'LMAYDI", false);
 
@@ -402,12 +413,14 @@ public class UserService {
         return ResponseEntity.ok(result);
     }
 
-    public void forGrossPriceControlEditeOneState(UUID userId, Boolean checked) {
-        User user = userRepository.findById(userId).get();
+    public ApiResponse forGrossPriceControlEditeOneState(UUID userId, Boolean checked) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
+            return new ApiResponse("NOT FOUND", false);
+        }
+        User user = optionalUser.get();
         user.setGrossPriceControlOneUser(checked);
         userRepository.save(user);
+        return new ApiResponse("UPDATED", true);
     }
-
-
-
 }

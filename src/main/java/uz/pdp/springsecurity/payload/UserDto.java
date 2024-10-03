@@ -69,4 +69,8 @@ public class UserDto {
     private String leaveTime;
 
     private boolean enabled;
+
+    // new fields
+    private String passportNumber;
+    private Date dateOfEmployment;
 }
