@@ -27,6 +27,5 @@ public class BusinessDto {
 
     private AddressDto addressDto;
 
-    @NotNull(message = "required permissions")
     private List<Permissions> permissionsList;
 }

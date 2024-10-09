@@ -24,7 +24,7 @@ public class Tariff extends AbsEntity {
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<Permissions> permissions;
 
     private int branchAmount;
