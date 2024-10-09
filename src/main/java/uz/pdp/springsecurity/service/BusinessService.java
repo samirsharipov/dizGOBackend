@@ -41,7 +41,7 @@ public class BusinessService {
     private final LidFieldRepository lidFieldRepository;
     private final BalanceRepository balanceRepository;
     private final SmsService smsService;
-    private  final ShablonRepository shablonRepository;
+    private final ShablonRepository shablonRepository;
 
     private final static LocalDateTime TODAY = LocalDate.now().atStartOfDay();
     private final static LocalDateTime THIS_WEEK = TODAY.minusDays(TODAY.getDayOfWeek().ordinal());
@@ -57,6 +57,7 @@ public class BusinessService {
         business.setDescription(businessDto.getDescription());
         UUID tariffId = businessDto.getTariffId();
         Optional<Tariff> optionalTariff = tariffRepository.findById(tariffId);
+        Tariff tariff = optionalTariff.get();
         business.setActive(businessDto.isActive());
         business.setDelete(false);
         business = businessRepository.save(business);
@@ -104,14 +105,13 @@ public class BusinessService {
 
         BranchService.createBalance(branch, balanceRepository, payMethodRepository);
 
-
         Role admin = new Role();
         admin.setName(Constants.ADMIN);
         admin.setPermissions(businessDto.getPermissionsList());
         admin.setBusiness(business);
         Role newRole = roleRepository.save(admin);
-
         userDto.setRoleId(newRole.getId());
+
         userDto.setBusinessId(business.getId());
 
         userService.add(userDto, true);
