@@ -22,4 +22,7 @@ public interface BusinessRepository extends JpaRepository<Business, UUID> {
             "WHERE u.id = :userId ")
     List<Business> findAllByDeleteIsFalseMyFunc(UUID userId);
     Integer countAllByCreatedAtAfter(Timestamp startTime);
+
+    @Query("SELECT b.id FROM Business b")
+    List<UUID> findAllBusinessIds();
 }
