@@ -13,7 +13,7 @@ import uz.pdp.springsecurity.mapper.SalaryMapper;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.SalaryDto;
 import uz.pdp.springsecurity.repository.*;
-import uz.pdp.springsecurity.util.Constants;
+import uz.pdp.springsecurity.utils.Constants;
 
 import java.util.*;
 

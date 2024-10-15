@@ -12,10 +12,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -59,50 +57,4 @@ public class Customer extends AbsEntity {
     private Boolean active = true;
 
     private Long chatId;
-
-    public Customer(String name, String phoneNumber, String telegram, Business business) {
-        this.name = name;
-        this.phoneNumber = phoneNumber;
-        this.telegram = telegram;
-        this.business = business;
-
-    }
-
-    public Customer(UUID id, Timestamp createdAt, Timestamp updateAt, String name, String phoneNumber, String telegram, CustomerGroup customerGroup, Business business, Double debt) {
-        super(id, createdAt, updateAt);
-        this.name = name;
-        this.phoneNumber = phoneNumber;
-        this.telegram = telegram;
-        this.customerGroup = customerGroup;
-        this.business = business;
-        this.debt = debt;
-    }
-
-    public Customer(UUID id, Timestamp createdAt, Timestamp updateAt, String name, String phoneNumber, String telegram, CustomerGroup customerGroup, Business business) {
-        super(id, createdAt, updateAt);
-        this.name = name;
-        this.phoneNumber = phoneNumber;
-        this.telegram = telegram;
-        this.customerGroup = customerGroup;
-        this.business = business;
-    }
-
-
-    public Customer(String name, String phoneNumber, String telegram, Business business, Branch branch) {
-        this.name = name;
-        this.phoneNumber = phoneNumber;
-        this.telegram = telegram;
-        this.business = business;
-        this.branch = branch;
-
-    }
-
-    public Customer(String name, String phoneNumber, String telegram, Business business, Branch branch, CustomerGroup customerGroup) {
-        this.name = name;
-        this.phoneNumber = phoneNumber;
-        this.telegram = telegram;
-        this.business = business;
-        this.branch = branch;
-        this.customerGroup = customerGroup;
-    }
 }

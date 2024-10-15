@@ -16,6 +16,7 @@ import java.util.UUID;
 @RequestMapping(value = "/api/bonus")
 @RequiredArgsConstructor
 public class BonusController {
+
     private final BonusService bonusService;
 
     @CheckPermission("ADD_BONUS")

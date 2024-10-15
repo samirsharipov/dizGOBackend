@@ -15,7 +15,7 @@ import uz.pdp.springsecurity.payload.SubscriptionPostDto;
 import uz.pdp.springsecurity.repository.BusinessRepository;
 import uz.pdp.springsecurity.repository.RoleRepository;
 import uz.pdp.springsecurity.repository.SubscriptionRepository;
-import uz.pdp.springsecurity.util.Constants;
+import uz.pdp.springsecurity.utils.Constants;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;

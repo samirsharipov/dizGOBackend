@@ -2,7 +2,6 @@ package uz.pdp.springsecurity.bot;
 
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
@@ -21,7 +20,7 @@ import uz.pdp.springsecurity.entity.CustomerTelegramUser;
 import uz.pdp.springsecurity.enums.STATE;
 import uz.pdp.springsecurity.repository.CustomerRepository;
 import uz.pdp.springsecurity.repository.CustomerTelegramUserRepository;
-import uz.pdp.springsecurity.util.Constants;
+import uz.pdp.springsecurity.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;

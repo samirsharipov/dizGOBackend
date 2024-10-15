@@ -1,6 +1,5 @@
 package uz.pdp.springsecurity.repository;
 
-import org.glassfish.grizzly.http.util.TimeStamp;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,7 +11,6 @@ import uz.pdp.springsecurity.enums.Permissions;
 import uz.pdp.springsecurity.payload.MonthlyEmploymentDismissalReportDto;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.*;
 
 public interface UserRepository extends JpaRepository<User, UUID> {

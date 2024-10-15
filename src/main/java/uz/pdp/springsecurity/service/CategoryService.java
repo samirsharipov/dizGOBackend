@@ -1,5 +1,6 @@
 package uz.pdp.springsecurity.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uz.pdp.springsecurity.entity.Business;
@@ -15,12 +16,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class CategoryService {
-    @Autowired
-    CategoryRepository categoryRepository;
 
-    @Autowired
-    BusinessRepository businessRepository;
+    private final CategoryRepository categoryRepository;
+
+    private final BusinessRepository businessRepository;
 
     public ApiResponse add(CategoryDto categoryDto) {
         UUID businessId = categoryDto.getBusinessId();
@@ -133,7 +134,7 @@ public class CategoryService {
         if (category.getParentCategory() != null) {
             dto.setParentCategory(category.getParentCategory().getId());
             dto.setParentCategoryName(category.getParentCategory().getName());
-        }else {
+        } else {
             dto.setParentCategory(null);
             dto.setParentCategoryName(null);
         }

@@ -4,7 +4,6 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
@@ -17,7 +16,7 @@ import uz.pdp.springsecurity.entity.User;
 import uz.pdp.springsecurity.enums.STATE;
 import uz.pdp.springsecurity.repository.TelegramUserRepository;
 import uz.pdp.springsecurity.repository.UserRepository;
-import uz.pdp.springsecurity.util.Constants;
+import uz.pdp.springsecurity.utils.Constants;
 
 import java.util.Objects;
 

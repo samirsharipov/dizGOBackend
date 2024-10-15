@@ -16,6 +16,7 @@ import java.util.UUID;
 @RequestMapping(value = "/api/agreement")
 @RequiredArgsConstructor
 public class AgreementController {
+
     private final AgreementService agreementService;
 
     @CheckPermission("EDIT_SALARY")

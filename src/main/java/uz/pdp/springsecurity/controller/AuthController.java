@@ -24,9 +24,11 @@ import java.util.Date;
 @CrossOrigin(origins = "*")
 @RequestMapping("/api/auth")
 public class AuthController {
+
     private final AuthenticationManager authenticationManager;
 
     private final JwtProvider jwtProvider;
+
     private final SalaryCountService salaryCountService;
 
     @PostMapping("/login")

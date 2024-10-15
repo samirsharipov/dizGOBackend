@@ -16,7 +16,7 @@ import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.payload.projections.InActiveUserProjection;
 import uz.pdp.springsecurity.payload.projections.MonthProjection;
 import uz.pdp.springsecurity.repository.*;
-import uz.pdp.springsecurity.util.Constants;
+import uz.pdp.springsecurity.utils.Constants;
 
 import java.sql.Timestamp;
 import java.text.DecimalFormat;

@@ -1,5 +1,6 @@
 package uz.pdp.springsecurity.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
@@ -25,22 +26,18 @@ import uz.pdp.springsecurity.repository.UserRepository;
 import java.util.*;
 
 @Controller
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ChatController {
 
-    @Autowired
-    private SimpMessagingTemplate simpMessagingTemplate;
-    @Autowired
-    private MessageRepository messageRepository;
-    @Autowired
-    private MessageMapper mapper;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private AttachmentRepository attachmentRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final MessageRepository messageRepository;
+    private final MessageMapper mapper;
+    private final UserRepository userRepository;
+    private final AttachmentRepository attachmentRepository;
 
     @Autowired
     @Qualifier("sessionRegistry")
-    private SessionRegistry sessionRegistry;
+    private final SessionRegistry sessionRegistry;
 
     @MessageMapping("/message")
     @SendTo("/chatroom/public")

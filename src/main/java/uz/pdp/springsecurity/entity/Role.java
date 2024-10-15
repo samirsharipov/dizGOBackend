@@ -1,10 +1,7 @@
 package uz.pdp.springsecurity.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -14,9 +11,9 @@ import uz.pdp.springsecurity.enums.Permissions;
 import javax.persistence.*;
 import java.util.List;
 
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 @Entity
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)

@@ -1,21 +1,27 @@
 package uz.pdp.springsecurity.entity.template;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.proxy.HibernateProxy;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Objects;
 import java.util.UUID;
 
-@NoArgsConstructor
-@AllArgsConstructor
+@EqualsAndHashCode
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @MappedSuperclass
-public abstract class AbsEntity  implements Serializable{
+public abstract class AbsEntity implements Serializable {
     @Id
     @GeneratedValue
     private UUID id;
@@ -24,7 +30,12 @@ public abstract class AbsEntity  implements Serializable{
     @Column(nullable = false, updatable = false)
     private Timestamp createdAt;
 
-
     @UpdateTimestamp
     private Timestamp updateAt;
+
+    @CreatedBy
+    private UUID createdBy;
+
+    @LastModifiedBy
+    private UUID lastModifiedBy;
 }
