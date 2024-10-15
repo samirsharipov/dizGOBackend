@@ -12,7 +12,7 @@ import uz.pdp.springsecurity.payload.LidDto;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-10-02T11:04:48+0500",
+    date = "2024-10-15T16:34:55+0500",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.12 (Amazon.com Inc.)"
 )
 @Component

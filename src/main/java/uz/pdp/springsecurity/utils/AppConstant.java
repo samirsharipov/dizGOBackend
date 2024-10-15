@@ -19,8 +19,4 @@ public interface AppConstant {
     String DELETE_OUTLAY = " xarajat o'chirildi";
 
     String ADD_PRODUCTION = " ishlab chiqarildi";
-
-    String ASKED_EXCHANGE = " boshqa filialdan maxsulot so'raldi";
-    String REJECTED_EXCHANGE = " boshqa filialdan so'ralgan maxsulot rad etildi";
-    String SEND_EXCHANGE = " boshqa filialdan maxsulot so'raldi";
 }

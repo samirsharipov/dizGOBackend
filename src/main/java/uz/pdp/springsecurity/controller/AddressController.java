@@ -1,5 +1,6 @@
 package uz.pdp.springsecurity.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
@@ -15,19 +16,11 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/address")
+@RequiredArgsConstructor
 public class AddressController {
-    @Autowired
-    AddressRepository addressRepository;
 
-    @Autowired
-    AddressService addressService;
+    private final AddressService addressService;
 
-    /**
-     * YANGI ADDRESS QO'SHISH
-     *
-     * @param addressDto
-     * @return ApiResponse(success - > true message - > DELETED)
-     */
     @CheckPermission("ADD_ADDRESS")
     @PostMapping
     public HttpEntity<?> add(@Valid @RequestBody AddressDto addressDto) {
@@ -35,12 +28,6 @@ public class AddressController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    /**
-     * ADDRESSNI TAXRIRLASH ID ORQALI
-     * @param id
-     * @param addressDto
-     * @return ApiResponse(success - > true message - > EDITED)
-     */
     @CheckPermission("EDIT_ADDRESS")
     @PutMapping("/{id}")
     public HttpEntity<?> edit(@PathVariable UUID id, @RequestBody AddressDto addressDto) {
@@ -48,11 +35,6 @@ public class AddressController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    /**
-     * ADDRESSNI ID ORQALI KO'RISH
-     * @param id
-     * @return ApiResponse(success - > true object - > value)
-     */
     @CheckPermission("VIEW_ADDRESS")
     @GetMapping("/{id}")
     public HttpEntity<?> get(@PathVariable UUID id) {
@@ -60,10 +42,6 @@ public class AddressController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    /**
-     * HAMMA ADDRESSLARNI OLIB CHIQISH
-     * @return  ApiResponse(success - > true object - > value)
-     */
     @CheckPermission("VIEW_ADDRESS")
     @GetMapping
     public HttpEntity<?> get() {
@@ -71,11 +49,6 @@ public class AddressController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    /**
-     * ADDRESSNI DELETE QILSIH
-     * @param id
-     * @return ApiResponse(success - > true message - > DELETED)
-     */
     @CheckPermission("DELETE_ADDRESS")
     @DeleteMapping("/{id}")
     public HttpEntity<?> delete(@PathVariable UUID id) {

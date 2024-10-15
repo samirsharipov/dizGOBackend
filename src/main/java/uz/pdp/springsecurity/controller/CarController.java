@@ -1,6 +1,6 @@
 package uz.pdp.springsecurity.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,14 +14,10 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/car")
+@RequiredArgsConstructor
 public class CarController {
 
     private final CarService carService;
-
-    @Autowired
-    public CarController(CarService carService) {
-        this.carService = carService;
-    }
 
     @PostMapping
     public HttpEntity<?> add(@RequestBody CarDto carDto) {
@@ -61,8 +57,7 @@ public class CarController {
 
     @GetMapping("/invoice/branch/{id}")
     public HttpEntity<?> getInvoiceListByBranch(@PathVariable UUID id, @RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "15") Integer limit, @RequestParam(required = false) Date startDate, @RequestParam(required = false) Date endDate) {
-        ApiResponse apiResponse = carService.getInvoiceListByBranch(id, page, limit,startDate,endDate);
+        ApiResponse apiResponse = carService.getInvoiceListByBranch(id, page, limit, startDate, endDate);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
-
 }

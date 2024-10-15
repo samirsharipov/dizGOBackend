@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 import uz.pdp.springsecurity.entity.User;
 import uz.pdp.springsecurity.exeptions.ForbiddenException;
 
-@Component
 @Aspect
+@Component
 public class CheckPermissionExecutor {
     @Before(value = "@annotation(checkPermission)")
     public void checkUserPermissionMyMethod(CheckPermission checkPermission) {

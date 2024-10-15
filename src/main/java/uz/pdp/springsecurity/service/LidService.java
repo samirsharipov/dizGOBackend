@@ -12,7 +12,7 @@ import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.LidDto;
 import uz.pdp.springsecurity.payload.LidGetDto;
 import uz.pdp.springsecurity.repository.*;
-import uz.pdp.springsecurity.util.Constants;
+import uz.pdp.springsecurity.utils.Constants;
 
 import java.sql.Timestamp;
 import java.util.*;

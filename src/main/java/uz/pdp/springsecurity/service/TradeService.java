@@ -24,7 +24,7 @@ import uz.pdp.springsecurity.mapper.PaymentMapper;
 import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.payload.projections.DataProjection;
 import uz.pdp.springsecurity.repository.*;
-import uz.pdp.springsecurity.util.Constants;
+import uz.pdp.springsecurity.utils.Constants;
 import uz.pdp.springsecurity.utils.AppConstant;
 import uz.pdp.springsecurity.utils.ConstantProduct;
 

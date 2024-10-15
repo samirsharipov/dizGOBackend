@@ -13,7 +13,7 @@ import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.mapper.UserMapper;
 import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
-import uz.pdp.springsecurity.util.Constants;
+import uz.pdp.springsecurity.utils.Constants;
 
 import java.util.*;
 

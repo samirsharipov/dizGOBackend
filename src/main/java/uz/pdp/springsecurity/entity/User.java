@@ -1,10 +1,8 @@
 package uz.pdp.springsecurity.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -17,14 +15,17 @@ import uz.pdp.springsecurity.enums.Permissions;
 import javax.persistence.*;
 import java.util.*;
 
-@Data
+@Builder
+@Getter
+@Setter
+@ToString
 @Entity(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler", "fieldHandler"})
 public class User extends AbsEntity implements UserDetails {
+
     @Column(nullable = false)
     private String firstName;
 
@@ -32,6 +33,7 @@ public class User extends AbsEntity implements UserDetails {
     private String lastName;
 
     private String email;
+
     @Column(nullable = false, unique = true)
     private String username;
 
@@ -48,6 +50,7 @@ public class User extends AbsEntity implements UserDetails {
     private Date birthday;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ToString.Exclude
     private Role role;
 
     @ManyToOne
@@ -55,12 +58,12 @@ public class User extends AbsEntity implements UserDetails {
     private Business business;
 
     @ManyToMany
+    @ToString.Exclude
     private Set<Branch> branches;
 
     @OneToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Attachment photo;
-
 
     private boolean active;
 
@@ -70,46 +73,35 @@ public class User extends AbsEntity implements UserDetails {
 
     private Date probation;
 
-    private String workingTime;
+    private String workingTime; //?
 
-    private double salary;
+    private double salary; // ?
 
     @ManyToMany
-    private List<Bonus> bonuses;
+    @ToString.Exclude
+    private List<Bonus> bonuses;//ochirilsin
 
     private String arrivalTime = "08:00";
 
     private String leaveTime = "16:00";
 
-    //yoqilgan
-    private boolean enabled = false;
-    //muddati tugamagan
-    private boolean accountNonExpired = true;
-    //qulflanmagan
-    private boolean accountNonLocked = true;
-    //Foydalanuvchining hisob ma'lumotlari (parol) muddati tugaganligini ko'rsatadi.
-    private boolean credentialsNonExpired = true;
-
-    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
-    private boolean grossPriceControlOneUser;
-    private Long chatId;
-
-    // new fields
     private String passportNumber;
+
     private Date dateOfEmployment;
 
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+    private boolean grossPriceControlOneUser; // ?
 
-    public User(String firstName, String lastName, String username, String password, Role role, boolean enabled, Business business, Attachment photo) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.username = username;
-        this.password = password;
-        this.role = role;
-        this.enabled = enabled;
-        this.business = business;
-        this.photo = photo;
+    private Long chatId; // telegram ?
 
-    }
+
+    private boolean enabled = false;
+
+    private boolean accountNonExpired = true;
+
+    private boolean accountNonLocked = true;
+
+    private boolean credentialsNonExpired = true;
 
     public User(String firstName, String lastName, String username, String password, Role role, boolean enabled, Business business, Set<Branch> branches, boolean active) {
         this.firstName = firstName;
@@ -121,32 +113,6 @@ public class User extends AbsEntity implements UserDetails {
         this.business = business;
         this.branches = branches;
         this.active = active;
-        this.photo = photo;
-    }
-
-    public User(String firstName, String lastName, String username, String password, Role role, boolean enabled, Attachment photo) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.username = username;
-        this.password = password;
-        this.role = role;
-        this.enabled = enabled;
-        this.photo = photo;
-
-    }
-
-    public User(String firstName, String lastName, String username, String password, Role role, Business business, Attachment photo, boolean enabled, boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.username = username;
-        this.password = password;
-        this.role = role;
-        this.business = business;
-        this.photo = photo;
-        this.enabled = enabled;
-        this.accountNonExpired = accountNonExpired;
-        this.accountNonLocked = accountNonLocked;
-        this.credentialsNonExpired = credentialsNonExpired;
     }
 
     @Override
@@ -158,36 +124,5 @@ public class User extends AbsEntity implements UserDetails {
         }
         return grantedAuthorities;
     }
-
-    @Override
-    public String getPassword() {
-        return this.password;
-    }
-
-    @Override
-    public String getUsername() {
-        return this.username;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return this.accountNonExpired;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return this.accountNonLocked;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return this.credentialsNonExpired;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return this.enabled;
-    }
-
 }
 

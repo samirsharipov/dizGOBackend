@@ -1,22 +1,16 @@
 package uz.pdp.springsecurity.service.schedules;
 
 import lombok.RequiredArgsConstructor;
-import org.glassfish.grizzly.http.util.TimeStamp;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import uz.pdp.springsecurity.entity.Business;
 import uz.pdp.springsecurity.entity.EmploymentDismissalReport;
 import uz.pdp.springsecurity.payload.MonthlyEmploymentDismissalReportDto;
-import uz.pdp.springsecurity.payload.TimeStampDto;
 import uz.pdp.springsecurity.repository.BusinessRepository;
 import uz.pdp.springsecurity.repository.EmploymentDismissalReportRepository;
 import uz.pdp.springsecurity.repository.UserRepository;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 

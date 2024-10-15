@@ -1,5 +1,6 @@
 package uz.pdp.springsecurity.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
@@ -15,20 +16,10 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/brand")
+@RequiredArgsConstructor
 public class BrandController {
-    @Autowired
-    BrandRepository brandRepository;
 
-    @Autowired
-    BrandService brandService;
-
-    /**
-     * YANGI BRAND QO'SHISH
-     *
-     * @param brandDto
-     * @return ApiResponse(success - > true message - > ADDED)
-     */
-
+    private final BrandService brandService;
 
     @CheckPermission("ADD_BRAND")
     @PostMapping
@@ -37,13 +28,6 @@ public class BrandController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    /**
-     * BRANDNI EDIT QILISH
-     *
-     * @param id
-     * @param brandDto
-     * @return ApiResponse(success - > true message - > EDITED)
-     */
     @CheckPermission("EDIT_BRAND")
     @PutMapping("/{id}")
     public HttpEntity<?> edit(@PathVariable UUID id, @RequestBody BrandDto brandDto) {
@@ -51,12 +35,6 @@ public class BrandController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    /**
-     * IDSI ORQALI BITTA BRAND OLISH
-     *
-     * @param id
-     * @return ApiResponse(success - > true object - > value)
-     */
     @CheckPermission("VIEW_BRAND")
     @GetMapping("/{id}")
     public HttpEntity<?> get(@PathVariable UUID id) {
@@ -64,12 +42,6 @@ public class BrandController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    /**
-     * ID ORQALI BRANDNI DELETE QILISH
-     *
-     * @param id
-     * @return ApiResponse(success - > true message - > DELETED)
-     */
     @CheckPermission("DELETE_BRAND")
     @DeleteMapping("/{id}")
     public HttpEntity<?> delete(@PathVariable UUID id) {
@@ -77,12 +49,6 @@ public class BrandController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    /**
-     * BUSINESS ID ORQALI BITTA BUSINESSDAGI BARCHA BRANDLARNI OLIB CHIQISH
-     *
-     * @param business_id
-     * @return ApiResponse(success - > true object - > value)
-     */
     @CheckPermission("VIEW_BRAND")
     @GetMapping("by-businessId/{business_id}")
     public HttpEntity<?> getAllByBranchId(@PathVariable UUID business_id) {

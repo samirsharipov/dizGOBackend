@@ -1,4 +1,4 @@
-package uz.pdp.springsecurity.util;
+package uz.pdp.springsecurity.utils;
 
 public interface Constants {
     String ADMIN = "Admin";
