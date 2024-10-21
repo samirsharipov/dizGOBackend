@@ -1,27 +1,24 @@
 package uz.pdp.springsecurity.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.proxy.HibernateProxy;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import java.sql.Timestamp;
-import java.util.UUID;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
+@ToString
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@OnDelete(action = OnDeleteAction.CASCADE)
 public class Category extends AbsEntity {
+
     private String name;
 
     private String description;
@@ -35,9 +32,7 @@ public class Category extends AbsEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Category parentCategory;
 
-
-    public Category(String name, Business business) {
-        this.business = business;
-        this.name = name;
-    }
+    @ToString.Exclude
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    private List<CategoryTranslate> translations = new ArrayList<>();
 }

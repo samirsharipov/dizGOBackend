@@ -3,10 +3,7 @@ package uz.pdp.springsecurity.payload;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uz.pdp.springsecurity.enums.Language;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.validation.constraints.NotNull;
 import java.sql.Date;
 import java.util.List;

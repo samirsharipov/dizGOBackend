@@ -1,14 +1,10 @@
 package uz.pdp.springsecurity.entity;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
-import uz.pdp.springsecurity.enums.Language;
 import uz.pdp.springsecurity.enums.Type;
 
 import javax.persistence.*;
@@ -16,21 +12,22 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
-@Data
+@Getter
+@Setter
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 public class Product extends AbsEntity {
-    @Column(nullable = false)
-    private String name;// product name
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<ProductTranslate> translations;
 
     private String uniqueSKU;//unique SKU
+
     private double salePrice;// price sum
     private double salePriceDollar;// price dollar
-
-    @Enumerated(EnumType.STRING)
-    private Language language;//language ru,uz,en
 
     private Double stockAmount;// stock amount
     private Boolean inStock; // in stock (stockda mavjudmi?)
@@ -44,10 +41,6 @@ public class Product extends AbsEntity {
     private String hsCode22;
     private String hsCode32;
     private String hsCode44;
-
-    private String keyWord;
-    private String briefDescription;
-    private String longDescription;
 
     private String agreementExportsID;
     private String agreementExportsPID;
@@ -94,14 +87,6 @@ public class Product extends AbsEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Category category;
 
-    @ManyToOne
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Category childCategory;
-
-    @ManyToOne
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Category subChildCategory;
-
     @OneToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Measurement measurement;
@@ -115,15 +100,20 @@ public class Product extends AbsEntity {
 
     @ManyToMany
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @ToString.Exclude
     private List<Branch> branch;
 
     @ManyToMany
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @ToString.Exclude
     private List<WarehouseRasta> rastas = new ArrayList<>();
+
     private Integer warehouseCount;
 
     @Transient
     private double quantity;
 
     private Boolean isGlobal;
+
+    private boolean main;
 }
