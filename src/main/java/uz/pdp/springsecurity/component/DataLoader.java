@@ -197,11 +197,6 @@ public class DataLoader implements CommandLineRunner {
                             business
                     ));
 
-            categoryRepository.save(
-                    new Category(
-                            "category",
-                            business
-                    ));
 
             Timestamp startDay = new Timestamp(System.currentTimeMillis());
             LocalDate date = LocalDate.now().plusMonths(1);

@@ -1,30 +1,18 @@
 package uz.pdp.springsecurity.payload;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import javax.validation.constraints.NotNull;
+import java.util.List;
 import java.util.UUID;
 
-@Data
-@NoArgsConstructor
+@Getter
+@Setter
 public class CategoryDto {
-
     private UUID id;
-    @NotNull(message = "required line")
-    private String name;
-    @NotNull(message = "required line")
+
+    private UUID parentCategoryId;
+
     private UUID businessId;
-    private String description;
-    private UUID parentCategory;
 
-    private String parentCategoryName;
-
-    public CategoryDto(String name, UUID businessId, String description,UUID parentCategory) {
-        this.name = name;
-        this.businessId = businessId;
-        this.description = description;
-        this.parentCategory=parentCategory;
-    }
+    private List<CategoryTranslateDto> categoryTranslateDtoList;
 }

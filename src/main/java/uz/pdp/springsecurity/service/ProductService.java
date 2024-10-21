@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.entity.Currency;
-import uz.pdp.springsecurity.enums.Language;
 import uz.pdp.springsecurity.enums.Type;
 import uz.pdp.springsecurity.mapper.ProductMapper;
 import uz.pdp.springsecurity.payload.*;
@@ -155,7 +154,7 @@ public class ProductService {
 
 
         product.setUniqueSKU(productDto.getUniqueSKU());
-        product.setLanguage(Language.valueOf(productDto.getLanguage()));
+//        product.setLanguage(Language.valueOf(productDto.getLanguage()));
         product.setStockAmount(productDto.getStockAmount());
         product.setInStock(productDto.getInStock());
         product.setPreorder(productDto.getPreorder());
@@ -187,16 +186,6 @@ public class ProductService {
             optionalCategory.ifPresent(product::setCategory);
         }
 
-        if (productDto.getChildCategoryId() != null) {
-            UUID categoryId = productDto.getChildCategoryId();
-            Optional<Category> optionalCategory = categoryRepository.findById(categoryId);
-            optionalCategory.ifPresent(product::setChildCategory);
-        }
-
-        if (productDto.getSubChildCategoryId() != null) {
-            Optional<Category> optionalCategory = categoryRepository.findById(productDto.getSubChildCategoryId());
-            optionalCategory.ifPresent(product::setSubChildCategory);
-        }
 
         if (productDto.getBrandId() != null) {
             UUID brandId = productDto.getBrandId();
@@ -909,9 +898,6 @@ public class ProductService {
 
 
             productViewDto.setUniqueSKU(product.getUniqueSKU());
-            if (product.getLanguage() != null) {
-                productViewDto.setLanguage(product.getLanguage().name());
-            }
             productViewDto.setStockAmount(product.getStockAmount());
             productViewDto.setInStock(product.getInStock());
             productViewDto.setPreorder(product.getPreorder());
@@ -950,12 +936,6 @@ public class ProductService {
 
             if (product.getCategory() != null)
                 productViewDto.setCategory(product.getCategory().getName());
-
-            if (product.getChildCategory() != null)
-                productViewDto.setChildCategory(product.getChildCategory().getName());
-
-            if (product.getSubChildCategory() != null)
-                productViewDto.setSubChildCategory(product.getSubChildCategory().getName());
 
             if (product.getPhoto() != null)
                 productViewDto.setPhotoId(product.getPhoto().getId());

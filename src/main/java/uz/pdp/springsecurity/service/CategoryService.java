@@ -1,14 +1,20 @@
 package uz.pdp.springsecurity.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import uz.pdp.springsecurity.entity.Business;
 import uz.pdp.springsecurity.entity.Category;
+import uz.pdp.springsecurity.entity.CategoryTranslate;
+import uz.pdp.springsecurity.entity.Language;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.CategoryDto;
+import uz.pdp.springsecurity.payload.CategoryGetDto;
+import uz.pdp.springsecurity.payload.CategoryTranslateDto;
 import uz.pdp.springsecurity.repository.BusinessRepository;
 import uz.pdp.springsecurity.repository.CategoryRepository;
+import uz.pdp.springsecurity.repository.CategoryTranslateRepository;
+import uz.pdp.springsecurity.repository.LanguageRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,146 +26,165 @@ import java.util.UUID;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
-
     private final BusinessRepository businessRepository;
+    private final CategoryTranslateRepository categoryTranslateRepository;
+    private final LanguageRepository languageRepository;
 
+    // Kategoriya qo'shish
     public ApiResponse add(CategoryDto categoryDto) {
-        UUID businessId = categoryDto.getBusinessId();
-        Optional<Business> optionalBusiness = businessRepository.findById(businessId);
+        Optional<Business> optionalBusiness = businessRepository.findById(categoryDto.getBusinessId());
         if (optionalBusiness.isEmpty()) {
-            return new ApiResponse("Business Not Found");
+            return new ApiResponse("Business not found", false);
         }
 
         Category category = new Category();
-        category.setName(categoryDto.getName());
-        category.setDescription(categoryDto.getDescription());
         category.setBusiness(optionalBusiness.get());
 
-        if (categoryDto.getParentCategory() != null) {
-            Optional<Category> optionalCategory = categoryRepository.findById(categoryDto.getParentCategory());
-
-            if (optionalCategory.isPresent()) {
-                Category parentCategory = optionalCategory.get();
-                category.setParentCategory(parentCategory);
+        if (categoryDto.getParentCategoryId() != null) {
+            Optional<Category> optionalParentCategory = categoryRepository.findById(categoryDto.getParentCategoryId());
+            if (optionalParentCategory.isPresent()) {
+                category.setParentCategory(optionalParentCategory.get());
             }
-
         }
-        categoryRepository.save(category);
 
-        return new ApiResponse("Added", true, category);
+        category = categoryRepository.save(category);
 
+        // Tarjima qo'shish
+        for (CategoryTranslateDto translateDto : categoryDto.getCategoryTranslateDtoList()) {
+            addTranslation(category, translateDto);
+        }
+
+        return new ApiResponse("Category added successfully", true, category);
     }
 
+    // Tarjima qo'shish uchun metod
+    private void addTranslation(Category category, CategoryTranslateDto translateDto) {
+        Optional<Language> optionalLanguage = languageRepository.findById(translateDto.getLanguageId());
+        if (optionalLanguage.isPresent()) {
+            CategoryTranslate categoryTranslate = new CategoryTranslate();
+            categoryTranslate.setCategory(category);
+            categoryTranslate.setName(translateDto.getName());
+            categoryTranslate.setDescription(translateDto.getDescription());
+            categoryTranslate.setLanguage(optionalLanguage.get());
+            categoryTranslateRepository.save(categoryTranslate);
+        }
+    }
 
+    // Kategoriyani tahrirlash
     public ApiResponse edit(UUID id, CategoryDto categoryDto) {
-
         Optional<Category> optionalCategory = categoryRepository.findById(id);
         if (optionalCategory.isEmpty()) {
-            return new ApiResponse("not found", false);
+            return new ApiResponse("Category not found", false);
         }
 
         Category category = optionalCategory.get();
-        category.setName(categoryDto.getName());
-        category.setDescription(categoryDto.getDescription());
+        if (categoryDto.getParentCategoryId() != null) {
+            Optional<Category> parentCategoryOptional = categoryRepository.findById(categoryDto.getParentCategoryId());
+            parentCategoryOptional.ifPresent(category::setParentCategory);
+        }
 
-        if (categoryDto.getParentCategory() != null) {
-            Optional<Category> optional = categoryRepository.findById(id);
-            optional.ifPresent(category::setParentCategory);
+        // Tarjimalarni yangilash
+        categoryTranslateRepository.deleteAllByCategory_Id(id); // Eski tarjimalarni o'chirish
+        for (CategoryTranslateDto translateDto : categoryDto.getCategoryTranslateDtoList()) {
+            addTranslation(category, translateDto);
         }
 
         categoryRepository.save(category);
-        return new ApiResponse("EDITED", true);
+        return new ApiResponse("Category edited successfully", true);
     }
 
+    // Kategoriyani olish
+    public ApiResponse get(UUID id, String languageCode) {
+        Optional<Category> optionalCategory = categoryRepository.findById(id);
+        if (optionalCategory.isEmpty()) {
+            return new ApiResponse("Category not found", false);
+        }
 
-    public ApiResponse get(UUID id) {
-        if (!categoryRepository.existsById(id)) return new ApiResponse("NOT FOUND", false);
+        Category category = optionalCategory.get();
 
-        return new ApiResponse("FOUND", true, categoryRepository.findById(id).get());
+        Optional<CategoryTranslate> optionalCategoryTranslate
+                = categoryTranslateRepository.findByCategory_IdAndLanguage_Code(id, languageCode);
+
+        return new ApiResponse("Category found", true, getGetDto(optionalCategoryTranslate, category));
     }
 
+    @NotNull
+    private static CategoryGetDto getGetDto(Optional<CategoryTranslate> optionalCategoryTranslate, Category category) {
+        CategoryGetDto categoryGetDto = new CategoryGetDto();
+        if (optionalCategoryTranslate.isPresent()) {
+            CategoryTranslate categoryTranslate = optionalCategoryTranslate.get();
+            categoryGetDto.setId(category.getId());
+            categoryGetDto.setName(categoryTranslate.getName());
+            categoryGetDto.setDescription(categoryTranslate.getDescription());
+        } else {
+            categoryGetDto.setId(category.getId());
+            categoryGetDto.setName(category.getName());
+            categoryGetDto.setDescription(category.getDescription());
+        }
+        return categoryGetDto;
+    }
+
+    // Kategoriyani o'chirish
     public ApiResponse delete(UUID id) {
-        if (!categoryRepository.existsById(id)) return new ApiResponse("NOT FOUND", false);
+        if (!categoryRepository.existsById(id)) {
+            return new ApiResponse("Category not found", false);
+        }
 
         categoryRepository.deleteById(id);
-        return new ApiResponse("DELETED", true);
+        return new ApiResponse("Category deleted successfully", true);
     }
 
-
-    public ApiResponse getAllByBusinessId(UUID businessId) {
-//        List<Category> allByBusinessId = categoryRepository.findByBusinessIdAndParentCategoryNull(businessId);
-        List<Category> allByBusinessId = categoryRepository.findAllByBusiness_Id(businessId);
-        if (allByBusinessId.isEmpty()) return new ApiResponse("NOT FOUND", false);
-        return new ApiResponse("FOUND", true, allByBusinessId);
-    }
-
-    public ApiResponse addChildCategory(CategoryDto categoryDto) {
-        Optional<Business> optionalBusiness = businessRepository.findById(categoryDto.getBusinessId());
-        if (optionalBusiness.isEmpty()) {
-            return new ApiResponse("BUSINESS NOT FOUND", false);
+    // Biznes ID bo'yicha barcha kategoriyalarni olish
+    public ApiResponse getAllByBusinessId(UUID businessId, String languageCode) {
+        List<Category> categories = categoryRepository.findAllByBusiness_Id(businessId);
+        if (categories.isEmpty()) {
+            return new ApiResponse("No categories found", false);
         }
-        Optional<Category> optionalCategory = categoryRepository.findById(categoryDto.getParentCategory());
+
+        List<CategoryGetDto> categoryGetDtoList = new ArrayList<>();
+        for (Category category : categories) {
+            Optional<CategoryTranslate> optionalCategoryTranslate
+                    = categoryTranslateRepository.findByCategory_IdAndLanguage_Code(category.getId(), languageCode);
+            categoryGetDtoList.add(getGetDto(optionalCategoryTranslate, category));
+        }
+
+        return new ApiResponse("Categories found", true, categoryGetDtoList);
+    }
+
+    // Kategoriya ID bo'yicha barcha tarjimalarni olish
+    public ApiResponse getAllTranslations(UUID categoryId) {
+
+        Optional<Category> optionalCategory = categoryRepository.findById(categoryId);
         if (optionalCategory.isEmpty()) {
-            return new ApiResponse("SELECTED CATEGORY NOT FOUND", false);
+            return new ApiResponse("Category not found", false);
         }
-        Category category = new Category(
-                categoryDto.getName(),
-                categoryDto.getDescription(),
-                optionalBusiness.get(),
-                optionalCategory.get()
-        );
-        category = categoryRepository.save(category);
-        CategoryDto dto = generateCategoryDtoFromCategory(category);
-        return new ApiResponse("ADDED", true, dto);
+
+        List<CategoryGetDto> categoryGetDtoList = new ArrayList<>();
+
+        for (CategoryTranslate translation : optionalCategory.get().getTranslations()) {
+            CategoryGetDto categoryGetDto = new CategoryGetDto();
+            categoryGetDto.setId(categoryId);
+            categoryGetDto.setName(translation.getName());
+            categoryGetDto.setDescription(translation.getDescription());
+            categoryGetDtoList.add(categoryGetDto);
+        }
+
+        return new ApiResponse("Translations found", true, categoryGetDtoList);
     }
 
-    public ApiResponse getAllChildCategoryById(UUID id) {
-        List<Category> allByBusiness_id = categoryRepository.findAllByBusinessIdAndParentCategoryNotNull(id);
-        if (allByBusiness_id.isEmpty()) {
-            return new ApiResponse("CATEGORIES NOT FOUND", false);
+    // Bola kategoriyalarini olish
+    public ApiResponse getAllChildCategoriesById(UUID parentId, String languageCode) {
+        List<Category> childCategories = categoryRepository.findAllByParentCategory_Id(parentId);
+        if (childCategories.isEmpty()) {
+            return new ApiResponse("Child categories not found", false);
         }
-        List<CategoryDto> dtos = new ArrayList<>();
-        for (Category category : allByBusiness_id) {
-            dtos.add(generateCategoryDtoFromCategory(category));
-        }
-        return new ApiResponse("All Child Category", true, dtos);
-    }
 
-    public CategoryDto generateCategoryDtoFromCategory(Category category) {
-        CategoryDto dto = new CategoryDto();
-        dto.setId(category.getId());
-        dto.setName(category.getName());
-        dto.setDescription(category.getDescription());
-        dto.setBusinessId(category.getBusiness().getId());
-        if (category.getParentCategory() != null) {
-            dto.setParentCategory(category.getParentCategory().getId());
-            dto.setParentCategoryName(category.getParentCategory().getName());
-        } else {
-            dto.setParentCategory(null);
-            dto.setParentCategoryName(null);
+        List<CategoryGetDto> categoryGetDtoList = new ArrayList<>();
+        for (Category category : childCategories) {
+            Optional<CategoryTranslate> optionalCategoryTranslate
+                    = categoryTranslateRepository.findByCategory_IdAndLanguage_Code(category.getId(), languageCode);
+            categoryGetDtoList.add(getGetDto(optionalCategoryTranslate, category));
         }
-        return dto;
-    }
-
-    public ApiResponse getAllChildcategoryByParentId(UUID id) {
-        List<Category> categoriesByParentCategoryId = categoryRepository.findCategoriesByParentCategoryId(id);
-        if (categoriesByParentCategoryId.isEmpty()) {
-            return new ApiResponse(false, "Not yet child category");
-        }
-        List<CategoryDto> dtos = new ArrayList<>();
-        for (Category category : categoriesByParentCategoryId) {
-            dtos.add(generateCategoryDtoFromCategory(category));
-        }
-        return new ApiResponse("All child category", true, dtos);
-    }
-
-    public ApiResponse getAllParentCategory(UUID id) {
-
-        List<Category> categoriesByParentCategoryId = categoryRepository.findAllByBusiness_IdAndAndParentCategoryNull(id);
-        if (categoriesByParentCategoryId.isEmpty()) {
-            return new ApiResponse(false, "Not Found");
-        }
-        List<Category> categoryList = categoriesByParentCategoryId;
-        return new ApiResponse("All Parent Categories ", true, categoryList);
+        return new ApiResponse("Child categories found", true, categoryGetDtoList);
     }
 }
