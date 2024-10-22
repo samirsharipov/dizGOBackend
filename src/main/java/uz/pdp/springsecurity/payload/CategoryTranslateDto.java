@@ -8,7 +8,6 @@ import java.util.UUID;
 @Getter
 @Setter
 public class CategoryTranslateDto {
-    private UUID categoryId;    // Kategoriya ID
     private UUID languageId;    // Til ID
     private String name;        // Kategoriya nomi
     private String description; // Kategoriya tavsifi

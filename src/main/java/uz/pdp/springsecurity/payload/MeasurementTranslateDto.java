@@ -4,16 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MeasurementDto {
+public class MeasurementTranslateDto {
     private String name;
-    private Double value;
-    private UUID subMeasurementId;
-    private UUID businessId;
-    private List<MeasurementTranslateDto> translations;
+    private String description;
+    private UUID languageId;
 }
