@@ -80,7 +80,6 @@ public class Product extends AbsEntity {
     private Type type;
 
     @ManyToOne
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private Brand brand;
 
     @ManyToOne

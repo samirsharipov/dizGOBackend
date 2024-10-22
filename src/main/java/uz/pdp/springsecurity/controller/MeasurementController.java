@@ -34,24 +34,25 @@ public class MeasurementController {
     }
 
     @CheckPermission("VIEW_MEASUREMENT")
-    @GetMapping("/{id}")
-    public HttpEntity<?> get(@PathVariable UUID id) {
-        ApiResponse apiResponse = measurementService.get(id);
-        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
-    }
-
-    @CheckPermission("DELETE_MEASUREMENT")
-    @DeleteMapping("/{id}")
-    public HttpEntity<?> delete(@PathVariable UUID id) {
-        ApiResponse apiResponse = measurementService.delete(id);
+    @GetMapping("/{id}/{languageCode}")
+    public HttpEntity<?> get(@PathVariable UUID id, @PathVariable String languageCode) {
+        ApiResponse apiResponse = measurementService.get(id,languageCode);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
 
     @CheckPermission("VIEW_MEASUREMENT")
-    @GetMapping("/get-by-business/{business_id}")
-    public HttpEntity<?> getAllByBusiness(@PathVariable UUID business_id) {
-        ApiResponse apiResponse = measurementService.getByBusiness(business_id);
+    @GetMapping("/get-by-business/{business_id}/{languageCode}")
+    public HttpEntity<?> getAllByBusiness(@PathVariable UUID business_id, @PathVariable String languageCode) {
+        ApiResponse apiResponse = measurementService.getByBusiness(business_id,languageCode);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
+
+
+    @CheckPermission("DELETE_MEASUREMENT")
+    @DeleteMapping("/{id}")
+    public HttpEntity<?> delete(@PathVariable UUID id) {
+        ApiResponse apiResponse = measurementService.delete(id);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 }

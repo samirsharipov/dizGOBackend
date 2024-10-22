@@ -94,25 +94,25 @@ public class ProductService {
             uuids.add(user1.getId());
         }
 
-        String message = "Mahsulot tahrirlandi!" +
-                "\n\nAvvalgi holat" +
-                "\nMahsulot Nomi: " + product.getName() +
-                "\nMahsulot Shtrix Kodi: " + product.getBarcode() +
-                "\nMahsulot Sotuv Narxi: " + product.getSalePrice() +
-                "\n\nHozirgi holat" +
-                "\nMahsulot Nomi: " + productDto.getName() +
-                "\nMahsulot Shtrix Kodi: " + productDto.getBarcode() +
-                "\nMahsulot Sotuv Narxi: " + productDto.getSalePrice() +
-                "\nKim tomonidan tahrirlandi: " + user.getUsername();
+//        String message = "Mahsulot tahrirlandi!" +
+//                "\n\nAvvalgi holat" +
+//                "\nMahsulot Nomi: " + product.getName() +
+//                "\nMahsulot Shtrix Kodi: " + product.getBarcode() +
+//                "\nMahsulot Sotuv Narxi: " + product.getSalePrice() +
+//                "\n\nHozirgi holat" +
+//                "\nMahsulot Nomi: " + productDto.getName() +
+//                "\nMahsulot Shtrix Kodi: " + productDto.getBarcode() +
+//                "\nMahsulot Sotuv Narxi: " + productDto.getSalePrice() +
+//                "\nKim tomonidan tahrirlandi: " + user.getUsername();
 
-        notificationService.create(new NotificationDto(
-                "Mahsulot tahrirlandi!",
-                message,
-                "not",
-                "kay",
-                businessId,
-                uuids
-        ));
+//        notificationService.create(new NotificationDto(
+//                "Mahsulot tahrirlandi!",
+//                message,
+//                "not",
+//                "kay",
+//                businessId,
+//                uuids
+//        ));
         if (optionalProduct.isEmpty()) {
             return new ApiResponse("NOT FOUND", false);
         }
@@ -134,7 +134,7 @@ public class ProductService {
             return new ApiResponse("not found branches", false);
         }
 
-        product.setName(productDto.getName());
+//        product.setName(productDto.getName());
         product.setBranch(allBranch);
         product.setMeasurement(optionalMeasurement.get());
 
@@ -166,9 +166,9 @@ public class ProductService {
         product.setHsCode22(productDto.getHsCode22());
         product.setHsCode32(productDto.getHsCode32());
         product.setHsCode44(productDto.getHsCode44());
-        product.setKeyWord(productDto.getKeyWord());
-        product.setBriefDescription(productDto.getBriefDescription());
-        product.setLongDescription(productDto.getLongDescription());
+//        product.setKeyWord(productDto.getKeyWord());
+//        product.setBriefDescription(productDto.getBriefDescription());
+//        product.setLongDescription(productDto.getLongDescription());
         product.setAgreementExportsID(productDto.getAgreementExportsID());
         product.setAgreementExportsPID(productDto.getAgreementExportsPID());
         product.setAgreementLocalID(productDto.getAgreementLocalID());
@@ -239,7 +239,7 @@ public class ProductService {
             }
             product.setBarcode(productDto.getBarcode());
         } else {
-            product.setBarcode(generateBarcode(product.getBusiness().getId(), product.getName(), product.getId(), isUpdate));
+//            product.setBarcode(generateBarcode(product.getBusiness().getId(), product.getName(), product.getId(), isUpdate));
         }
         Product saveProduct = productRepository.save(product);
 
@@ -304,7 +304,7 @@ public class ProductService {
             }
             product.setBarcode(productDto.getBarcode());
         } else {
-            product.setBarcode(generateBarcode(product.getBusiness().getId(), product.getName(), product.getId(), isUpdate));
+//            product.setBarcode(generateBarcode(product.getBusiness().getId(), product.getName(), product.getId(), isUpdate));
         }
 
         productRepository.save(product);
