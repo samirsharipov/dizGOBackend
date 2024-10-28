@@ -9,7 +9,7 @@ import uz.pdp.springsecurity.payload.BranchDto;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-10-02T11:04:49+0500",
+    date = "2024-10-28T11:55:46+0500",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.12 (Amazon.com Inc.)"
 )
 @Component

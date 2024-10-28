@@ -14,7 +14,6 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ProductResult {
     private UUID id;
-    private Type type;
     private String name;
     private Double amount;
     private Double percentage;

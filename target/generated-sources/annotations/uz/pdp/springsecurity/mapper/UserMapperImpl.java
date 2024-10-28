@@ -17,7 +17,7 @@ import uz.pdp.springsecurity.payload.UserDto;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-10-02T11:04:48+0500",
+    date = "2024-10-28T11:55:46+0500",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.12 (Amazon.com Inc.)"
 )
 @Component
@@ -32,6 +32,7 @@ public class UserMapperImpl implements UserMapper {
         User user = new User();
 
         user.setBusiness( userDtoToBusiness( userDto ) );
+        user.setId( userDto.getId() );
         user.setFirstName( userDto.getFirstName() );
         user.setLastName( userDto.getLastName() );
         user.setEmail( userDto.getEmail() );
@@ -48,6 +49,8 @@ public class UserMapperImpl implements UserMapper {
         user.setSalary( userDto.getSalary() );
         user.setArrivalTime( userDto.getArrivalTime() );
         user.setLeaveTime( userDto.getLeaveTime() );
+        user.setPassportNumber( userDto.getPassportNumber() );
+        user.setDateOfEmployment( userDto.getDateOfEmployment() );
         user.setEnabled( userDto.isEnabled() );
 
         return user;
@@ -84,6 +87,8 @@ public class UserMapperImpl implements UserMapper {
         userDto.setArrivalTime( user.getArrivalTime() );
         userDto.setLeaveTime( user.getLeaveTime() );
         userDto.setEnabled( user.isEnabled() );
+        userDto.setPassportNumber( user.getPassportNumber() );
+        userDto.setDateOfEmployment( user.getDateOfEmployment() );
 
         return userDto;
     }
@@ -128,6 +133,8 @@ public class UserMapperImpl implements UserMapper {
         user.setSalary( userDto.getSalary() );
         user.setArrivalTime( userDto.getArrivalTime() );
         user.setLeaveTime( userDto.getLeaveTime() );
+        user.setPassportNumber( userDto.getPassportNumber() );
+        user.setDateOfEmployment( userDto.getDateOfEmployment() );
         user.setEnabled( userDto.isEnabled() );
     }
 

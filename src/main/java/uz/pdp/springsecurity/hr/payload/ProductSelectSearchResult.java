@@ -13,5 +13,4 @@ import java.util.UUID;
 public class ProductSelectSearchResult {
     private UUID value;
     private String label;
-    private Type type;
 }

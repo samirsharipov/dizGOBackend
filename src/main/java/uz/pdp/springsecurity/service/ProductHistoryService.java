@@ -73,7 +73,6 @@ public class ProductHistoryService {
         for (Warehouse warehouse : warehouseList) {
             productHistoryRepository.save(new ProductHistory(
                     warehouse.getProduct(),
-                    warehouse.getProductTypePrice(),
                     branch,
                     warehouse.getAmount(),
                     0,
@@ -138,19 +137,13 @@ public class ProductHistoryService {
             Double quantityD;
             Double quantityD2;
             ProductAmountDto dto = new ProductAmountDto();
-            if (warehouse.getProduct() != null) {
-                dto.setName(warehouse.getProduct().getName());
-                dto.setMeasurement(warehouse.getProduct().getMeasurement().getName());
-                quantityD = tradeProductRepository.quantityByBranchIdAndProductIdAndCreatedAtBetween(Timestamp.valueOf(TODAY_START.minusDays(days)), Timestamp.valueOf(TODAY_START.plusDays(1)), warehouse.getProduct().getId() ,branchId);
-                quantityD2 = contentProductRepository.quantityByBranchIdAndProductIdAndCreatedAtBetween(Timestamp.valueOf(TODAY_START.minusDays(days)), Timestamp.valueOf(TODAY_START.plusDays(1)), warehouse.getProduct().getId() ,branchId);
-            } else {
-                dto.setName(warehouse.getProductTypePrice().getName());
-                dto.setMeasurement(warehouse.getProductTypePrice().getProduct().getMeasurement().getName());
-                quantityD = tradeProductRepository.quantityByBranchIdAndProductTypePriceIdAndCreatedAtBetween(Timestamp.valueOf(TODAY_START.minusDays(days)), Timestamp.valueOf(TODAY_START.plusDays(1)), warehouse.getProductTypePrice().getId() ,branchId);
-                quantityD2 = contentProductRepository.quantityByBranchIdAndProductTypePriceIdAndCreatedAtBetween(Timestamp.valueOf(TODAY_START.minusDays(days)), Timestamp.valueOf(TODAY_START.plusDays(1)), warehouse.getProductTypePrice().getId() ,branchId);
-            }
-            double quantity = quantityD == null? 0: quantityD;
-            quantity += quantityD2 == null? 0: quantityD2;
+            dto.setName(warehouse.getProduct().getName());
+            dto.setMeasurement(warehouse.getProduct().getMeasurement().getName());
+            quantityD = tradeProductRepository.quantityByBranchIdAndProductIdAndCreatedAtBetween(Timestamp.valueOf(TODAY_START.minusDays(days)), Timestamp.valueOf(TODAY_START.plusDays(1)), warehouse.getProduct().getId(), branchId);
+            quantityD2 = contentProductRepository.quantityByBranchIdAndProductIdAndCreatedAtBetween(Timestamp.valueOf(TODAY_START.minusDays(days)), Timestamp.valueOf(TODAY_START.plusDays(1)), warehouse.getProduct().getId(), branchId);
+
+            double quantity = quantityD == null ? 0 : quantityD;
+            quantity += quantityD2 == null ? 0 : quantityD2;
             double average = quantity / days;
             dto.setAverage(Math.round(average * 10) / 10.);
             dto.setDay(average == 0 ? 0 : Math.round(warehouse.getAmount() / average));

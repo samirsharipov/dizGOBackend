@@ -1,8 +1,6 @@
 package uz.pdp.springsecurity.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
 import uz.pdp.springsecurity.enums.NotificationType;
 
@@ -12,7 +10,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity

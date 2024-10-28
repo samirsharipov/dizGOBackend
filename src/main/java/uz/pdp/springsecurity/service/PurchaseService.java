@@ -35,7 +35,6 @@ public class PurchaseService {
     private final UserRepository userRepository;
     private final CurrencyRepository currencyRepository;
     private final FifoCalculationService fifoCalculationService;
-    private final ProductTypePriceRepository productTypePriceRepository;
     private final WarehouseService warehouseService;
     private final BalanceService balanceService;
     private final PayMethodRepository payMethodRepository;
@@ -275,31 +274,16 @@ public class PurchaseService {
 
     private PurchaseProduct createOrEditPurchaseProduct(PurchaseProduct purchaseProduct, PurchaseProductDto purchaseProductDto, double course) {
 
-        //SINGLE TYPE
-        if (purchaseProductDto.getProductId() != null) {
-            UUID productId = purchaseProductDto.getProductId();
-            Optional<Product> optional = productRepository.findById(productId);
-            if (optional.isEmpty()) return null;
-            Product product = optional.get();
-            product.setSalePrice(purchaseProductDto.getSalePrice());
-            product.setBuyPrice(purchaseProductDto.getBuyPrice());
-            product.setBuyPriceDollar(Math.round(purchaseProductDto.getBuyPrice() / course * 100) / 100.);
-            product.setSalePriceDollar(Math.round(purchaseProductDto.getSalePrice() / course * 100) / 100.);
-            productRepository.save(product);
-            purchaseProduct.setProduct(product);
-        } else {//MANY TYPE
-            UUID productTypePriceId = purchaseProductDto.getProductTypePriceId();
-            Optional<ProductTypePrice> optional = productTypePriceRepository.findById(productTypePriceId);
-            if (optional.isEmpty()) return null;
-            ProductTypePrice productTypePrice = optional.get();
-            productTypePrice.setBuyPrice(purchaseProductDto.getBuyPrice());
-            productTypePrice.setSalePrice(purchaseProductDto.getSalePrice());
-            productTypePrice.setBuyPriceDollar(Math.round(purchaseProductDto.getBuyPrice() / course * 100) / 100.);
-            productTypePrice.setSalePriceDollar(Math.round(purchaseProductDto.getSalePrice() / course * 100) / 100.);
-            productTypePriceRepository.save(productTypePrice);
-            purchaseProduct.setProductTypePrice(productTypePrice);
-        }
-
+        UUID productId = purchaseProductDto.getProductId();
+        Optional<Product> optional = productRepository.findById(productId);
+        if (optional.isEmpty()) return null;
+        Product product = optional.get();
+        product.setSalePrice(purchaseProductDto.getSalePrice());
+        product.setBuyPrice(purchaseProductDto.getBuyPrice());
+        product.setBuyPriceDollar(Math.round(purchaseProductDto.getBuyPrice() / course * 100) / 100.);
+        product.setSalePriceDollar(Math.round(purchaseProductDto.getSalePrice() / course * 100) / 100.);
+        productRepository.save(product);
+        purchaseProduct.setProduct(product);
         purchaseProduct.setPurchasedQuantity(purchaseProductDto.getPurchasedQuantity());
         purchaseProduct.setSalePrice(purchaseProductDto.getSalePrice());
         purchaseProduct.setBuyPrice(purchaseProductDto.getBuyPrice());
@@ -341,13 +325,8 @@ public class PurchaseService {
                     purchaseProduct.getSalePrice(),
                     purchaseProduct.getTotalSum()
             );
-            if (purchaseProduct.getProduct() != null) {
                 dto.setName(purchaseProduct.getProduct().getName());
                 dto.setMeasurement(purchaseProduct.getProduct().getMeasurement().getName());
-            } else {
-                dto.setName(purchaseProduct.getProductTypePrice().getName());
-                dto.setMeasurement(purchaseProduct.getProductTypePrice().getProduct().getMeasurement().getName());
-            }
             double remainQuantity = fifoCalculationRepository.remainQuantityByPurchaseProductId(purchaseProduct.getId());
             remainQuantity = Math.round(remainQuantity * 100) / 100.;
             dto.setSoldQuantity(dto.getQuantity() - remainQuantity);

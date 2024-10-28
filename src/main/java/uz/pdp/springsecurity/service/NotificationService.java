@@ -29,7 +29,6 @@ public class NotificationService {
     private final AttachmentRepository attachmentRepository;
     private final ShablonRepository shablonRepository;
     private final ProductRepository productRepository;
-    private final ProductTypePriceRepository productTypePriceRepository;
 
     public ApiResponse getAll(User user, int page, int size) {
         UUID userId = user.getId();
@@ -130,38 +129,22 @@ public class NotificationService {
     }
 
     public void lessProduct(UUID productId, boolean isProduct, double amount) {
-        if (isProduct) {
-            Optional<Product> optionalProduct = productRepository.findById(productId);
-            if (optionalProduct.isPresent()) {
-                Product product = optionalProduct.get();
-                String name = product.getName();
-                Notification notification = new Notification();
-                notification.setName("Oz qolgan maxsulotlar");
-                notification.setObjectId(product.getId());
-                notification.setMessage(name + " maxsulotdan " + amount + " ta qoldi!");
-                Optional<User> optionalUser = userRepository.
-                        findByBusinessIdAndRoleName(product.getBusiness().getId(), "Admin");
-                optionalUser.ifPresent(notification::setUserTo);
-                notification.setObjectId(product.getId());
-                notification.setType(NotificationType.LESS_PRODUCT);
-                repository.save(notification);
-            }
-        } else {
-            Optional<ProductTypePrice> optionalProductTypePrice = productTypePriceRepository.findById(productId);
-            if (optionalProductTypePrice.isPresent()) {
-                ProductTypePrice productTypePrice = optionalProductTypePrice.get();
-                String name = productTypePrice.getName();
-                Notification notification = new Notification();
-                notification.setName("Oz qolgan maxsulotlar");
-                notification.setObjectId(productTypePrice.getId());
-                notification.setMessage(name + " maxsulotdan " + amount + " ta qoldi!");
-                Optional<User> optionalUser = userRepository.
-                        findByBusinessIdAndRoleName(productTypePrice.getProduct().getBusiness().getId(), "Admin");
-                optionalUser.ifPresent(notification::setUserTo);
-                notification.setObjectId(productTypePrice.getProduct().getId());
-                notification.setType(NotificationType.LESS_PRODUCT);
-                repository.save(notification);
-            }
+
+        Optional<Product> optionalProduct = productRepository.findById(productId);
+        if (optionalProduct.isPresent()) {
+            Product product = optionalProduct.get();
+            String name = product.getName();
+            Notification notification = new Notification();
+            notification.setName("Oz qolgan maxsulotlar");
+            notification.setObjectId(product.getId());
+            notification.setMessage(name + " maxsulotdan " + amount + " ta qoldi!");
+            Optional<User> optionalUser = userRepository.
+                    findByBusinessIdAndRoleName(product.getBusiness().getId(), "Admin");
+            optionalUser.ifPresent(notification::setUserTo);
+            notification.setObjectId(product.getId());
+            notification.setType(NotificationType.LESS_PRODUCT);
+            repository.save(notification);
         }
+
     }
 }

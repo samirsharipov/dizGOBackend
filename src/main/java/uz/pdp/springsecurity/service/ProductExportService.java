@@ -118,7 +118,12 @@ public class ProductExportService {
                 String[] data = {
                         product.getName(),
                         product.getUniqueSKU(),
-                        product.getLanguage() != null ? product.getLanguage().name() : "",
+
+//                        product.getSoldIndividualy() != null ? product.getSoldIndividualy().toString() : "",
+//                        product.getLanguage() != null ? product.getLanguage().name() : "",
+//                        product.getKeyWord(),
+//                        product.getBriefDescription(),
+
                         product.getStockAmount() != null ? product.getStockAmount().toString() : "",
                         product.getInStock() != null ? product.getInStock().toString() : "",
                         product.getPreorder() != null ? product.getPreorder().toString() : "",
@@ -130,8 +135,6 @@ public class ProductExportService {
                         product.getHsCode22(),
                         product.getHsCode32(),
                         product.getHsCode44(),
-                        product.getKeyWord(),
-                        product.getBriefDescription(),
                         product.getLongDescription(),
                         product.getAgreementExportsID(),
                         product.getAgreementExportsPID(),
@@ -140,7 +143,6 @@ public class ProductExportService {
                         product.getLangGroup(),
                         product.getShippingClass(),
                         product.getAttributes(),
-                        product.getSoldIndividualy() != null ? product.getSoldIndividualy().toString() : "",
                         product.getBusiness() != null ? product.getBusiness().getId().toString() : "",
                 };
                 csvWriter.writeNext(data);

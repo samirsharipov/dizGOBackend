@@ -136,13 +136,9 @@ public class ExchangeProductBranchService {
         List<ExchangeBranchGetOneDto> getOneDtoList = new ArrayList<>();
         for (ExchangeProduct exchangeProduct : exchangeProductBranch.getExchangeProductList()) {
             ExchangeBranchGetOneDto branchGetOneDto = new ExchangeBranchGetOneDto();
-            if (exchangeProduct.getProduct() != null) {
-                branchGetOneDto.setProductName(exchangeProduct.getProduct().getName());
-                branchGetOneDto.setBarCode(exchangeProduct.getProduct().getBarcode());
-            } else {
-                branchGetOneDto.setProductName(exchangeProduct.getProductTypePrice().getName());
-                branchGetOneDto.setBarCode(exchangeProduct.getProductTypePrice().getBarcode());
-            }
+            branchGetOneDto.setProductName(exchangeProduct.getProduct().getName());
+            branchGetOneDto.setBarCode(exchangeProduct.getProduct().getBarcode());
+
             branchGetOneDto.setExchangeProductQuantity(exchangeProduct.getExchangeProductQuantity());
             getOneDtoList.add(branchGetOneDto);
         }

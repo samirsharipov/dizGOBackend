@@ -40,8 +40,6 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     Optional<Customer> findByPhoneNumberAndActiveIsTrueOrPhoneNumberAndActiveIsNull(String phoneNumber, String phoneNumber2);
 
-    Customer findByPhoneNumber(String phoneNumber);
-
     List<Customer> findAllByPayDateBetweenAndBusinessIdAndActiveIsTrueOrPayDateBetweenAndBusinessIdAndActiveIsNull(Date payDate, Date payDate2, UUID business_id, Date payDate3, Date payDate4, UUID business_id2);
 
     List<Customer> findAllByBranchesIdAndLidCustomerIsTrueAndActiveIsTrueOrBranchesIdAndLidCustomerIsTrueAndActiveIsNull(UUID branches_id, UUID branches_id2);

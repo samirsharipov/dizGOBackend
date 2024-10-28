@@ -13,36 +13,13 @@ import java.util.List;
 import java.util.UUID;
 
 public interface LossProductRepository extends JpaRepository<LossProduct, UUID> {
-    List<LossProduct> findAllByLossId(UUID lossId);
 
     List<LossProduct> findAllByLoss_Branch_IdAndLoss_Id(UUID branch_id, UUID loss_id);
     Page<LossProduct> findAllByLoss_Branch_IdOrderByCreatedAtDesc(UUID loss_branch_id, Pageable pageable);
     Page<LossProduct> findAllByLoss_Branch_IdAndCreatedAtBetweenOrderByCreatedAtDesc(UUID loss_branch_id, Date startDate, Date endDate, Pageable pageable);
 
 
-    List<LossProduct> findAllByLoss_BranchIdAndCreatedAtBetween(UUID loss_branch_id, Date createdAt, Date createdAt2);
 
-    @Query("SELECT SUM(lp.quantity) " +
-           "FROM LossProduct lp " +
-           "WHERE lp.loss.branch.id = :branchId " +
-           "AND lp.status = :status " +
-           "AND lp.createdAt BETWEEN :startDate AND :endDate")
-    Double calculateQuantityByStatusAndDateRange(
-            @Param("branchId") UUID branchId,
-            @Param("status") String status,
-            @Param("startDate") Date startDate,
-            @Param("endDate") Date endDate);
-
-    @Query("SELECT SUM(lp.quantity * lp.productTypePrice.buyPrice) " +
-           "FROM LossProduct lp " +
-           "WHERE lp.loss.branch.id = :branchId " +
-           "AND lp.status = :status " +
-           "AND lp.createdAt BETWEEN :startDate AND :endDate")
-    Double calculateTotalCostByStatusAndDateRangeAndProductTypePriceBuyPrice(
-            @Param("branchId") UUID branchId,
-            @Param("status") String status,
-            @Param("startDate") Date startDate,
-            @Param("endDate") Date endDate);
 
     @Query("SELECT SUM(lp.quantity * lp.product.buyPrice) " +
            "FROM LossProduct lp " +
@@ -55,16 +32,6 @@ public interface LossProductRepository extends JpaRepository<LossProduct, UUID> 
             @Param("startDate") Date startDate,
             @Param("endDate") Date endDate);
 
-    @Query("SELECT SUM(lp.quantity * lp.productTypePrice.salePrice) " +
-           "FROM LossProduct lp " +
-           "WHERE lp.loss.branch.id = :branchId " +
-           "AND lp.status = :status " +
-           "AND lp.createdAt BETWEEN :startDate AND :endDate")
-    Double calculateTotalCostByStatusAndDateRangeAndProductTypePriceSalePrice(
-            @Param("branchId") UUID branchId,
-            @Param("status") String status,
-            @Param("startDate") Date startDate,
-            @Param("endDate") Date endDate);
 
     @Query("SELECT SUM(lp.quantity * lp.product.salePrice) " +
            "FROM LossProduct lp " +

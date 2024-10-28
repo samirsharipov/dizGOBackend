@@ -1,8 +1,6 @@
 package uz.pdp.springsecurity.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
@@ -16,15 +14,12 @@ import java.util.Date;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 public class FifoCalculation extends AbsEntity {
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Product product;
-
-    @ManyToOne
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private ProductTypePrice productTypePrice;
 
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)

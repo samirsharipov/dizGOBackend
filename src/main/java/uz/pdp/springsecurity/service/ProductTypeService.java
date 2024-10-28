@@ -14,22 +14,8 @@ import java.util.*;
 public class ProductTypeService {
 
     private final ProductTypeRepository typeRepository;
-
     private final ProductTypeValueRepository valueRepository;
-
     private final BusinessRepository businessRepository;
-
-    @Autowired
-    WarehouseRepository warehouseRepository;
-
-    @Autowired
-    ProductTypePriceRepository productTypePriceRepository;
-
-    @Autowired
-    ProductRepository productRepository;
-
-    @Autowired
-    AttachmentRepository attachmentRepository;
 
 
     public ApiResponse addProductType(ProductTypePostDto postDto) {
@@ -103,8 +89,8 @@ public class ProductTypeService {
         List<ProductTypeGetDto> productTypePostDto = new ArrayList<>();
 
         List<ProductType> all = typeRepository.findAllByBusinessId(uuid);
-        if (all.isEmpty()){
-            return new ApiResponse("Not Found ",false);
+        if (all.isEmpty()) {
+            return new ApiResponse("Not Found ", false);
         }
 
         for (ProductType productType : all) {
@@ -242,16 +228,5 @@ public class ProductTypeService {
         typeRepository.deleteById(productType.getId());
 
         return new ApiResponse("successfully deleted", true);
-    }
-
-    public void deactivateProduct(UUID id) {
-        Optional<ProductTypePrice> optionalProductTypePrice = productTypePriceRepository.findById(id);
-        if (optionalProductTypePrice.isPresent()) {
-            ProductTypePrice productTypePrice = optionalProductTypePrice.get();
-            productTypePrice.setActive(false);
-            productTypePriceRepository.save(productTypePrice);
-        } else {
-            throw new RuntimeException("Product not found");
-        }
     }
 }

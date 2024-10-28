@@ -1,9 +1,6 @@
 package uz.pdp.springsecurity.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
@@ -12,8 +9,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -26,9 +23,6 @@ public class LossProduct extends AbsEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Product product;
 
-    @ManyToOne
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private ProductTypePrice productTypePrice;
 
     private double quantity;
 

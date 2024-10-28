@@ -26,7 +26,6 @@ public class ExchangeProductByConfirmationService {
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
     private final ProductRepository productRepository;
-    private final ProductTypePriceRepository productTypePriceRepository;
     private final BranchRepository branchRepository;
 
     public ApiResponse add(ExchangeProductByConfirmationDto byConfirmationDto) {
@@ -37,14 +36,8 @@ public class ExchangeProductByConfirmationService {
         for (ExchangeProductDTO exchangeProductDTO : byConfirmationDto.getExchangeProductBranchDTO().getExchangeProductDTOS()) {
             ExchangeProduct exchangeProduct = new ExchangeProduct();
             exchangeProduct.setExchangeProductQuantity(exchangeProductDTO.getExchangeProductQuantity());
-            if (exchangeProductDTO.getProductExchangeId() != null) {
-                Optional<Product> optionalProduct = productRepository.findById(exchangeProductDTO.getProductExchangeId());
-                optionalProduct.ifPresent(exchangeProduct::setProduct);
-            } else {
-                Optional<ProductTypePrice> optionalProductTypePrice = productTypePriceRepository
-                        .findById(exchangeProductDTO.getProductTypePriceId());
-                optionalProductTypePrice.ifPresent(exchangeProduct::setProductTypePrice);
-            }
+            Optional<Product> optionalProduct = productRepository.findById(exchangeProductDTO.getProductExchangeId());
+            optionalProduct.ifPresent(exchangeProduct::setProduct);
             exchangeProductList.add(exchangeProduct);
             exchangeProductRepository.save(exchangeProduct);
         }
@@ -56,14 +49,9 @@ public class ExchangeProductByConfirmationService {
         for (ExchangeProductDTO exchangeProductDTO : byConfirmationDto.getExchangeProductBranchDTO().getExchangeProductDTOS()) {
             ExchangeProduct exchangeProduct = new ExchangeProduct();
             exchangeProduct.setExchangeProductQuantity(exchangeProductDTO.getExchangeProductQuantity());
-            if (exchangeProductDTO.getProductExchangeId() != null) {
-                Optional<Product> optionalProduct = productRepository.findById(exchangeProductDTO.getProductExchangeId());
-                optionalProduct.ifPresent(exchangeProduct::setProduct);
-            } else {
-                Optional<ProductTypePrice> optionalProductTypePrice = productTypePriceRepository
-                        .findById(exchangeProductDTO.getProductTypePriceId());
-                optionalProductTypePrice.ifPresent(exchangeProduct::setProductTypePrice);
-            }
+            Optional<Product> optionalProduct = productRepository.findById(exchangeProductDTO.getProductExchangeId());
+            optionalProduct.ifPresent(exchangeProduct::setProduct);
+
             exchangeProductRepository.save(exchangeProduct);
         }
 
