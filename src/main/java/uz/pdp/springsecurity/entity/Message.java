@@ -2,6 +2,7 @@ package uz.pdp.springsecurity.entity;
 
 import lombok.*;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
+import uz.pdp.springsecurity.enums.Status;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
@@ -22,12 +23,4 @@ public class Message extends AbsEntity {
     private Attachment attachment;
     private String date;
     private Status status;
-
-    public Message(UUID senderId, UUID receiverId, String message, String date, Status status) {
-        this.senderId = senderId;
-        this.receiverId = receiverId;
-        this.message = message;
-        this.date = date;
-        this.status = status;
-    }
 }

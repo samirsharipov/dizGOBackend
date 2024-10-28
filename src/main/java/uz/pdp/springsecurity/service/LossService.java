@@ -18,7 +18,6 @@ public class LossService {
     private final BranchRepository branchRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
-    private final ProductTypePriceRepository productTypePriceRepository;
     private final LossRepository lossRepository;
     private final LossProductRepository lossProductRepository;
     private final WarehouseService warehouseService;
@@ -63,32 +62,24 @@ public class LossService {
                     quantity,
                     status
             );
-            if (dto.getProductId() != null) {
-                Optional<Product> optionalProduct = productRepository.findById(dto.getProductId());
-                if (optionalProduct.isEmpty())
-                    return new ApiResponse("PRODUCT NOT FOUND", false);
-                lossProduct.setProduct(optionalProduct.get());
-                double amount;
-                if (warehouseRepository.amountByProductSingle(dto.getProductId()) == null) {
-                    amount = 0;
-                } else {
-                    amount = warehouseRepository.amountByProductSingle(dto.getProductId());
-                }
-                lossProduct.setLastAmount(amount);
+            Optional<Product> optionalProduct = productRepository.findById(dto.getProductId());
+            if (optionalProduct.isEmpty())
+                return new ApiResponse("PRODUCT NOT FOUND", false);
+            lossProduct.setProduct(optionalProduct.get());
+            double amount;
+            if (warehouseRepository.amountByProductSingle(dto.getProductId()) == null) {
+                amount = 0;
             } else {
-                Optional<ProductTypePrice> optionalProductTypePrice = productTypePriceRepository.findById(dto.getProductTypePriceId());
-                if (optionalProductTypePrice.isEmpty())
-                    return new ApiResponse("PRODUCT NOT FOUND", false);
-                lossProduct.setProductTypePrice(optionalProductTypePrice.get());
-                lossProduct.setLastAmount(warehouseRepository.amountByProductTypePrice(dto.getProductTypePriceId()));
+                amount = warehouseRepository.amountByProductSingle(dto.getProductId());
             }
-            warehouseService.createOrEditWareHouseHelper(loss.getBranch(), lossProduct.getProduct(), lossProduct.getProductTypePrice(), quantity);
+            lossProduct.setLastAmount(amount);
+
+            warehouseService.createOrEditWareHouseHelper(loss.getBranch(), lossProduct.getProduct(), quantity);
             fifoCalculationService.createLossProduct(loss.getBranch(), lossProduct);
             lossProductList.add(lossProduct);
             // product haqida saqlash
             productAboutRepository.save(new ProductAbout(
                     lossProduct.getProduct(),
-                    lossProduct.getProductTypePrice(),
                     loss.getBranch(),
                     ConstantProduct.LOSE,
                     lossProduct.getQuantity(),
@@ -141,19 +132,12 @@ public class LossService {
         List<LossProductGetDto> list = new ArrayList<>();
         for (LossProduct l : lossProductList) {
             LossProductGetDto dto = new LossProductGetDto();
-            if (l.getProduct() != null) {
-                dto.setName(l.getProduct().getName());
-                dto.setMeasurement(l.getProduct().getMeasurement().getName());
-                dto.setLastAmount(l.getLastAmount());
-                dto.setStatus(l.getStatus());
-                dto.setBuyPrice(l.getProduct().getBuyPrice());
-            } else {
-                dto.setName(l.getProductTypePrice().getName());
-                dto.setMeasurement(l.getProductTypePrice().getProduct().getMeasurement().getName());
-                dto.setLastAmount(l.getLastAmount());
-                dto.setStatus(l.getStatus());
-                dto.setBuyPrice(l.getProductTypePrice().getBuyPrice());
-            }
+            dto.setName(l.getProduct().getName());
+            dto.setMeasurement(l.getProduct().getMeasurement().getName());
+            dto.setLastAmount(l.getLastAmount());
+            dto.setStatus(l.getStatus());
+            dto.setBuyPrice(l.getProduct().getBuyPrice());
+
             dto.setQuantity(l.getQuantity());
             list.add(dto);
         }
@@ -183,20 +167,12 @@ public class LossService {
         if (branch == null) {
             return new ApiResponse("Filial topilmadi", false);
         } else {
-            Double harmBuyPriceMany = lossProductRepository.calculateTotalCostByStatusAndDateRangeAndProductTypePriceBuyPrice(branchId, "HARM", startDate, endDate);
             Double harmBuyPriceSingle = lossProductRepository.calculateTotalCostByStatusAndDateRangeAndProductBuyPrice(branchId, "HARM", startDate, endDate);
-            Double benefitBuyPriceMany = lossProductRepository.calculateTotalCostByStatusAndDateRangeAndProductTypePriceBuyPrice(branchId, "BENEFIT", startDate, endDate);
             Double benefitBuyPriceSingle = lossProductRepository.calculateTotalCostByStatusAndDateRangeAndProductBuyPrice(branchId, "BENEFIT", startDate, endDate);
-            Double harmSalePriceMany = lossProductRepository.calculateTotalCostByStatusAndDateRangeAndProductTypePriceSalePrice(branchId, "HARM", startDate, endDate);
             Double harmSalePriceSingle = lossProductRepository.calculateTotalCostByStatusAndDateRangeAndProductSalePrice(branchId, "HARM", startDate, endDate);
-            Double benefitSalePriceMany = lossProductRepository.calculateTotalCostByStatusAndDateRangeAndProductTypePriceSalePrice(branchId, "BENEFIT", startDate, endDate);
             Double benefitSalePriceSingle = lossProductRepository.calculateTotalCostByStatusAndDateRangeAndProductSalePrice(branchId, "BENEFIT", startDate, endDate);
             Map<String, Object> sale = new HashMap<>();
-            sale.put("harm", (harmSalePriceMany == null ? 0 : harmSalePriceMany) + (harmSalePriceSingle == null ? 0 : harmSalePriceSingle));
-            sale.put("benefit", (benefitSalePriceMany == null ? 0 : benefitSalePriceMany) + (benefitSalePriceSingle == null ? 0 : benefitSalePriceSingle));
             Map<String, Object> buy = new HashMap<>();
-            buy.put("harm", (harmBuyPriceMany == null ? 0 : harmBuyPriceMany) + (harmBuyPriceSingle == null ? 0 : harmBuyPriceSingle));
-            buy.put("benefit", (benefitBuyPriceMany == null ? 0 : benefitBuyPriceMany) + (benefitBuyPriceSingle == null ? 0 : benefitBuyPriceSingle));
             Map<String, Object> data = new HashMap<>();
             data.put("sale", sale);
             data.put("buy", buy);
@@ -219,19 +195,12 @@ public class LossService {
         List<LossProductGetDto> list = new ArrayList<>();
         for (LossProduct l : lossProductPage.getContent()) {
             LossProductGetDto dto = new LossProductGetDto();
-            if (l.getProduct() != null) {
-                dto.setName(l.getProduct().getName());
-                dto.setMeasurement(l.getProduct().getMeasurement().getName());
-                dto.setLastAmount(l.getLastAmount());
-                dto.setStatus(l.getStatus());
-                dto.setBuyPrice(l.getProduct().getBuyPrice());
-            } else {
-                dto.setName(l.getProductTypePrice().getName());
-                dto.setMeasurement(l.getProductTypePrice().getProduct().getMeasurement().getName());
-                dto.setLastAmount(l.getLastAmount());
-                dto.setStatus(l.getStatus());
-                dto.setBuyPrice(l.getProductTypePrice().getBuyPrice());
-            }
+            dto.setName(l.getProduct().getName());
+            dto.setMeasurement(l.getProduct().getMeasurement().getName());
+            dto.setLastAmount(l.getLastAmount());
+            dto.setStatus(l.getStatus());
+            dto.setBuyPrice(l.getProduct().getBuyPrice());
+
             dto.setQuantity(l.getQuantity());
             list.add(dto);
         }

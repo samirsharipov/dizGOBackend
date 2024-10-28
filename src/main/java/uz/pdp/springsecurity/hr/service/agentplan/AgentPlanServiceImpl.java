@@ -20,7 +20,6 @@ import java.util.*;
 public class AgentPlanServiceImpl implements AgentPlanService {
     private final ProductRepository productRepository;
     private final BranchRepository branchRepository;
-    private final ProductTypePriceRepository productTypePriceRepository;
     private final AgentPlanRepository agentPlanRepository;
     private final UserRepository userRepository;
     private final TradeRepository tradeRepository;
@@ -34,21 +33,12 @@ public class AgentPlanServiceImpl implements AgentPlanService {
         List<Product> products = productRepository.findAllByBranchIdAndActiveIsTrueAndNameContainingIgnoreCaseOrBarcodeContainingIgnoreCase(branch1.getId(), q, q);
         List<ProductSelectSearchResult> results = new LinkedList<>();
         for (Product product : products) {
-            if (product.getType().equals(Type.SINGLE) || product.getType().equals(Type.COMBO)) {
-                results.add(new ProductSelectSearchResult(
-                        product.getId(),
-                        product.getName(),
-                        product.getType()
-                ));
-            } else if (product.getType().equals(Type.MANY)) {
-                for (ProductTypePrice productTypePrice : productTypePriceRepository.findAllByProductIdAndActiveTrue(product.getId())) {
-                    results.add(new ProductSelectSearchResult(
-                            productTypePrice.getId(),
-                            productTypePrice.getName(),
-                            product.getType()
-                    ));
-                }
-            }
+
+            results.add(new ProductSelectSearchResult(
+                    product.getId(),
+                    product.getName()
+            ));
+
         }
         return ResponseEntity.ok(new Result(true, "Mahsulot topildi", results));
     }
@@ -60,20 +50,15 @@ public class AgentPlanServiceImpl implements AgentPlanService {
             Branch branch = branchRepository.findById(planDto.getBranch()).orElseThrow(() -> new HRException("Filial topilmadi!"));
             User user = userRepository.findById(planDto.getUser()).orElseThrow(() -> new HRException("Xodim topilmadi!"));
             Product product = null;
-            ProductTypePrice productTypePrice = null;
-            if (planDto.getProduct().getType().equals(Type.MANY)) {
-                productTypePrice = productTypePriceRepository.findById(planDto.getProduct().getValue()).orElseThrow(() -> new HRException("Mahsulot topilmadi!"));
-            } else {
-                product = productRepository.findById(planDto.getProduct().getValue()).orElseThrow(() -> new HRException("Mahsulot topilmadi!"));
-            }
+
+            product = productRepository.findById(planDto.getProduct().getValue()).orElseThrow(() -> new HRException("Mahsulot topilmadi!"));
+
             plans.add(AgentPlan.builder()
                     .plan(planDto.getPlan())
                     .startDate(planDto.getStartDate())
                     .endDate(planDto.getEndDate())
                     .branch(branch)
                     .user(user)
-                    .type(planDto.getProduct().getType())
-                    .productTypePrice(productTypePrice)
                     .product(product)
                     .active(true)
                     .build());
@@ -131,54 +116,29 @@ public class AgentPlanServiceImpl implements AgentPlanService {
     private void getAgentPlans(Map<String, Object> data, Page<AgentPlan> agentPlanPage) {
         List<AgentPlanResult> results = new LinkedList<>();
         for (AgentPlan agentPlan : agentPlanPage.getContent()) {
-            if (agentPlan.getType().equals(Type.MANY)) {
-                int sale = 0;
-                for (DataProjection dataProjection : tradeRepository.findAllTradeTypeManyProductByUserIdAndProductIdAndDateRange(agentPlan.getUser().getId(), agentPlan.getProductTypePrice().getId(), agentPlan.getStartDate(), agentPlan.getEndDate())) {
-                    sale = sale + dataProjection.getTreaderQuantity();
-                }
-                results.add(new AgentPlanResult(
-                        agentPlan.getId(),
-                        agentPlan.getPlan(),
-                        agentPlan.getStartDate(),
-                        agentPlan.getEndDate(),
-                        new AgentPlanProductResult(
-                                agentPlan.getProductTypePrice().getId(),
-                                agentPlan.getProductTypePrice().getName(),
-                                agentPlan.getType()
-                        ),
-                        new AgentPlanUserResult(
-                                agentPlan.getUser().getId(),
-                                agentPlan.getUser().getFirstName(),
-                                agentPlan.getUser().getLastName()
-                        ),
-                        sale,
-                        agentPlan.getBranch().getId()
-                ));
-            } else {
-                int sale = 0;
-                for (DataProjection dataProjection : tradeRepository.findAllByUserIdAndProductIdAndDateRange(agentPlan.getUser().getId(), agentPlan.getProduct().getId(), agentPlan.getStartDate(), agentPlan.getEndDate())) {
-                    sale = sale + dataProjection.getTreaderQuantity();
-                }
-                results.add(new AgentPlanResult(
-                        agentPlan.getId(),
-                        agentPlan.getPlan(),
-                        agentPlan.getStartDate(),
-                        agentPlan.getEndDate(),
-                        new AgentPlanProductResult(
-                                agentPlan.getProduct().getId(),
-                                agentPlan.getProduct().getName(),
-                                agentPlan.getType()
-                        ),
-                        new AgentPlanUserResult(
-                                agentPlan.getUser().getId(),
-                                agentPlan.getUser().getFirstName(),
-                                agentPlan.getUser().getLastName()
-                        ),
-                        sale,
-                        agentPlan.getBranch().getId()
-                ));
+            int sale = 0;
+            for (DataProjection dataProjection : tradeRepository.findAllByUserIdAndProductIdAndDateRange(agentPlan.getUser().getId(), agentPlan.getProduct().getId(), agentPlan.getStartDate(), agentPlan.getEndDate())) {
+                sale = sale + dataProjection.getTreaderQuantity();
             }
+            results.add(new AgentPlanResult(
+                    agentPlan.getId(),
+                    agentPlan.getPlan(),
+                    agentPlan.getStartDate(),
+                    agentPlan.getEndDate(),
+                    new AgentPlanProductResult(
+                            agentPlan.getProduct().getId(),
+                            agentPlan.getProduct().getName()
+                            ),
+                    new AgentPlanUserResult(
+                            agentPlan.getUser().getId(),
+                            agentPlan.getUser().getFirstName(),
+                            agentPlan.getUser().getLastName()
+                    ),
+                    sale,
+                    agentPlan.getBranch().getId()
+            ));
         }
+
         data.put("list", results);
         data.put("totalPages", agentPlanPage.getTotalPages());
     }

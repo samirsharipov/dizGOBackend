@@ -11,7 +11,7 @@ import uz.pdp.springsecurity.payload.ProductGetForPurchaseDto;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-10-02T11:04:48+0500",
+    date = "2024-10-28T11:55:46+0500",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.12 (Amazon.com Inc.)"
 )
 @Component
@@ -27,9 +27,6 @@ public class ProductMapperImpl implements ProductMapper {
 
         productGetForPurchaseDto.setProductId( product.getId() );
         productGetForPurchaseDto.setCategoryId( productCategoryId( product ) );
-        if ( product.getType() != null ) {
-            productGetForPurchaseDto.setType( product.getType().name() );
-        }
         productGetForPurchaseDto.setName( product.getName() );
         productGetForPurchaseDto.setBarcode( product.getBarcode() );
         productGetForPurchaseDto.setBuyPrice( product.getBuyPrice() );

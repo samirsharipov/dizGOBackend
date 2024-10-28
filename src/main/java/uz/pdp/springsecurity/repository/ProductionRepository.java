@@ -20,7 +20,8 @@ public interface ProductionRepository extends JpaRepository<Production, UUID> {
     List<Production> findAllByProduct_CategoryIdAndProduct_BranchIdAndDoneIsTrue(UUID product_category_id, UUID product_branch_business_id);
 
     List<Production> findAllByProduct_BrandIdAndProduct_BranchIdAndDoneIsTrue(UUID product_category_id, UUID product_branch_business_id);
-    Page<Production> findAllByBranchIdAndDoneIsTrueAndProduct_NameContainingIgnoreCaseOrBranchIdAndDoneIsTrueAndProductTypePrice_NameContainingIgnoreCase(UUID branchId, String name, UUID branchId2, String name2, Pageable pageable);
+
+    Page<Production> findAllByBranchIdAndDoneIsTrueAndProduct_NameContainingIgnoreCase(UUID branch_id, String product_name, Pageable pageable);
 
     @Query(value = "SELECT SUM(quantity) FROM production WHERE created_at BETWEEN ?1 AND  ?2 AND branch_id = ?3", nativeQuery = true)
     Double amountByCreatedAtBetweenAndBranchId(Timestamp from, Timestamp to, UUID branch_id);
@@ -31,12 +32,7 @@ public interface ProductionRepository extends JpaRepository<Production, UUID> {
     @Query(value = "SELECT SUM(quantity) FROM production WHERE product_id = ?1", nativeQuery = true)
     Double quantityByProductSingle(UUID productId);
 
-    @Query(value = "SELECT SUM(quantity) FROM production WHERE product_type_price_id IN (SELECT id FROM product_type_price WHERE product_id = ?1)", nativeQuery = true)
-    Double quantityByProductMany(UUID productId);
 
     @Query(value = "SELECT SUM(quantity) FROM production WHERE product_id = ?1 AND branch_id = ?2", nativeQuery = true)
     Double quantityByProductSingleAndBranchId(UUID productId, UUID branchId);
-
-    @Query(value = "SELECT SUM(quantity) FROM production WHERE product_type_price_id IN (SELECT id FROM product_type_price WHERE product_id = ?1) AND branch_id = ?2", nativeQuery = true)
-    Double quantityByProductManyAndBranchId(UUID productId, UUID branchId);
 }

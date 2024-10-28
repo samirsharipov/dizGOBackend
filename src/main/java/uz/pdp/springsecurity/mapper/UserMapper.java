@@ -10,14 +10,13 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
+    @Mapping(target = "grossPriceControlOneUser", ignore = true)
+    @Mapping(target = "chatId", ignore = true)
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "photo", ignore = true)
     @Mapping(target = "job", ignore = true)
     @Mapping(target = "business", ignore = true)
-    @Mapping(target = "updateAt", ignore = true)
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "credentialsNonExpired", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "branches", ignore = true)
     @Mapping(target = "bonuses", ignore = true)
     @Mapping(target = "accountNonLocked", ignore = true)
@@ -39,6 +38,8 @@ public interface UserMapper {
     List<UserDto> toDto(List<User> users);
 
 
+    @Mapping(target = "grossPriceControlOneUser", ignore = true)
+    @Mapping(target = "chatId", ignore = true)
     @Mapping(target = "updateAt", ignore = true)
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "photo", ignore = true)

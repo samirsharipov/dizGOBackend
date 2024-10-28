@@ -1,11 +1,9 @@
 package uz.pdp.springsecurity.repository;
 
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import uz.pdp.springsecurity.entity.Product;
-import uz.pdp.springsecurity.entity.ProductTypePrice;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,7 +18,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     List<Product> findAllByBrandIdAndActiveIsTrue(UUID brand_id);
 
-    Optional<Product> findByIdAndBranchIdAndActiveTrue(UUID id, UUID branchId);
 
     Optional<Product> findAllByBarcodeAndBranchIdAndActiveTrue(String barcode, UUID branch_id);
 
@@ -89,8 +86,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     Page<Product> findAllByBranch_IdAndActiveTrue(UUID branchId, Pageable pageable);
 
-    Page<Product> findAllByRastas_IdAndActiveTrue(UUID rastas_id, Pageable pageable);
+    Page<Product> findAllByRastaList_IdAndActiveTrue(UUID rastaListId, Pageable pageable);
 
-
-    Optional<Product> findById(Long id);
 }

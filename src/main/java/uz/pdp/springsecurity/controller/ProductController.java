@@ -9,14 +9,12 @@ import uz.pdp.springsecurity.annotations.CurrentUser;
 import uz.pdp.springsecurity.entity.User;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.ProductBarcodeDto;
-import uz.pdp.springsecurity.payload.ProductDto;
+import uz.pdp.springsecurity.payload.ProductDTO;
 import uz.pdp.springsecurity.payload.ProductIdsDto;
 import uz.pdp.springsecurity.service.ProductService;
-import uz.pdp.springsecurity.service.ProductTypeService;
 import uz.pdp.springsecurity.utils.AppConstant;
 
 import javax.validation.Valid;
-import java.text.ParseException;
 import java.util.UUID;
 
 @RestController
@@ -28,29 +26,29 @@ public class ProductController {
 
     @CheckPermission("ADD_PRODUCT")
     @PostMapping()
-    public HttpEntity<?> add(@Valid @RequestBody ProductDto productDto, @CurrentUser User user) throws ParseException {
-        ApiResponse apiResponse = productService.addProduct(productDto, user);
+    public HttpEntity<?> add(@Valid @RequestBody ProductDTO productDto){
+        ApiResponse apiResponse = productService.addProduct(productDto);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
     @CheckPermission("EDIT_PRODUCT")
     @PutMapping("{id}")
-    public HttpEntity<?> edit(@PathVariable UUID id, @RequestBody ProductDto productDto, @CurrentUser User user) {
-        ApiResponse apiResponse = productService.editProduct(id, productDto, user);
+    public HttpEntity<?> edit(@PathVariable UUID id, @RequestBody ProductDTO productDto) {
+        ApiResponse apiResponse = productService.editProduct(id, productDto);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
     @CheckPermission("VIEW_PRODUCT")
     @GetMapping("/{id}")
     public HttpEntity<?> getOne(@PathVariable UUID id, @CurrentUser User user) {
-        ApiResponse apiResponse = productService.getProduct(id, user);
+        ApiResponse apiResponse = productService.getProduct(id);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
     @CheckPermission("DELETE_PRODUCT")
     @DeleteMapping("/{id}")
-    public HttpEntity<?> deleteOne(@PathVariable UUID id, @CurrentUser User user) {
-        ApiResponse apiResponse = productService.deleteProduct(id, user);
+    public HttpEntity<?> deleteOne(@PathVariable UUID id) {
+        ApiResponse apiResponse = productService.deleteProduct(id);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
@@ -66,7 +64,6 @@ public class ProductController {
     @DeleteMapping("/deactivate/{id}")
     public ResponseEntity<String> deactivateProduct(@PathVariable UUID id) {
         System.out.println("Deactivating product with ID: " + id); // Tekshiruv
-        productService.deactivateProduct(id);
         return ResponseEntity.ok("Product deactivated successfully");
     }
 
@@ -143,7 +140,7 @@ public class ProductController {
     public HttpEntity<?> getByBusiness(@PathVariable UUID business_id,
                                        @RequestParam(required = false) UUID branch_id,
                                        @RequestParam(required = false) UUID brand_id,
-                                       @RequestParam(required = false) UUID categoryId){
+                                       @RequestParam(required = false) UUID categoryId) {
         ApiResponse apiResponse = productService.getByBusiness(business_id, branch_id, brand_id, categoryId);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }

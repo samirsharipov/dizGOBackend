@@ -1,17 +1,14 @@
 package uz.pdp.springsecurity.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
 import uz.pdp.springsecurity.enums.HistoryName;
 
 import javax.persistence.*;
 
 @Entity
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class History extends AbsEntity {

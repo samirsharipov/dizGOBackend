@@ -22,7 +22,6 @@ public class WaitingService {
     private final CustomerRepository customerRepository;
     private final WaitingRepository waitingRepository;
     private final ProductRepository productRepository;
-    private final ProductTypePriceRepository productTypePriceRepository;
     private final WaitingMapper waitingMapper;
     private final WarehouseRepository warehouseRepository;
 
@@ -67,13 +66,10 @@ public class WaitingService {
                     dto.isSubMeasurement()
             );
             Optional<Product> optionalProduct = productRepository.findById(dto.getProductId());
-            Optional<ProductTypePrice> optionalProductTypePrice = productTypePriceRepository.findById(dto.getProductId());
 
             if (optionalProduct.isPresent())
                 waitingProduct.setProduct(optionalProduct.get());
-            else if (optionalProductTypePrice.isPresent()) {
-                waitingProduct.setProductTypePrice(optionalProductTypePrice.get());
-            }else {
+            else {
                 return new ApiResponse("PRODUCT NOT FOUND", false);
             }
             waitingProductList.add(waitingProduct);
@@ -125,27 +121,15 @@ public class WaitingService {
         dto.setSubMeasurement(waitingProduct.getSubMeasurement() != null && waitingProduct.getSubMeasurement());
 
         Optional<Warehouse> optionalWarehouse = Optional.empty();
-        if (waitingProduct.getProduct() != null) {
-            dto.setProductId(waitingProduct.getProduct().getId());
-            dto.setProductName(waitingProduct.getProduct().getName());
-            dto.setType(waitingProduct.getProduct().getType().name());
-            dto.setMeasurement(waitingProduct.getProduct().getMeasurement().getName());
-            if (waitingProduct.getProduct().getMeasurement().getSubMeasurement() != null){
-                dto.setSubMeasurementName(waitingProduct.getProduct().getMeasurement().getSubMeasurement().getName());
-                dto.setSubMeasurementValue(waitingProduct.getProduct().getMeasurement().getValue());
-            }
-            optionalWarehouse = warehouseRepository.findByBranchIdAndProductId(branchId, waitingProduct.getProduct().getId());
-        } else if (waitingProduct.getProductTypePrice() != null) {
-            dto.setProductTypePriceId(waitingProduct.getProductTypePrice().getId());
-            dto.setProductName(waitingProduct.getProductTypePrice().getName());
-            dto.setType(Type.MANY.name());
-            dto.setMeasurement(waitingProduct.getProductTypePrice().getProduct().getMeasurement().getName());
-            if (waitingProduct.getProductTypePrice().getProduct().getMeasurement().getSubMeasurement() != null){
-                dto.setSubMeasurementName(waitingProduct.getProductTypePrice().getProduct().getMeasurement().getSubMeasurement().getName());
-                dto.setSubMeasurementValue(waitingProduct.getProductTypePrice().getProduct().getMeasurement().getValue());
-            }
-            optionalWarehouse = warehouseRepository.findByBranchIdAndProductTypePriceId(branchId, waitingProduct.getProductTypePrice().getId());
+        dto.setProductId(waitingProduct.getProduct().getId());
+        dto.setProductName(waitingProduct.getProduct().getName());
+        dto.setMeasurement(waitingProduct.getProduct().getMeasurement().getName());
+        if (waitingProduct.getProduct().getMeasurement().getParentMeasurement() != null) {
+            dto.setSubMeasurementName(waitingProduct.getProduct().getMeasurement().getParentMeasurement().getName());
+            dto.setSubMeasurementValue(waitingProduct.getProduct().getMeasurement().getValue());
         }
+        optionalWarehouse = warehouseRepository.findByBranchIdAndProductId(branchId, waitingProduct.getProduct().getId());
+
         dto.setAmount(optionalWarehouse.map(Warehouse::getAmount).orElse(0.0));
         return dto;
     }

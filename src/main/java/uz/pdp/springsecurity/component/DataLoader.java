@@ -186,10 +186,6 @@ public class DataLoader implements CommandLineRunner {
                 }
             }
 
-            measurementRepository.save(
-                    new Measurement("dona",
-                            business)
-            );
 
             brandRepository.save(
                     new Brand(

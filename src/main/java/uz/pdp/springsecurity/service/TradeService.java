@@ -54,7 +54,6 @@ public class TradeService {
     private final WarehouseRepository warehouseRepository;
     private final PaymentMapper paymentMapper;
     private final SubscriptionRepository subscriptionRepository;
-    private final ProductTypeComboRepository productTypeComboRepository;
     private final PaymentRepository paymentRepository;
     private final SalaryCountService salaryCountService;
     private final AgreementRepository agreementRepository;
@@ -162,23 +161,8 @@ public class TradeService {
                             if (tradedQuantity < 0) tradedQuantity = 0d;
                         }
                     }
-                    if (dto.getType().equalsIgnoreCase("single")) {
-                        UUID productId = dto.getProductId();
-                        map.put(productId, map.getOrDefault(productId, 0d) + tradedQuantity);
-                    } else if (dto.getType().equalsIgnoreCase("many")) {
-                        UUID productId = dto.getProductTypePriceId();
-                        map.put(productId, map.getOrDefault(productId, 0d) + tradedQuantity);
-                    } else if (dto.getType().equalsIgnoreCase("combo")) {
-                        UUID productId = dto.getProductId();
-                        List<ProductTypeCombo> comboList = productTypeComboRepository.findAllByMainProductId(productId);
-                        if (comboList.isEmpty()) return new ApiResponse("PRODUCT NOT FOUND", false);
-                        for (ProductTypeCombo combo : comboList) {
-                            UUID contentProduct = combo.getContentProduct().getId();
-                            map.put(contentProduct, map.getOrDefault(contentProduct, 0d) + tradedQuantity * combo.getAmount());
-                        }
-                    } else {
-                        return new ApiResponse("PRODUCT TYPE NOT FOUND", false);
-                    }
+                    UUID productId = dto.getProductId();
+                    map.put(productId, map.getOrDefault(productId, 0d) + tradedQuantity);
                 }
 
                 if (!warehouseService.checkBeforeTrade(branch, map))
@@ -339,7 +323,7 @@ public class TradeService {
 
             if (tradeDTO.getDebdSum() > 0)
                 optional.ifPresent(paymentMethod -> balanceService.edit(tradeDTO.getBranchId(), Double.valueOf(tradeDTO.getDebdSum()), false, paymentMethod.getId(), false, "Savdo so'mda bo'ldi tulov dollarda " + tradeDTO.getDebdSum() + " so'm qaytim sifatida berildi!"));
-        }else {
+        } else {
             try {
                 balanceService.edit(branch.getId(), true, tradeDTO.getPaymentDtoList(), tradeDTO.getDollar(), "trade");
             } catch (Exception e) {
@@ -445,11 +429,8 @@ public class TradeService {
 
             StringBuilder products = new StringBuilder();
             for (TradeProduct tradeProduct : tradeGetOneDto.getTradeProductList()) {
-                if (tradeProduct.getProduct() != null) {
-                    products.append("<b>Mahsulot nomi: ").append(tradeProduct.getProduct().getName()).append("</b>").append(" || ").append(tradeProduct.getTradedQuantity()).append(" X ").append(tradeProduct.getProduct().getSalePrice()).append(" = ").append(tradeProduct.getTotalSalePrice()).append("\n");
-                } else {
-                    products.append("<b>Mahsulot nomi: ").append(tradeProduct.getProductTypePrice().getProduct().getName()).append("</b>").append(" || ").append(tradeProduct.getTradedQuantity()).append(" X ").append(tradeProduct.getProductTypePrice().getProduct().getSalePrice()).append(" = ").append(tradeProduct.getTotalSalePrice()).append("\n");
-                }
+                products.append("<b>Mahsulot nomi: ").append(tradeProduct.getProduct().getName()).append("</b>").append(" || ").append(tradeProduct.getTradedQuantity()).append(" X ").append(tradeProduct.getProduct().getSalePrice()).append(" = ").append(tradeProduct.getTotalSalePrice()).append("\n");
+
             }
             String sendText = telegramSendText(trade, products);
             Business business = tradeGetOneDto.getTrade().getTrader().getBusiness();
@@ -558,11 +539,8 @@ public class TradeService {
     private double countKPIProduct(List<TradeProduct> tradeProductList) {
         double kpi = 0;
         for (TradeProduct tradeProduct : tradeProductList) {
-            if (tradeProduct.getProduct() != null) {
-                kpi += countKPIProductHelper(tradeProduct.getProduct(), tradeProduct.getTradedQuantity(), tradeProduct.getTotalSalePrice());
-            } else {
-                kpi += countKPIProductHelper(tradeProduct.getProductTypePrice().getProduct(), tradeProduct.getTradedQuantity(), tradeProduct.getTotalSalePrice());
-            }
+            kpi += countKPIProductHelper(tradeProduct.getProduct(), tradeProduct.getTradedQuantity(), tradeProduct.getTotalSalePrice());
+
         }
         return kpi;
     }
@@ -586,11 +564,7 @@ public class TradeService {
         if (tradeProductList.isEmpty()) return new ApiResponse("NOT FOUND", false);
         for (TradeProduct tradeProduct : tradeProductList) {
             Optional<Warehouse> optionalWarehouse;
-            if (tradeProduct.getProduct() != null)
-                optionalWarehouse = warehouseRepository.findByBranchIdAndProductId(trade.getBranch().getId(), tradeProduct.getProduct().getId());
-            else
-                optionalWarehouse = warehouseRepository.findByBranchIdAndProductTypePriceId(trade.getBranch().getId(), tradeProduct.getProductTypePrice().getId());
-
+            optionalWarehouse = warehouseRepository.findByBranchIdAndProductId(trade.getBranch().getId(), tradeProduct.getProduct().getId());
             tradeProduct.setRemainQuantity(optionalWarehouse.map(Warehouse::getAmount).orElse(0d));
         }
         List<Payment> paymentList = paymentRepository.findAllByTradeId(trade.getId());
@@ -615,7 +589,7 @@ public class TradeService {
         }
 
         for (TradeProduct tradeProduct : tradeProductRepository.findAllByTradeId(tradeId)) {
-            double amount = warehouseService.createOrEditWareHouseHelper(trade.getBranch(), tradeProduct.getProduct(), tradeProduct.getProductTypePrice(), tradeProduct.getTradedQuantity());
+            double amount = warehouseService.createOrEditWareHouseHelper(trade.getBranch(), tradeProduct.getProduct(), tradeProduct.getTradedQuantity());
             if (amount < tradeProduct.getTradedQuantity())
                 fifoCalculationService.returnedTrade(trade.getBranch(), tradeProduct, tradeProduct.getTradedQuantity() - amount);
         }
@@ -795,15 +769,10 @@ public class TradeService {
         String measurement;
         double quantity;
         for (TradeProduct t : tradeProductList) {
-            if (t.getProduct() != null) {
-                id = t.getProduct().getId();
-                name = t.getProduct().getName();
-                measurement = t.getProduct().getMeasurement().getName();
-            } else {
-                id = t.getProductTypePrice().getId();
-                name = t.getProductTypePrice().getName();
-                measurement = t.getProductTypePrice().getProduct().getMeasurement().getName();
-            }
+            id = t.getProduct().getId();
+            name = t.getProduct().getName();
+            measurement = t.getProduct().getMeasurement().getName();
+
             quantity = t.getBacking();
             ProductBackingDto dto = map.getOrDefault(id, new ProductBackingDto(
                     id,
@@ -820,12 +789,8 @@ public class TradeService {
     public ApiResponse getBackingByProduct(UUID branchId, UUID productId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<TradeProduct> tradeProductPage;
-        if (productRepository.existsById(productId)) {
-            tradeProductPage = tradeProductRepository.findAllByTrade_BranchIdAndProductIdAndBackingIsNotNullOrderByCreatedAtDesc(branchId, productId, pageable);
-        } else {
+        tradeProductPage = tradeProductRepository.findAllByTrade_BranchIdAndProductIdAndBackingIsNotNullOrderByCreatedAtDesc(branchId, productId, pageable);
 
-            tradeProductPage = tradeProductRepository.findAllByTrade_BranchIdAndProductTypePriceIdAndBackingIsNotNullOrderByCreatedAtDesc(branchId, productId, pageable);
-        }
         if (tradeProductPage.isEmpty())
             return new ApiResponse("BACKING PRODUCT NOT FOUND", false);
 
@@ -851,7 +816,7 @@ public class TradeService {
         return list;
     }
 
-    ///new function
+    /// new function
     public ApiResponse getAllTreade(UUID userId) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {

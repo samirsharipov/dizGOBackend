@@ -302,7 +302,7 @@ public class TaskServise {
                 List<ContentProduct> contentProductList = contentProductRepository.findAllByProductionId(task.getProduction().getId());
                 for (ContentProduct contentProduct : contentProductList) {
                     if (!contentProduct.isByProduct()) {
-                        warehouseService.createOrEditWareHouseHelper(task.getBranch(), contentProduct.getProduct(), contentProduct.getProductTypePrice(), contentProduct.getQuantity());
+                        warehouseService.createOrEditWareHouseHelper(task.getBranch(), contentProduct.getProduct(),  contentProduct.getQuantity());
                         fifoCalculationService.returnedTaskProduction(task.getBranch(), contentProduct);
                     }
                 }

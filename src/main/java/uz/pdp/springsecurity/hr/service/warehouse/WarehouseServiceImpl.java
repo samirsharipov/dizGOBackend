@@ -22,7 +22,6 @@ public class WarehouseServiceImpl implements WarehouseService {
     private final FloorRepository floorRepository;
     private final SectorRepository sectorRepository;
     private final RastaRepository rastaRepository;
-    private final ProductTypePriceRepository productTypePriceRepository;
     private final ProductRepository productRepository;
 
     @Override
@@ -126,55 +125,32 @@ public class WarehouseServiceImpl implements WarehouseService {
     public HttpEntity<Result> rastaConn(RastaConnDto[] rastaConnDto) {
         for (RastaConnDto connDto : rastaConnDto) {
             WarehouseRasta rasta = rastaRepository.findById(connDto.getRasta()).orElseThrow(() -> new HRException("Rasta topilmadi!"));
-            if (connDto.getProduct().getType().equals(Type.MANY)) {
-                ProductTypePrice productTypePrice = productTypePriceRepository.findById(connDto.getProduct().getValue()).orElseThrow(() -> new HRException("Mahsulot topilmadi!"));
-                if (productTypePrice.getRastas().isEmpty()) {
-                    productTypePrice.getRastas().add(rasta);
-                    try {
-                        productTypePriceRepository.save(productTypePrice);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    for (WarehouseRasta productTypePriceRasta : productTypePrice.getRastas()) {
-                        if (!productTypePriceRasta.getId().equals(rasta.getId())) {
-                            productTypePrice.getRastas().add(rasta);
-                            try {
-                                productTypePriceRepository.save(productTypePrice);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
+
+            Product product = productRepository.findById(connDto.getProduct().getValue()).orElseThrow(() -> new HRException("Mahsulot topilmadi!"));
+
+            if (product.getRastaList().isEmpty()) {
+                product.getRastaList().add(rasta);
+                try {
+                    productRepository.save(product);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
-
             } else {
-                Product product = productRepository.findById(connDto.getProduct().getValue()).orElseThrow(() -> new HRException("Mahsulot topilmadi!"));
-
-                if (product.getRastas().isEmpty()) {
-                    product.getRastas().add(rasta);
-                    try {
-                        productRepository.save(product);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                } else {
-                    for (WarehouseRasta productRasta : product.getRastas()) {
-                        if (!productRasta.getId().equals(rasta.getId())) {
-                            product.getRastas().add(rasta);
-                            try {
-                                productRepository.save(product);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-
+                for (WarehouseRasta productRasta : product.getRastaList()) {
+                    if (!productRasta.getId().equals(rasta.getId())) {
+                        product.getRastaList().add(rasta);
+                        try {
+                            productRepository.save(product);
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
+
                     }
                 }
             }
         }
+
         return ResponseEntity.ok(new Result(true, "Rasta biriktirildi"));
     }
 

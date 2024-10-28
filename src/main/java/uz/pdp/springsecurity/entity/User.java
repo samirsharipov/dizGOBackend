@@ -15,7 +15,6 @@ import uz.pdp.springsecurity.enums.Permissions;
 import javax.persistence.*;
 import java.util.*;
 
-@Builder
 @Getter
 @Setter
 @ToString

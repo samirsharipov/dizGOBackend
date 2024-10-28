@@ -13,5 +13,4 @@ import java.util.UUID;
 public class AgentPlanProductResult {
     private UUID id;
     private String name;
-    private Type type;
 }

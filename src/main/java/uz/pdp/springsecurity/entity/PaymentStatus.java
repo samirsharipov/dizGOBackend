@@ -1,9 +1,6 @@
 package uz.pdp.springsecurity.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
 import uz.pdp.springsecurity.enums.StatusName;
 
@@ -12,8 +9,8 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor

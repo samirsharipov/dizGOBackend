@@ -328,16 +328,8 @@ public class ProjectService {
                 contentProject.setContentName(task.getContent().getProduct().getName());
                 contentProject.setMeasurement(task.getContent().getProduct().getMeasurement().getName());
                 contentProject.setGoalAmount(task.getGoalAmount());
-                if (task.getContent().getProduct() != null) {
-                    if (task.getContent().getProduct().getPhoto() != null) {
-                        contentProject.setPhotoId(task.getContent().getProduct().getPhoto().getId());
-                    }
-                } else if (task.getContent().getProductTypePrice() != null) {
-                    if (task.getContent().getProductTypePrice().getPhoto() != null) {
-                        contentProject.setPhotoId(task.getContent().getProductTypePrice().getPhoto().getId());
-                    }
-                } else {
-                    contentProject.setPhotoId(null);
+                if (task.getContent().getProduct().getPhoto() != null) {
+                    contentProject.setPhotoId(task.getContent().getProduct().getPhoto().getId());
                 }
                 contentProjectList.add(contentProject);
             }

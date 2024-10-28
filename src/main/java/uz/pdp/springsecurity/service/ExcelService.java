@@ -1,13 +1,10 @@
 package uz.pdp.springsecurity.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,9 +27,6 @@ import uz.pdp.springsecurity.repository.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -42,30 +36,19 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ExcelService {
     private final ProductRepository productRepository;
-
     private final TradeProductRepository tradeProductRepository;
     private final WarehouseRepository warehouseRepository;
-
     private final MeasurementRepository measurementRepository;
-
     private final BranchRepository branchRepository;
-    private final CustomerRepository customerRepository;
     private final CarRepository carRepository;
     private final CarInvoiceRepository carInvoiceRepository;
     private final CategoryRepository categoryRepository;
-
-    private final ProductTypePriceRepository productTypePriceRepository;
-
     private final CurrencyRepository currencyRepository;
-
     private final ProductTypeValueRepository productTypeValueRepository;
-
     private final TradeRepository tradeRepository;
-
     private final AttachmentRepository attachmentRepository;
     private final AttachmentContentRepository attachmentContentRepository;
-    @Autowired
-    BrandRepository brandRepository;
+    private final BrandRepository brandRepository;
     private final FifoCalculationRepository fifoCalculationRepository;
 
     public List<ProductViewDtos> getByBusiness(UUID businessId) {
@@ -162,8 +145,7 @@ public class ExcelService {
                 product.setName(excelDto.getProductName());
                 product.setExpireDate(excelDto.getExpiredDate());
                 boolean exists = productRepository.existsByBarcodeAndBusinessIdAndActiveTrue(excelDto.getBarcode(), optionalBranch.get().getBusiness().getId());
-                boolean exists1 = productTypePriceRepository.existsByBarcodeAndProduct_BusinessIdAndActiveTrue(excelDto.getBarcode(), optionalBranch.get().getBusiness().getId());
-                if (exists && exists1) {
+                if (exists) {
                     continue;
                 }
                 product.setBarcode(String.valueOf(excelDto.getBarcode()));
@@ -186,7 +168,6 @@ public class ExcelService {
                     product.setBrand(brand);
                 }
                 product.setMeasurement(optionalMeasurement.get());
-                product.setType(Type.SINGLE);
                 product.setPhoto(null);
                 Warehouse warehouse = new Warehouse();
                 warehouse.setBranch(optionalBranch.get());
@@ -341,15 +322,6 @@ public class ExcelService {
                     checkingColor = false;
                 }
                 if (checkingSize && checkingColor) {
-
-                    boolean exists = productTypePriceRepository.existsByProduct_ActiveAndBarcodeAndProduct_BusinessIdAndActiveTrue(true, excelDto.getBarcode(), business.getId());
-                    if (exists) {
-                        Warehouse warehouseProductTypePrice = warehouseRepository.findAllByProductTypePrice_BarcodeAndBranch_BusinessId(excelDto.getBarcode(), business.getId());
-                        warehouseProductTypePrice.setAmount(warehouseProductTypePrice.getAmount() + excelDto.getAmount());
-                        warehouseRepository.save(warehouseProductTypePrice);
-                        continue;
-                    }
-
                     String typeSizes = excelDto.getTypeColor();
                     String typeColor = excelDto.getTypeSize();
 
@@ -368,49 +340,13 @@ public class ExcelService {
                     } else {
                         product.setName(product.getName() + "( " + productTypeValueColor.getProductType().getName() + " - " + productTypeValueColor.getName() + " )");
                     }
-                    product.setType(Type.MANY);
                     productRepository.save(product);
 
-                    ProductTypePrice productTypePrice = new ProductTypePrice();
-                    productTypePrice.setProduct(product);
-                    if (productTypeValueSize != null) {
-                        productTypePrice.setName(product.getName() + " ( " + productTypeValueColor.getName() + " " + productTypeValueSize.getName() + " )");
-                        productTypePrice.setSubProductTypeValue(productTypeValueSize);
-                    } else {
-                        productTypePrice.setName(product.getName() + "( " + productTypeValueColor.getProductType().getName() + " - " + productTypeValueColor.getName() + " )");
-                    }
-                    productTypePrice.setProductTypeValue(productTypeValueColor);
-                    if (excelDto.getDollarBuy().equals("true")) {
-                        assert currency != null;
-                        productTypePrice.setBuyPrice(currency.getCourse() * excelDto.getBuyPrice());
-                        productTypePrice.setBuyPriceDollar(excelDto.getBuyPrice());
-                    } else {
-                        productTypePrice.setBuyPrice(excelDto.getBuyPrice());
-                        productTypePrice.setBuyPriceDollar(Math.round(excelDto.getBuyPrice() / currency.getCourse() * 100) / 100.);
-
-                    }
-                    if (excelDto.getDollarSale().equals("true")) {
-                        productTypePrice.setSalePrice(currency.getCourse() * excelDto.getSalePrice());
-                        productTypePrice.setSalePriceDollar(excelDto.getSalePrice());
-                        productTypePrice.setGrossPrice(currency.getCourse() * excelDto.getWholeSale());
-                        productTypePrice.setGrossPriceDollar(excelDto.getWholeSale());
-                    } else {
-                        productTypePrice.setSalePrice(excelDto.getSalePrice());
-                        productTypePrice.setSalePriceDollar(Math.round(excelDto.getSalePrice() / currency.getCourse() * 100) / 100.);
-                        productTypePrice.setGrossPrice(excelDto.getWholeSale());
-                        productTypePrice.setGrossPriceDollar(Math.round(excelDto.getWholeSale() / currency.getCourse() * 100) / 100.);
-                    }
-                    productTypePrice.setProfitPercent(10);
-                    productTypePrice.setPhoto(null);
-                    productTypePrice.setBarcode(excelDto.getBarcode());
-                    productTypePriceRepository.save(productTypePrice);
                     Warehouse warehouse1 = new Warehouse();
                     warehouse1.setBranch(optionalBranch.get());
-                    warehouse1.setProductTypePrice(productTypePrice);
                     warehouse1.setAmount(excelDto.getAmount());
                     warehouseRepository.save(warehouse1);
                 } else {
-                    product.setType(Type.SINGLE);
                     warehouseList.add(warehouse);
                     productList.add(product);
                 }
@@ -439,29 +375,14 @@ public class ExcelService {
         str.reverse();
         String barcode = str.substring(0, 9);
         if (isUpdate) {
-            if (productRepository.existsByBarcodeAndBusinessIdAndIdIsNotAndActiveTrue(barcode, businessId, productId) || productTypePriceRepository.existsByBarcodeAndProduct_BusinessIdAndIdIsNotAndActiveTrue(barcode, businessId, productId))
+            if (productRepository.existsByBarcodeAndBusinessIdAndIdIsNotAndActiveTrue(barcode, businessId, productId))
                 return generateBarcode(businessId, productName, productId, isUpdate);
         } else {
-            if (productRepository.existsByBarcodeAndBusinessIdAndActiveTrue(barcode, businessId) || productTypePriceRepository.existsByBarcodeAndProduct_BusinessIdAndActiveTrue(barcode, businessId))
+            if (productRepository.existsByBarcodeAndBusinessIdAndActiveTrue(barcode, businessId))
                 return generateBarcode(businessId, productName, productId, isUpdate);
         }
         return barcode;
     }
-
-    private ApiResponse addProductMany(Product product, ExcelDto excelDto) {
-        product.setType(Type.MANY);
-
-
-        return null;
-    }
-
-    private ApiResponse addProductSingle(Product product, ExcelDto excelDto) {
-        product.setType(Type.SINGLE);
-
-
-        return null;
-    }
-
 
     private boolean checkProduct(UUID branchId, Optional<Branch> optionalBranch, List<FifoCalculation> fifoCalculationList, String barcode, double amount, double buyPrice) {
         Optional<Product> optionalProduct = productRepository.findByBarcodeAndBranch_IdAndActiveTrue(barcode, branchId);
@@ -498,13 +419,8 @@ public class ExcelService {
             history.setDate(formattedDate);
             history.setId(trade.getInvoice());
             for (TradeProduct tradeProduct : tradeProductRepository.findAllByTradeId(trade.getId())) {
-                if (tradeProduct.getProduct() == null && tradeProduct.getProductTypePrice() != null) {
-                    ProductTypePrice productTypePrice = tradeProduct.getProductTypePrice();
-                    history.getProducts().add(new ExcelProductTrade(productTypePrice.getName(), productTypePrice.getBarcode(), tradeProduct.getTradedQuantity(), tradeProduct.getTotalSalePrice() / tradeProduct.getTradedQuantity()));
-                } else {
-                    assert tradeProduct.getProduct() != null;
-                    history.getProducts().add(new ExcelProductTrade(tradeProduct.getProduct().getName(), tradeProduct.getProduct().getBarcode(), tradeProduct.getTradedQuantity(), tradeProduct.getTotalSalePrice() / tradeProduct.getTradedQuantity()));
-                }
+                assert tradeProduct.getProduct() != null;
+                history.getProducts().add(new ExcelProductTrade(tradeProduct.getProduct().getName(), tradeProduct.getProduct().getBarcode(), tradeProduct.getTradedQuantity(), tradeProduct.getTotalSalePrice() / tradeProduct.getTradedQuantity()));
             }
             sales.add(history);
         }
@@ -572,7 +488,7 @@ public class ExcelService {
             // Populate the Excel sheet with sales data
             Page<CarInvoice> invoices = carInvoiceRepository.findAllByCarIdOrderByCreatedAtDesc(car.getId(), PageRequest.of(0, 1));
             int rowIndex = 1;
-            for (CarInvoice carInvoice : carInvoiceRepository.findAllByCarIdOrderByCreatedAtDesc(car.getId(),PageRequest.of(0, Math.toIntExact(invoices.getTotalElements())))) {
+            for (CarInvoice carInvoice : carInvoiceRepository.findAllByCarIdOrderByCreatedAtDesc(car.getId(), PageRequest.of(0, Math.toIntExact(invoices.getTotalElements())))) {
                 Row row = sheet.createRow(rowIndex++);
                 if (carInvoice.getType().equals(CarInvoiceType.INCOME)) {
                     row.createCell(0).setCellValue("KIRIM");

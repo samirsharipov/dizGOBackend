@@ -18,10 +18,7 @@ public interface LidStatusRepository extends JpaRepository<LidStatus, UUID> {
 
     Optional<LidStatus> findByName(String name);
 
-    List<LidStatus> findAllByBusinessIdAndOrginalName(UUID business_id, String orginalName);
 
     Optional<LidStatus> findBySortAndBusinessId(Integer sort, UUID business_id);
 
-    @Query(value = "select max (l.sort) from LidStatus l where l.business.id = :businessId")
-    Integer getMaxSort(@Param("businessId") UUID businessId);
 }

@@ -386,27 +386,17 @@ public class CustomerService {
                     customerTradeInfo1.setTotalSumma(tradeProduct.getTrade().getTotalSum());
                 }
 
-                if (tradeProduct.getProduct() != null) {
-                    if (tradeProduct.getProduct().getPhoto() != null) {
-                        productCustomerDto.setAttachmentId(tradeProduct.getProduct().getPhoto().getId());
-                    }
-                }
-                if (tradeProduct.getProductTypePrice() != null) {
-                    if (tradeProduct.getProductTypePrice().getPhoto() != null) {
-                        productCustomerDto.setAttachmentId(tradeProduct.getProductTypePrice().getPhoto().getId());
-                    }
+                if (tradeProduct.getProduct().getPhoto() != null) {
+                    productCustomerDto.setAttachmentId(tradeProduct.getProduct().getPhoto().getId());
                 }
 
 
-                productCustomerDto.setProductName(tradeProduct.getProductTypePrice() != null ?
-                        tradeProduct.getProductTypePrice().getName() : tradeProduct.getProduct().getName());
+                productCustomerDto.setProductName(tradeProduct.getProduct().getName());
 
                 productCustomerDto.setProductCount(tradeProduct.getTradedQuantity());
 
                 //measurementni nameni olish uchun product type price ni null likga tekshirildi!
-                productCustomerDto.setMeasurementName(tradeProduct.getProductTypePrice() != null ?
-                        tradeProduct.getProductTypePrice().getProduct().getMeasurement().getName()
-                        : tradeProduct.getProduct().getMeasurement().getName());
+                productCustomerDto.setMeasurementName(tradeProduct.getProduct().getMeasurement().getName());
 
                 tradeProductCustomerDtoList.add(productCustomerDto);
             }

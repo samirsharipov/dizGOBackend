@@ -17,13 +17,10 @@ public class ExchangeProductDTO {
 
     private UUID productExchangeId;
 
-    private UUID productTypePriceId;
 
     private String productName;
 
-    private String productTypePriceName;
 
     private String measurementProductName;
 
-    private String measurementProductTypePriceName;
 }

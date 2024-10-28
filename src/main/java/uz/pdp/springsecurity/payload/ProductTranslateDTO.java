@@ -1,0 +1,20 @@
+package uz.pdp.springsecurity.payload;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.UUID;
+
+
+@Getter
+@Setter
+public class ProductTranslateDTO {
+
+    private UUID languageId;
+
+    private String name;
+    private String description;
+    private String longDescription;
+    private String keywords;
+    private String attributes;
+}

@@ -9,6 +9,4 @@ import java.util.UUID;
 
 public interface ExchangeProductRepository extends JpaRepository<ExchangeProduct, UUID> {
 
-    Optional<ExchangeProduct> findByProductId(UUID product_id);
-
 }

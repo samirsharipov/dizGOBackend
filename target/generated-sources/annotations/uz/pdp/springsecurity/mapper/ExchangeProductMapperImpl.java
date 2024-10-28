@@ -8,12 +8,11 @@ import org.springframework.stereotype.Component;
 import uz.pdp.springsecurity.entity.ExchangeProduct;
 import uz.pdp.springsecurity.entity.Measurement;
 import uz.pdp.springsecurity.entity.Product;
-import uz.pdp.springsecurity.entity.ProductTypePrice;
 import uz.pdp.springsecurity.payload.ExchangeProductDTO;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-10-15T16:34:55+0500",
+    date = "2024-10-28T11:55:46+0500",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.12 (Amazon.com Inc.)"
 )
 @Component
@@ -27,9 +26,7 @@ public class ExchangeProductMapperImpl implements ExchangeProductMapper {
 
         ExchangeProductDTO exchangeProductDTO = new ExchangeProductDTO();
 
-        exchangeProductDTO.setMeasurementProductTypePriceName( exchangeProductProductTypePriceProductMeasurementName( exchangeProduct ) );
         exchangeProductDTO.setMeasurementProductName( exchangeProductProductMeasurementName( exchangeProduct ) );
-        exchangeProductDTO.setProductTypePriceName( exchangeProductProductTypePriceProductName( exchangeProduct ) );
         exchangeProductDTO.setProductName( exchangeProductProductName( exchangeProduct ) );
         exchangeProductDTO.setProductExchangeId( exchangeProductProductId( exchangeProduct ) );
         exchangeProductDTO.setExchangeProductQuantity( exchangeProduct.getExchangeProductQuantity() );
@@ -60,7 +57,6 @@ public class ExchangeProductMapperImpl implements ExchangeProductMapper {
         ExchangeProduct exchangeProduct = new ExchangeProduct();
 
         exchangeProduct.setProduct( exchangeProductDTOToProduct( exchangeProductDTO ) );
-        exchangeProduct.setProductTypePrice( exchangeProductDTOToProductTypePrice( exchangeProductDTO ) );
         exchangeProduct.setExchangeProductQuantity( exchangeProductDTO.getExchangeProductQuantity() );
 
         return exchangeProduct;
@@ -72,10 +68,6 @@ public class ExchangeProductMapperImpl implements ExchangeProductMapper {
             return;
         }
 
-        if ( exchangeProduct.getProductTypePrice() == null ) {
-            exchangeProduct.setProductTypePrice( new ProductTypePrice() );
-        }
-        exchangeProductDTOToProductTypePrice1( exchangeProductDTO, exchangeProduct.getProductTypePrice() );
         exchangeProduct.setExchangeProductQuantity( exchangeProductDTO.getExchangeProductQuantity() );
     }
 
@@ -91,29 +83,6 @@ public class ExchangeProductMapperImpl implements ExchangeProductMapper {
         }
     }
 
-    private String exchangeProductProductTypePriceProductMeasurementName(ExchangeProduct exchangeProduct) {
-        if ( exchangeProduct == null ) {
-            return null;
-        }
-        ProductTypePrice productTypePrice = exchangeProduct.getProductTypePrice();
-        if ( productTypePrice == null ) {
-            return null;
-        }
-        Product product = productTypePrice.getProduct();
-        if ( product == null ) {
-            return null;
-        }
-        Measurement measurement = product.getMeasurement();
-        if ( measurement == null ) {
-            return null;
-        }
-        String name = measurement.getName();
-        if ( name == null ) {
-            return null;
-        }
-        return name;
-    }
-
     private String exchangeProductProductMeasurementName(ExchangeProduct exchangeProduct) {
         if ( exchangeProduct == null ) {
             return null;
@@ -127,25 +96,6 @@ public class ExchangeProductMapperImpl implements ExchangeProductMapper {
             return null;
         }
         String name = measurement.getName();
-        if ( name == null ) {
-            return null;
-        }
-        return name;
-    }
-
-    private String exchangeProductProductTypePriceProductName(ExchangeProduct exchangeProduct) {
-        if ( exchangeProduct == null ) {
-            return null;
-        }
-        ProductTypePrice productTypePrice = exchangeProduct.getProductTypePrice();
-        if ( productTypePrice == null ) {
-            return null;
-        }
-        Product product = productTypePrice.getProduct();
-        if ( product == null ) {
-            return null;
-        }
-        String name = product.getName();
         if ( name == null ) {
             return null;
         }
@@ -192,49 +142,5 @@ public class ExchangeProductMapperImpl implements ExchangeProductMapper {
         product.setId( exchangeProductDTO.getProductExchangeId() );
 
         return product;
-    }
-
-    protected ProductTypePrice exchangeProductDTOToProductTypePrice(ExchangeProductDTO exchangeProductDTO) {
-        if ( exchangeProductDTO == null ) {
-            return null;
-        }
-
-        ProductTypePrice productTypePrice = new ProductTypePrice();
-
-        productTypePrice.setId( exchangeProductDTO.getProductTypePriceId() );
-
-        return productTypePrice;
-    }
-
-    protected void exchangeProductDTOToMeasurement(ExchangeProductDTO exchangeProductDTO, Measurement mappingTarget) {
-        if ( exchangeProductDTO == null ) {
-            return;
-        }
-
-        mappingTarget.setName( exchangeProductDTO.getMeasurementProductTypePriceName() );
-    }
-
-    protected void exchangeProductDTOToProduct1(ExchangeProductDTO exchangeProductDTO, Product mappingTarget) {
-        if ( exchangeProductDTO == null ) {
-            return;
-        }
-
-        if ( mappingTarget.getMeasurement() == null ) {
-            mappingTarget.setMeasurement( new Measurement() );
-        }
-        exchangeProductDTOToMeasurement( exchangeProductDTO, mappingTarget.getMeasurement() );
-        mappingTarget.setName( exchangeProductDTO.getProductTypePriceName() );
-    }
-
-    protected void exchangeProductDTOToProductTypePrice1(ExchangeProductDTO exchangeProductDTO, ProductTypePrice mappingTarget) {
-        if ( exchangeProductDTO == null ) {
-            return;
-        }
-
-        if ( mappingTarget.getProduct() == null ) {
-            mappingTarget.setProduct( new Product() );
-        }
-        exchangeProductDTOToProduct1( exchangeProductDTO, mappingTarget.getProduct() );
-        mappingTarget.setId( exchangeProductDTO.getProductTypePriceId() );
     }
 }
