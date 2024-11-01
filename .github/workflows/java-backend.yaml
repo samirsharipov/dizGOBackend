@@ -21,13 +21,14 @@ jobs:
 
       - name: Loyihani yig'ish (build)
         run: |
+          chmod +x ./mvnw
           ./mvnw clean package
 
       - name: JAR faylni Plesk'ga yuklash
         uses: appleboy/scp-action@v0.1.0
         with:
-          host: 37.27.181.70
-          username: bnav.uz_website1995888
-          password: aQL3yzK2#112iesad
+          host: ${{ secrets.PLESK_HOST }}
+          username: ${{ secrets.PLESK_USERNAME }}
+          password: ${{ secrets.PLESK_PASSWORD }}
           source: "target/spring-security.jar" # Yig'ilgan JAR fayl manzili
-          target: "/var/www/vhosts/bnav.uz/back.bnav.uz" #
+          target: "/var/www/vhosts/bnav.uz/back.bnav.uz" # Maqsadli katalog
