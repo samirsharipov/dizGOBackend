@@ -88,6 +88,9 @@ public class Product extends AbsEntity {
     @Column(nullable = false)
     private String barcode;              // Mahsulotning barkodi
 
+    @Column(unique = true)
+    private String pluCode;             // Mahsulotning plu kodi
+
     private double minQuantity;          // Sotish uchun minimal miqdor
 
     // Bog'lanishlar

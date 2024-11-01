@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.entity.Currency;
-import uz.pdp.springsecurity.enums.Type;
 import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
 
@@ -33,8 +32,6 @@ public class ProductService {
     private final ContentProductRepository contentProductRepository;
     private final CurrencyRepository currencyRepository;
     private final FifoCalculationRepository fifoCalculationRepository;
-    private final UserRepository userRepository;
-    private final NotificationService notificationService;
     private final LanguageRepository languageRepository;
     private final ProductTranslateRepository productTranslateRepository;
 
@@ -107,6 +104,15 @@ public class ProductService {
             product.setBarcode(generateBarcode(product.getBusiness().getId(), product.getName(), product.getId(), isUpdate));
         }
 
+        if (productDto.getPluCode() != null && !productDto.getPluCode().isBlank()) {
+            if (isUpdate) {
+                if (!productRepository.existsByPluCodeAndBusiness_Id(productDto.getPluCode(), product.getBusiness().getId())) {
+                    product.setPluCode(productDto.getPluCode());
+                }
+            } else {
+                product.setPluCode(productDto.getPluCode());
+            }
+        }
 
         Product saved = productRepository.save(product);
 
@@ -419,7 +425,7 @@ public class ProductService {
             }
         } else {
             if (search != null) {
-                productPage = productRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndActiveTrueOrBusinessIdAndBarcodeContainingIgnoreCaseAndActiveTrue(businessId, search, businessId, search, pageable);
+                productPage = productRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndActiveTrue(businessId, search,  pageable);
             } else if (catId != null && brandId != null) {
                 productPage = productRepository.findAllByBusinessIdAndCategoryIdAndBrandIdAndActiveTrue(businessId, catId, brandId, pageable);
             } else if (catId != null) {
@@ -740,7 +746,6 @@ public class ProductService {
         product.setAttributes(productDto.getAttributes());
 
         product.setUniqueSKU(productDto.getUniqueSKU());
-
 
         product.setStockAmount(productDto.getStockAmount());
         product.setInStock(productDto.getInStock());

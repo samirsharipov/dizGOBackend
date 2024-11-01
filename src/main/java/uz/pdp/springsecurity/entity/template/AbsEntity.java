@@ -38,4 +38,8 @@ public abstract class AbsEntity implements Serializable {
 
     @LastModifiedBy
     private UUID lastModifiedBy;
+
+    private boolean deleted;
+
+    private boolean active;
 }
