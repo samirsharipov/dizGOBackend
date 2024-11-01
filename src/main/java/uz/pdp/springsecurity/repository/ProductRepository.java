@@ -18,6 +18,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     List<Product> findAllByBrandIdAndActiveIsTrue(UUID brand_id);
 
+    boolean existsByPluCodeAndBusiness_Id(String pluCode, UUID business_id);
 
     Optional<Product> findAllByBarcodeAndBranchIdAndActiveTrue(String barcode, UUID branch_id);
 
@@ -67,6 +68,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
 
     Page<Product> findAllByBusinessIdAndNameContainingIgnoreCaseAndActiveTrueOrBusinessIdAndBarcodeContainingIgnoreCaseAndActiveTrue(UUID busId1, String name, UUID busId2, String barcode, Pageable pageable);
+    Page<Product> findAllByBusinessIdAndNameContainingIgnoreCaseAndActiveTrue(UUID busId1, String name, Pageable pageable);
 
     Page<Product> findAllByBranch_IdAndNameContainingIgnoreCaseAndActiveTrueOrBusinessIdAndBarcodeContainingIgnoreCaseAndActiveTrue(UUID branchId1, String name, UUID branchId2, String barcode, Pageable pageable);
 

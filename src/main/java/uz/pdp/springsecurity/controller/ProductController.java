@@ -40,7 +40,7 @@ public class ProductController {
 
     @CheckPermission("VIEW_PRODUCT")
     @GetMapping("/{id}")
-    public HttpEntity<?> getOne(@PathVariable UUID id, @CurrentUser User user) {
+    public HttpEntity<?> getOne(@PathVariable UUID id) {
         ApiResponse apiResponse = productService.getProduct(id);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
@@ -60,12 +60,6 @@ public class ProductController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    @CheckPermission("DELETE_PRODUCT")
-    @DeleteMapping("/deactivate/{id}")
-    public ResponseEntity<String> deactivateProduct(@PathVariable UUID id) {
-        System.out.println("Deactivating product with ID: " + id); // Tekshiruv
-        return ResponseEntity.ok("Product deactivated successfully");
-    }
 
     @CheckPermission("VIEW_PRODUCT")
     @GetMapping("/get-by-barcode/{barcode}")

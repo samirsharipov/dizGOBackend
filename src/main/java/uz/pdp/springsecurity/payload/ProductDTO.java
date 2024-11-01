@@ -62,6 +62,8 @@ public class ProductDTO {
     private Date expireDate;            // Expiry date
 
     private String barcode;             // Product barcode
+    private String pluCode;             // Product pluCode
+
     private double minQuantity;         // Minimum quantity for sale
 
     private UUID brandId;               // Brand reference

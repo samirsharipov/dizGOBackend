@@ -39,16 +39,15 @@ public class DataLoader implements CommandLineRunner {
     private final TaskStatusRepository taskStatusRepository;
     private final AddressRepository addressRepository;
     private final BrandRepository brandRepository;
-    private final CategoryRepository categoryRepository;
     private final TariffRepository tariffRepository;
     private final SubscriptionRepository subscriptionRepository;
-    private final MeasurementRepository measurementRepository;
     private final AgreementService agreementService;
     private final LidStatusRepository lidStatusRepository;
     private final LidFieldRepository lidFieldRepository;
     private final SourceRepository sourceRepository;
     private final InvoiceService invoiceService;
     private final BalanceRepository balanceRepository;
+    private final LanguageRepository languageRepository;
 
     @Value("${spring.sql.init.mode}")
     private String initMode;
@@ -80,6 +79,26 @@ public class DataLoader implements CommandLineRunner {
                 );
                 tariffRepository.save(tariff);
             }
+
+            Language uzbek = new Language();
+            uzbek.setName("uzbek");
+            uzbek.setDescription("uzbek");
+            uzbek.setCode("uz");
+
+
+            Language rus = new Language();
+            rus.setName("rus");
+            rus.setDescription("rus");
+            rus.setCode("ru");
+
+            Language english = new Language();
+            english.setName("english");
+            english.setDescription("english");
+            english.setCode("en");
+
+            languageRepository.save(uzbek);
+            languageRepository.save(rus);
+            languageRepository.save(english);
 
             Business business = new Business();
             business.setDescription("Test Uchun");
