@@ -17,7 +17,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '17' # loyihangizga mos Java versiyasini tanlang
-          distribution: ''
+          distribution: 'temurin'
 
       - name: Loyihani yig'ish (build)
         run: |
@@ -30,4 +30,4 @@ jobs:
           username: bnav.uz_website1995888
           password: aQL3yzK2#112iesad
           source: "target/spring-security.jar" # Yig'ilgan JAR fayl manzili
-          target: "/plesk/var/www/vhosts/bnav.uz/back.bnav.uz" #
+          target: "/var/www/vhosts/bnav.uz/back.bnav.uz" #

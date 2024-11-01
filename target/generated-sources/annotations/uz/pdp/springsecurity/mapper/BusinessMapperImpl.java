@@ -9,8 +9,8 @@ import uz.pdp.springsecurity.payload.BusinessGetDto;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-10-28T11:55:46+0500",
-    comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.12 (Amazon.com Inc.)"
+    date = "2024-11-01T15:47:00+0500",
+    comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.13 (Amazon.com Inc.)"
 )
 @Component
 public class BusinessMapperImpl implements BusinessMapper {
