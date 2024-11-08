@@ -31,10 +31,6 @@ public class Trade extends AbsEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private PaymentStatus paymentStatus;
 
-    /**
-     * DO NOT USE THIS FIELD/ USE PAYMENT ENTITY
-     */
-
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
     private PaymentMethod payMethod;

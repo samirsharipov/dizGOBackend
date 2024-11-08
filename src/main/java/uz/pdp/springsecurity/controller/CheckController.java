@@ -14,7 +14,7 @@ import uz.pdp.springsecurity.service.CheckService;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/check")
+@RequestMapping("/api/check")
 @RequiredArgsConstructor
 public class CheckController {
 

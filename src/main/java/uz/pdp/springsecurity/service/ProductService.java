@@ -14,6 +14,7 @@ import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -172,8 +173,10 @@ public class ProductService {
 
     public ApiResponse getProduct(UUID id) {
         Optional<Product> optionalProduct = productRepository.findById(id);
-        return optionalProduct.map(product -> new ApiResponse("success", true, product))
+
+        return optionalProduct.map(product -> new ApiResponse("FOUND", true, convertToDto(product)))
                 .orElseGet(() -> new ApiResponse("NOT FOUND", false));
+
     }
 
     @Transactional
@@ -425,7 +428,7 @@ public class ProductService {
             }
         } else {
             if (search != null) {
-                productPage = productRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndActiveTrue(businessId, search,  pageable);
+                productPage = productRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndActiveTrue(businessId, search, pageable);
             } else if (catId != null && brandId != null) {
                 productPage = productRepository.findAllByBusinessIdAndCategoryIdAndBrandIdAndActiveTrue(businessId, catId, brandId, pageable);
             } else if (catId != null) {
@@ -810,6 +813,85 @@ public class ProductService {
         Business business = optionalBusiness.get();
         product.setBusiness(business);
         product.setBranch(allBranch);
+        product.setActive(true);
+    }
+
+
+    public ProductGetDto convertToDto(Product product) {
+        ProductGetDto dto = new ProductGetDto();
+
+        // ID va yaratilgan vaqt
+        dto.setId(product.getId());  // UUID dan string ga o'zgartirish
+        dto.setCreatedAt(product.getCreatedAt()); // Yaratilgan vaqt
+
+        // Mahsulot nomi va tavsifi
+        dto.setName(product.getName());
+        dto.setDescription(product.getDescription());
+        dto.setLongDescription(product.getLongDescription());
+        dto.setKeywords(product.getKeywords());
+        dto.setAttributes(product.getAttributes());
+
+        // Mahsulotga oid boshqa ma'lumotlar
+        dto.setUniqueSKU(product.getUniqueSKU());
+        dto.setSalePrice(product.getSalePrice());
+        dto.setBuyPrice(product.getBuyPrice());
+        dto.setSalePriceDollar(product.getSalePriceDollar());
+        dto.setStockAmount(product.getStockAmount());
+        dto.setInStock(product.getInStock());
+        dto.setPreorder(product.getPreorder());
+        dto.setLength(product.getLength());
+        dto.setWidth(product.getWidth());
+        dto.setHeight(product.getHeight());
+        dto.setWeight(product.getWeight());
+
+        // Harmonizatsiya kodlari
+        dto.setHsCode12(product.getHsCode12());
+        dto.setHsCode22(product.getHsCode22());
+        dto.setHsCode32(product.getHsCode32());
+        dto.setHsCode44(product.getHsCode44());
+
+        // Shartnomalar bilan bog'liq ma'lumotlar
+        dto.setAgreementExportsID(product.getAgreementExportsID());
+        dto.setAgreementExportsPID(product.getAgreementExportsPID());
+        dto.setAgreementLocalID(product.getAgreementLocalID());
+        dto.setAgreementLocalPID(product.getAgreementLocalPID());
+
+        // Qo'shimcha ma'lumotlar
+        dto.setLangGroup(product.getLangGroup());
+        dto.setShippingClass(product.getShippingClass());
+        dto.setSoldIndividually(product.getSoldIndividually());
+        dto.setActive(product.isActive());
+        dto.setProfitPercent(product.getProfitPercent());
+        dto.setTax(product.getTax());
+
+        // Ixtiyoriy qiymatlar
+        dto.setGrossPrice(product.getGrossPrice());
+        dto.setGrossPriceDollar(product.getGrossPriceDollar());
+        dto.setGrossPriceMyControl(product.getGrossPriceMyControl());
+        dto.setBuyPriceDollar(product.getBuyPriceDollar());
+        dto.setBuyDollar(product.isBuyDollar());
+        dto.setSaleDollar(product.isSaleDollar());
+        dto.setKpiPercent(product.getKpiPercent());
+        dto.setKpi(product.getKpi());
+        dto.setExpireDate(product.getExpireDate());
+        dto.setBarcode(product.getBarcode());
+        dto.setPluCode(product.getPluCode());
+        dto.setMinQuantity(product.getMinQuantity());
+
+        // Brand, Category va boshqa bog'lanishlar
+        dto.setBrandName(product.getBrand() != null ? product.getBrand().getName() : null); // Brend nomi
+        dto.setCategoryName(product.getCategory() != null ? product.getCategory().getName() : null); // Kategoriya nomi
+        dto.setMeasurementUnit(product.getMeasurement() != null ? product.getMeasurement().getName() : null); // O'lchov birligi
+        dto.setPhotoId(product.getPhoto() != null ? product.getPhoto().getId() : null);
+
+        // Ombor joylari va boshqa bog'lanishlar
+        Optional<Warehouse> optionalWarehouse =
+                warehouseRepository.findByProduct_Id(product.getId());
+        dto.setWarehouseCount(optionalWarehouse.map(Warehouse::getAmount).orElse(0d));
+        dto.setBusinessName(product.getBusiness() != null ? product.getBusiness().getName() : null);
+        dto.setBranches(product.getBranch() != null ? product.getBranch().stream().map(Branch::getName).collect(Collectors.toList()) : null); // Filiallar ro'yxati
+
+        return dto;
     }
 
 }

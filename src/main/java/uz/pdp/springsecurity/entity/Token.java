@@ -15,6 +15,7 @@ public class Token {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
+
     @Column(columnDefinition="TEXT")
     private String token;
 }

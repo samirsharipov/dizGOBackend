@@ -3,7 +3,7 @@ package uz.pdp.springsecurity.entity.template;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 
@@ -21,6 +21,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @MappedSuperclass
+@Where(clause = "deleted = false AND active = true")
 public abstract class AbsEntity implements Serializable {
     @Id
     @GeneratedValue

@@ -42,6 +42,8 @@ public class TradeProduct extends AbsEntity {
 
     @Transient
     private Double remainQuantity;
+
+    private boolean refund;
 }
 
 

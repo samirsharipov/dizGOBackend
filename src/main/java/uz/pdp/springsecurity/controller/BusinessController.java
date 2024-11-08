@@ -31,7 +31,7 @@ public class BusinessController {
 
     @CheckPermission("EDIT_BUSINESS")
     @PutMapping("/{id}")
-    public HttpEntity<?> edit(@PathVariable UUID id, @RequestBody BusinessEditDto businessEditDto) {
+    public HttpEntity<?> edit(@PathVariable UUID id,@Valid @RequestBody BusinessEditDto businessEditDto) {
         ApiResponse apiResponse = businessService.edit(id, businessEditDto);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
@@ -64,6 +64,8 @@ public class BusinessController {
         ApiResponse apiResponse = businessService.getAll();
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
+
+
     @GetMapping("/myAllBusiness")
     public HttpEntity<?> getMyAllBusiness(@RequestParam UUID userId) {
         ApiResponse apiResponse = businessService.getMyAllBusiness(userId);
