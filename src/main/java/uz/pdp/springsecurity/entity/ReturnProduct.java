@@ -5,10 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Where;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
 
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
@@ -16,6 +19,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Where(clause = "active = true")
+@Table(indexes = {
+        @Index(columnList = "businessId"),
+        @Index(columnList = "invoice")
+})
 public class ReturnProduct extends AbsEntity {
 
     private String invoice;
@@ -23,6 +31,8 @@ public class ReturnProduct extends AbsEntity {
     private UUID productId;
 
     private int quantity;
+
+    private UUID businessId;
 
     @ManyToOne
     private Reason reason;
