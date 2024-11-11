@@ -91,6 +91,7 @@ public class ReturnProductService {
         returnProduct.setRefundAmount(returnProductDTO.getRefundAmount());
         returnProduct.setMonetaryRefund(returnProductDTO.isRefunded());
         returnProduct.setBusinessId(reason.getBusinessId());
+        returnProduct.setActive(true);
         return returnProduct;
     }
 
