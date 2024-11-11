@@ -24,8 +24,12 @@ public class ReasonService {
         return new ApiResponse("Reason created successfully", true);
     }
 
-    public List<ReasonDto> getAllReasons(UUID businessId) {
-        return reasonRepository.findByBusinessIdOrderByNameAsc(businessId);
+    public ApiResponse getAllReasons(UUID businessId) {
+        List<ReasonDto> all = reasonRepository.findByBusinessIdOrderByNameAsc(businessId);
+        if (all.isEmpty())
+            return new ApiResponse("No Reasons found for this business", false);
+
+        return new ApiResponse("success", true, all);
     }
 
     public ApiResponse getReasonById(UUID id) {

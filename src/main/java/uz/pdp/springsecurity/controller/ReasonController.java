@@ -8,7 +8,6 @@ import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.ReasonDto;
 import uz.pdp.springsecurity.service.ReasonService;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -25,9 +24,9 @@ public class ReasonController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReasonDto>> getAllReasons(@RequestParam UUID businessId) {
-        List<ReasonDto> reasons = reasonService.getAllReasons(businessId);
-        return ResponseEntity.ok(reasons);
+    public ResponseEntity<ApiResponse> getAllReasons(@RequestParam UUID businessId) {
+        ApiResponse response = reasonService.getAllReasons(businessId);
+        return ResponseEntity.status(response.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(response);
     }
 
     @GetMapping("/{id}")

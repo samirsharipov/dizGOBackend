@@ -1,6 +1,10 @@
 package uz.pdp.springsecurity.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import uz.pdp.springsecurity.entity.Reason;
 import uz.pdp.springsecurity.entity.ReturnProduct;
@@ -8,14 +12,14 @@ import uz.pdp.springsecurity.entity.Trade;
 import uz.pdp.springsecurity.entity.TradeProduct;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.ReturnProductDto;
+import uz.pdp.springsecurity.payload.ReturnProductGetDto;
 import uz.pdp.springsecurity.repository.ReasonRepository;
 import uz.pdp.springsecurity.repository.ReturnProductRepository;
 import uz.pdp.springsecurity.repository.TradeProductRepository;
 import uz.pdp.springsecurity.repository.TradeRepository;
 
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -86,6 +90,25 @@ public class ReturnProductService {
         returnProduct.setReasonText(returnProductDTO.getReasonText());
         returnProduct.setRefundAmount(returnProductDTO.getRefundAmount());
         returnProduct.setMonetaryRefund(returnProductDTO.isRefunded());
+        returnProduct.setBusinessId(reason.getBusinessId());
         return returnProduct;
+    }
+
+    public ApiResponse getAll(UUID businessId, int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<ReturnProductGetDto> all = repository.findByBusinessId(businessId, pageable);
+        if (all.isEmpty()) {
+            return new ApiResponse("empty", false);
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("list", all.stream().toList());
+        response.put("currentPage", all.getNumber());
+        response.put("totalPage", all.getTotalPages());
+        response.put("totalItem", all.getTotalElements());
+
+        return new ApiResponse("found", true, response);
     }
 }
