@@ -2,12 +2,10 @@ package uz.pdp.springsecurity.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
-import org.hibernate.proxy.HibernateProxy;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import java.util.Objects;
 
 @Entity
 @Getter
@@ -39,4 +37,14 @@ public class Business extends AbsEntity {
     private boolean grossPriceControl;
 
     private int editDays = 30; // default 30 days
+
+    private Boolean main = Boolean.FALSE;
+
+    public Business(String name, String description, boolean active, boolean delete, boolean main) {
+        this.name = name;
+        this.description = description;
+        this.isActive = active;
+        this.delete = delete;
+        this.main = main;
+    }
 }
