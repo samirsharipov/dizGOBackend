@@ -47,6 +47,7 @@ public class ReturnProductService {
             if (returnProductDTO.isRefunded()) {
                 handleMonetaryRefund(returnProductDTO, tradeProduct);
             } else {
+                tradeProduct.setBacking(returnProductDTO.getRefundAmount());
                 handleProductExchange(tradeProduct);
             }
             repository.save(returnProduct);
@@ -61,6 +62,7 @@ public class ReturnProductService {
 
     private void handleMonetaryRefund(ReturnProductDto returnProductDTO, TradeProduct tradeProduct) {
         tradeProduct.setRefund(true);
+        tradeProduct.setBacking(returnProductDTO.getRefundAmount());
         Trade trade = tradeProduct.getTrade();
 
         double refundMoney = tradeProduct.getProduct().getSalePrice() * returnProductDTO.getRefundAmount();
