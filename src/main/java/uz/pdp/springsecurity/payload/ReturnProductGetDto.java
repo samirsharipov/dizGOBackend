@@ -1,10 +1,9 @@
 package uz.pdp.springsecurity.payload;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.UUID;
 
 @Data
@@ -13,7 +12,7 @@ import java.util.UUID;
 public class ReturnProductGetDto {
     private UUID id;
 
-    private Timestamp createdAt;
+    private Date createdAt;
 
     private String invoice;
 
