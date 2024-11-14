@@ -3,6 +3,7 @@ package uz.pdp.springsecurity.payload;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -11,4 +12,5 @@ public class CategoryGetDto {
     private UUID id;
     private String name;
     private String description;
+    private List<CategoryGetDto> children;
 }

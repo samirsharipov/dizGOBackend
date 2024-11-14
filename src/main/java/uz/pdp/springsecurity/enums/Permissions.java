@@ -71,6 +71,7 @@ public enum Permissions {
     VIEW_PRODUCT,
     VIEW_PRODUCT_ADMIN,
     DELETE_PRODUCT,
+    EDIT_PRODUCT_MAIN,
 
     ADD_ROLE,
     EDIT_ROLE,
