@@ -85,10 +85,9 @@ public class Product extends AbsEntity {
     private Double kpi;                  // KPI qiymati
     private Date expireDate;             // Muddati o'tgan sana
 
-    @Column(nullable = false)
-    private String barcode;              // Mahsulotning barkodi
 
-    @Column(unique = true)
+    private String barcode;           // Mahsulotning barkodi
+
     private String pluCode;             // Mahsulotning plu kodi
 
     private double minQuantity;          // Sotish uchun minimal miqdor
@@ -129,6 +128,9 @@ public class Product extends AbsEntity {
 
     private Boolean isGlobal;            // Global mavjudlik
     private boolean main;                // Asosiy mahsulot ko'rsatkichi
+
+
+    private String MXIKCode;             // Soliq uchun mxik kodi
 
     @Override
     public final boolean equals(Object o) {

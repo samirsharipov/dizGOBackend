@@ -6,10 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.pdp.springsecurity.entity.*;
-import uz.pdp.springsecurity.entity.Currency;
 import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
 
@@ -31,99 +31,48 @@ public class ProductService {
     private final PurchaseProductRepository purchaseProductRepository;
     private final TradeProductRepository tradeProductRepository;
     private final ContentProductRepository contentProductRepository;
-    private final CurrencyRepository currencyRepository;
     private final FifoCalculationRepository fifoCalculationRepository;
     private final LanguageRepository languageRepository;
     private final ProductTranslateRepository productTranslateRepository;
 
     @Transactional
-    public ApiResponse addProduct(ProductDTO productDto) {
+    public ApiResponse editProduct(UUID productId, ProductEditDto productEditDto) {
+        // Mahsulotni topish
+        Product product = findByIdOrThrow(productRepository, productId, "Product");
+        Category category = findByIdOrThrow(categoryRepository, product.getId(), "Category");
+        Brand brand = findByIdOrThrow(brandRepository, product.getId(), "Brand");
+        Measurement measurement = findByIdOrThrow(measurementRepository, product.getId(), "Measurement");
 
-        Optional<Business> optionalBusiness = businessRepository.findById(productDto.getBusinessId());
-        if (optionalBusiness.isEmpty()) {
-            return new ApiResponse("not found business", false);
+        // Mahsulotni yangilash
+        product.setName(productEditDto.getName());
+        product.setDescription(productEditDto.getDescription());
+        product.setLongDescription(productEditDto.getLongDescription());
+        product.setKeywords(productEditDto.getKeywords());
+        product.setAttributes(productEditDto.getAttributes());
+        product.setPluCode(productEditDto.getPluCode());
+        product.setBuyPrice(productEditDto.getBuyPrice());
+        product.setSalePrice(productEditDto.getSalePrice());
+        product.setGrossPrice(productEditDto.getGrossPrice());
+        product.setMXIKCode(productEditDto.getMXIKCode());
+
+        //    product.setBarcode(productEditDto.getBarcode());
+
+        product.setBrand(brand);
+        product.setCategory(category);
+        product.setMeasurement(measurement);
+
+        // Foto ni yangilash
+        if (productEditDto.getPhotoId() != null) {
+            Attachment photo = findByIdOrThrow(attachmentRepository, product.getId(), "Photo");
+            product.setPhoto(photo);
         }
-        Product product = new Product();
-        List<UUID> branchId = productDto.getBranchIds();
+        // Tarjimalarni yangilash
+        saveProductTranslations(productEditDto.getTranslations(), product);
 
-        Optional<Measurement> optionalMeasurement =
-                measurementRepository.findById(productDto.getMeasurementId());
+        // Mahsulotni saqlash
+        productRepository.save(product);
 
-        List<Branch> allBranch = branchRepository.findAllById(branchId);
-
-        if (optionalMeasurement.isEmpty()) {
-            return new ApiResponse("not found measurement", false);
-        }
-        if (allBranch.isEmpty()) {
-            return new ApiResponse("not found branches", false);
-        }
-
-        fromDto(productDto, product, optionalMeasurement, optionalBusiness, allBranch);
-
-        return createOrEditProduct(product, productDto, false);
-    }
-
-
-    public ApiResponse editProduct(UUID id, ProductDTO productDto) {
-        Optional<Product> optionalProduct = productRepository.findById(id);
-        if (optionalProduct.isEmpty()) {
-            return new ApiResponse("NOT FOUND", false);
-        }
-        return createOrEditProduct(optionalProduct.get(), productDto, true);
-    }
-
-    public ApiResponse createOrEditProduct(Product product, ProductDTO productDto, boolean isUpdate) {
-
-        Business business = product.getBusiness();
-
-        Optional<Currency> optionalCurrency = currencyRepository.findByBusinessId(business.getId());
-        Currency currency;
-        if (optionalCurrency.isPresent()) {
-            currency = optionalCurrency.get();
-        } else {
-            Optional<Currency> optional = currencyRepository.findFirstByCourseIsNotNullOrderByUpdateAtDesc();
-            currency = optional.orElseGet(() -> currencyRepository.save(new Currency(
-                    business,
-                    11400
-            )));
-        }
-        product.setBuyPriceDollar((productDto.getBuyPrice() / currency.getCourse() * 100) / 100);
-        product.setSalePriceDollar((productDto.getSalePrice() / currency.getCourse() * 100) / 100.);
-        product.setGrossPriceDollar((productDto.getGrossPrice() / currency.getCourse() * 100) / 100.);
-
-
-        if (productDto.getBarcode() != null && !productDto.getBarcode().isBlank()) {
-            if (isUpdate) {
-                if (productRepository.existsByBarcodeAndBusinessIdAndIdIsNotAndActiveTrue(productDto.getBarcode(), product.getBusiness().getId(), product.getId()))
-                    return new ApiResponse("product with the barcode is already exist", false);
-            } else {
-                if (productRepository.existsByBarcodeAndBusinessIdAndActiveTrue(productDto.getBarcode(), product.getBusiness().getId()))
-                    return new ApiResponse("product with the barcode is already exist", false);
-            }
-            product.setBarcode(productDto.getBarcode());
-        } else {
-            product.setBarcode(generateBarcode(product.getBusiness().getId(), product.getName(), product.getId(), isUpdate));
-        }
-
-        if (productDto.getPluCode() != null && !productDto.getPluCode().isBlank()) {
-            if (isUpdate) {
-                if (!productRepository.existsByPluCodeAndBusiness_Id(productDto.getPluCode(), product.getBusiness().getId())) {
-                    product.setPluCode(productDto.getPluCode());
-                }
-            } else {
-                product.setPluCode(productDto.getPluCode());
-            }
-        }
-
-        Product saved = productRepository.save(product);
-
-        for (ProductTranslateDTO productTranslateDTO : productDto.getTranslations()) {
-            ProductTranslate productTranslate = fromTranslateDto(productTranslateDTO, saved);
-            productTranslateRepository.save(productTranslate);
-        }
-
-
-        return new ApiResponse("OK", true);
+        return new ApiResponse("Product updated successfully", true);
     }
 
     @NotNull
@@ -625,6 +574,7 @@ public class ProductService {
         return new ApiResponse("all", true, response);
     }
 
+
     public ApiResponse getTradeProduct(UUID branchId, UUID productId, int page, int size) {
         if (!branchRepository.existsById(branchId)) return new ApiResponse("BRANCH NOT FOUND", false);
         Pageable pageable = PageRequest.of(page, size);
@@ -741,82 +691,6 @@ public class ProductService {
     }
 
 
-    private void fromDto(ProductDTO productDto, Product product, Optional<Measurement> optionalMeasurement, Optional<Business> optionalBusiness, List<Branch> allBranch) {
-        product.setName(productDto.getName());
-        product.setDescription(productDto.getDescription());
-        product.setLongDescription(productDto.getLongDescription());
-        product.setKeywords(productDto.getKeywords());
-        product.setAttributes(productDto.getAttributes());
-
-        product.setUniqueSKU(productDto.getUniqueSKU());
-
-        product.setStockAmount(productDto.getStockAmount());
-        product.setInStock(productDto.getInStock());
-        product.setPreorder(productDto.getPreorder());
-        product.setLength(productDto.getLength());
-        product.setWidth(productDto.getWidth());
-        product.setHeight(productDto.getHeight());
-        product.setWeight(productDto.getWeight());
-
-        product.setHsCode12(productDto.getHsCode12());
-        product.setHsCode22(productDto.getHsCode22());
-        product.setHsCode32(productDto.getHsCode32());
-        product.setHsCode44(productDto.getHsCode44());
-
-        product.setAgreementExportsID(productDto.getAgreementExportsID());
-        product.setAgreementExportsPID(productDto.getAgreementExportsPID());
-        product.setAgreementLocalID(productDto.getAgreementLocalID());
-        product.setAgreementLocalPID(productDto.getAgreementLocalPID());
-        product.setLangGroup(productDto.getLangGroup());
-        product.setShippingClass(productDto.getShippingClass());
-        product.setSoldIndividually(productDto.getSoldIndividually());
-
-        product.setDueDate(productDto.getDueDate());
-        product.setActive(productDto.isActive());
-        product.setProfitPercent(productDto.getProfitPercent());
-        product.setTax(productDto.getTax());
-
-
-        product.setBuyPrice(productDto.getBuyPrice());
-        product.setSalePrice(productDto.getSalePrice());
-        product.setGrossPrice(productDto.getGrossPrice());
-        product.setGrossPriceMyControl(productDto.getGrossPriceMyControl());
-        product.setBuyDollar(productDto.isBuyDollar());
-        product.setSaleDollar(productDto.isSaleDollar());
-
-        product.setMinQuantity(productDto.getMinQuantity());
-
-        product.setWarehouseCount(productDto.getWarehouseCount());
-        product.setQuantity(product.getQuantity());
-        product.setIsGlobal(productDto.getIsGlobal());
-        product.setMain(productDto.isMain());
-
-        if (productDto.getBrandId() != null) {
-            UUID brandId = productDto.getBrandId();
-            Optional<Brand> optionalBrand = brandRepository.findById(brandId);
-            optionalBrand.ifPresent(product::setBrand);
-        }
-
-        if (productDto.getCategoryId() != null) {
-            UUID categoryId = productDto.getCategoryId();
-            Optional<Category> optionalCategory = categoryRepository.findById(categoryId);
-            optionalCategory.ifPresent(product::setCategory);
-        }
-
-        product.setMeasurement(optionalMeasurement.get());
-
-        if (productDto.getPhotoId() != null) {
-            Optional<Attachment> optionalAttachment = attachmentRepository.findById(productDto.getPhotoId());
-            optionalAttachment.ifPresent(product::setPhoto);
-        }
-
-        Business business = optionalBusiness.get();
-        product.setBusiness(business);
-        product.setBranch(allBranch);
-        product.setActive(true);
-    }
-
-
     public ProductGetDto convertToDto(Product product) {
         ProductGetDto dto = new ProductGetDto();
 
@@ -894,4 +768,212 @@ public class ProductService {
         return dto;
     }
 
+    @Transactional
+    public ApiResponse createProduct(ProductPostDto productPostDto) {
+
+        Business business = findByIdOrThrow(businessRepository, productPostDto.getBusinessId(), "Business");
+        Measurement measurement = findByIdOrThrow(measurementRepository, productPostDto.getMeasurementId(), "Measurement");
+        Brand brand = findByIdOrThrow(brandRepository, productPostDto.getBrandId(), "Brand");
+        Category category = findByIdOrThrow(categoryRepository, productPostDto.getCategoryId(), "Category");
+
+        validateUniqueBarcode(productPostDto.getBarcode(), null, productPostDto.getBusinessId());
+
+        Product product = buildProduct(productPostDto, business, measurement, brand, category);
+
+        // Branchlarni o'rnatish
+        if (productPostDto.getIsGlobal()) {
+            setGlobalBranches(productPostDto, product);
+        } else {
+            setBusinessBranches(productPostDto, product, business);
+        }
+
+        // Maxsulot tarjimalarini saqlash
+        saveProductTranslations(productPostDto.getTranslations(), product);
+
+        productRepository.save(product);  // Yangi maxsulotni saqlash
+
+        return new ApiResponse("success", true);
+    }
+
+    private Product buildProduct(ProductPostDto productPostDto, Business business, Measurement measurement, Brand brand, Category category) {
+        Product product = new Product();
+        setProductFields(product,
+                productPostDto.getName(), productPostDto.getDescription(), productPostDto.getLongDescription(),
+                productPostDto.getKeywords(), productPostDto.getAttributes(), productPostDto.getPluCode(),
+                productPostDto.getBarcode(), productPostDto.getMXIKCode(), productPostDto.getAgreementExportsID(),
+                productPostDto.getAgreementExportsPID(), productPostDto.getAgreementLocalID(), productPostDto.getAgreementLocalPID(),
+                productPostDto.getHsCode12(), productPostDto.getHsCode22(), productPostDto.getHsCode32(),
+                productPostDto.getHsCode44(), productPostDto.getUniqueSKU(), productPostDto.getLength(),
+                productPostDto.getWidth(), productPostDto.getHeight(), productPostDto.getWeight(),
+                productPostDto.getShippingClass());
+
+        product.setMeasurement(measurement);
+        product.setCategory(category);
+        product.setBrand(brand);
+        product.setBusiness(business);
+
+        // Fotoni o'rnatish
+        if (productPostDto.getPhotoId() != null) {
+            Attachment photo = findByIdOrThrow(attachmentRepository, productPostDto.getPhotoId(), "Photo");
+            product.setPhoto(photo);
+        }
+
+        product.setIsGlobal(productPostDto.getIsGlobal());
+        return product;
+    }
+
+    private void setGlobalBranches(ProductPostDto productPostDto, Product product) {
+        if (productPostDto.getBranchIds() != null) {
+            List<Branch> branches = productPostDto.getBranchIds().stream()
+                    .map(branchId -> findByIdOrThrow(branchRepository, branchId, "Branch"))
+                    .collect(Collectors.toList());
+            product.setBranch(branches);
+        }
+    }
+
+    private void setBusinessBranches(ProductPostDto productPostDto, Product product, Business business) {
+        List<Branch> branches = branchRepository.findAllByBusiness_Id(business.getId());
+        product.setBranch(branches);
+
+        // KPI va boshqa parametrlarni o'rnatish
+        product.setKpiPercent(productPostDto.getKpiPercent());
+        product.setKpi(productPostDto.getKpi());
+        product.setMinQuantity(productPostDto.getMinQuantity());
+    }
+
+    @Transactional
+    public void saveProductTranslations(List<ProductTranslateDTO> productTranslateDTOList, Product product) {
+        productTranslateDTOList.forEach(translation -> {
+            ProductTranslate productTranslate = fromTranslateDto(translation, product);
+            productTranslateRepository.save(productTranslate);
+        });
+    }
+
+    public static <T> T findByIdOrThrow(JpaRepository<T, UUID> repository, UUID id, String entityName) {
+        return repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(entityName + " not found"));
+    }
+
+    @Transactional
+    public ApiResponse editProductMain(UUID productId, ProductEditMainDto productEditMainDto) {
+        // Mahsulotni ID bo'yicha topish yoki xatolik yuborish
+        Product product = findByIdOrThrow(productRepository, productId, "Product");
+        // Measurement, Brand va Category-ni yangilash
+        Measurement measurement = findByIdOrThrow(measurementRepository, productEditMainDto.getMeasurementId(), "Measurement");
+        Brand brand = findByIdOrThrow(brandRepository, productEditMainDto.getBrandId(), "Brand");
+        Category category = findByIdOrThrow(categoryRepository, productEditMainDto.getCategoryId(), "Category");
+
+        String barcode = product.getBarcode();
+        validateUniqueBarcode(productEditMainDto.getBarcode(), productId, product.getBusiness().getId());
+
+        // Barcode bir xil bo'lgan mahsulotlarni olish
+        List<Product> productsWithSameBarcode = productRepository.findAllByBarcode(barcode);
+        productsWithSameBarcode.forEach(p -> {
+            //o'zgarishlarni kiritish
+            editorProduct(productEditMainDto, p, p.getMeasurement(), p.getCategory(), p.getBrand());
+            saveProductTranslations(productEditMainDto, p);
+        });
+
+
+        editorProduct(productEditMainDto, product, measurement, category, brand);
+
+
+        // Fotoni yangilash
+        if (productEditMainDto.getPhotoId() != null) {
+            Attachment photo = findByIdOrThrow(attachmentRepository, productEditMainDto.getPhotoId(), "Photo");
+            product.setPhoto(photo);
+        }
+
+        // Filiallarni yangilash
+        if (productEditMainDto.getBranchIds() != null) {
+            List<Branch> branches = productEditMainDto.getBranchIds().stream()
+                    .map(branchId -> findByIdOrThrow(branchRepository, branchId, "Branch"))
+                    .collect(Collectors.toList());
+            product.setBranch(branches);
+        }
+
+        // Tarjimalarni saqlash
+        saveProductTranslations(productEditMainDto, product);
+
+        // Yangilangan mahsulotni saqlash
+        productRepository.save(product);
+        productRepository.saveAll(productsWithSameBarcode);
+
+        return new ApiResponse("Product updated successfully", true);
+    }
+
+    private static void editorProduct(ProductEditMainDto productEditMainDto, Product product, Measurement measurement, Category category, Brand brand) {
+        setProductFields(product,
+                productEditMainDto.getName(), productEditMainDto.getDescription(), productEditMainDto.getLongDescription(),
+                productEditMainDto.getKeywords(), productEditMainDto.getAttributes(), productEditMainDto.getPluCode(),
+                productEditMainDto.getBarcode(), productEditMainDto.getMXIKCode(), productEditMainDto.getAgreementExportsID(),
+                productEditMainDto.getAgreementExportsPID(), productEditMainDto.getAgreementLocalID(), productEditMainDto.getAgreementLocalPID(),
+                productEditMainDto.getHsCode12(), productEditMainDto.getHsCode22(), productEditMainDto.getHsCode32(),
+                productEditMainDto.getHsCode44(), productEditMainDto.getUniqueSKU(), productEditMainDto.getLength(),
+                productEditMainDto.getWidth(), productEditMainDto.getHeight(), productEditMainDto.getWeight(),
+                productEditMainDto.getShippingClass());
+
+        product.setMeasurement(measurement);
+        product.setCategory(category);
+        product.setBrand(brand);
+    }
+
+    private static void setProductFields(Product product,
+                                         String name, String description, String longDescription, String keywords, String attributes,
+                                         String pluCode, String barcode,
+                                         String mxikCode, String agreementExportsID, String agreementExportsPID,
+                                         String agreementLocalID, String agreementLocalPID,
+                                         String hsCode12, String hsCode22, String hsCode32, String hsCode44,
+                                         String uniqueSKU, Double length, Double width, Double height,
+                                         Double weight, String shippingClass) {
+
+        // Asosiy maydonlarni o'rnatish
+        product.setName(name);
+        product.setDescription(description);
+        product.setLongDescription(longDescription);
+        product.setKeywords(keywords);
+        product.setAttributes(attributes);
+        product.setPluCode(pluCode);
+
+
+        product.setBarcode(barcode);
+
+        // Qo'shimcha maydonlarni o'rnatish
+        product.setMXIKCode(mxikCode);
+        product.setAgreementExportsID(agreementExportsID);
+        product.setAgreementExportsPID(agreementExportsPID);
+        product.setAgreementLocalID(agreementLocalID);
+        product.setAgreementLocalPID(agreementLocalPID);
+        product.setHsCode12(hsCode12);
+        product.setHsCode22(hsCode22);
+        product.setHsCode32(hsCode32);
+        product.setHsCode44(hsCode44);
+        product.setUniqueSKU(uniqueSKU);
+        product.setLength(length);
+        product.setWidth(width);
+        product.setHeight(height);
+        product.setWeight(weight);
+        product.setShippingClass(shippingClass);
+    }
+
+    // Tarjimalarni saqlash funksiyasi
+    @Transactional
+    public void saveProductTranslations(ProductEditMainDto productEditMainDto, Product product) {
+        // Eski tarjimalarni o'chirish
+        productTranslateRepository.deleteAllByProductId(product.getId());
+
+        // Yangi tarjimalarni saqlash
+        productEditMainDto.getTranslations().forEach(translation -> {
+            ProductTranslate productTranslate = fromTranslateDto(translation, product);
+            productTranslateRepository.save(productTranslate);
+        });
+    }
+
+    public void validateUniqueBarcode(String barcode, UUID productId, UUID businessId) {
+        // Barcode yaratishda yoki boshqa mahsulotda mavjudligini tekshirish
+        Optional<Product> existingProduct = productRepository.findByBarcodeAndBusinessId(barcode, businessId);
+        if (existingProduct.isPresent() && !existingProduct.get().getId().equals(productId)) {
+            throw new IllegalArgumentException("Ushbu barcode bilan mahsulot allaqachon mavjud!");
+        }
+    }
 }

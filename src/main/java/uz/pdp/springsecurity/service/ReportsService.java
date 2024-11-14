@@ -1,7 +1,6 @@
 package uz.pdp.springsecurity.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -1197,7 +1196,7 @@ public class ReportsService {
         }
 
         Branch branch = optionalBranch.get();
-        List<Category> categoryList = categoryRepository.findAllByBusiness_Id(branch.getBusiness().getId());
+        List<Category> categoryList = categoryRepository.findAllByBusiness_IdAndParentCategoryIsNull(branch.getBusiness().getId());
 
         Map<UUID, Double> productAmount = new HashMap<>();
 

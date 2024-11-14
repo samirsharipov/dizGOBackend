@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -54,7 +55,7 @@ public class CategoryService {
             addTranslation(category, translateDto);
         }
 
-        return new ApiResponse("Category added successfully", true, category);
+        return new ApiResponse("Category added successfully", true);
     }
 
     // Tarjima qo'shish uchun metod
@@ -134,19 +135,38 @@ public class CategoryService {
         return new ApiResponse("Category deleted successfully", true);
     }
 
-    // Biznes ID bo'yicha barcha kategoriyalarni olish
     public ApiResponse getAllByBusinessId(UUID businessId, String languageCode) {
-        List<Category> categories = categoryRepository.findAllByBusiness_Id(businessId);
+        // Business ID bo'yicha asosiy kategoriyalarni topish
+        List<Category> categories = categoryRepository.findAllByBusiness_IdAndParentCategoryIsNull(businessId);
         if (categories.isEmpty()) {
             return new ApiResponse("No categories found", false);
         }
 
-        List<CategoryGetDto> categoryGetDtoList = new ArrayList<>();
-        for (Category category : categories) {
-            Optional<CategoryTranslate> optionalCategoryTranslate
-                    = categoryTranslateRepository.findByCategory_IdAndLanguage_Code(category.getId(), languageCode);
-            categoryGetDtoList.add(getGetDto(optionalCategoryTranslate, category));
-        }
+        List<CategoryGetDto> categoryGetDtoList = categories.stream()
+                .map(category -> {
+                    // Har bir kategoriya uchun tarjimani olish
+                    Optional<CategoryTranslate> categoryTranslate = categoryTranslateRepository
+                            .findByCategory_IdAndLanguage_Code(category.getId(), languageCode);
+
+                    // Kategoriyaning DTO'sini yaratish
+                    CategoryGetDto categoryGetDto = getGetDto(categoryTranslate, category);
+
+                    // Bolalar kategoriyalarini topish
+                    List<Category> childCategories = categoryRepository.findAllByParentCategory_Id(category.getId());
+                    List<CategoryGetDto> childCategoryDtoList = childCategories.stream()
+                            .map(childCategory -> {
+                                // Har bir bola kategoriya uchun tarjimani olish
+                                Optional<CategoryTranslate> childCategoryTranslate = categoryTranslateRepository
+                                        .findByCategory_IdAndLanguage_Code(childCategory.getId(), languageCode);
+                                return getGetDto(childCategoryTranslate, childCategory);
+                            })
+                            .collect(Collectors.toList());
+
+                    // Bolalar kategoriyalarini qo'shish
+                    categoryGetDto.setChildren(childCategoryDtoList);
+                    return categoryGetDto;
+                })
+                .collect(Collectors.toList());
 
         return new ApiResponse("Categories found", true, categoryGetDtoList);
     }
