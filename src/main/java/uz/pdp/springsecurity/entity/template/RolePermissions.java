@@ -9,7 +9,7 @@ import static uz.pdp.springsecurity.enums.Permissions.*;
 import static uz.pdp.springsecurity.enums.Permissions.DELETE_LOSS;
 
 public class RolePermissions {
-    public static final List<Permissions> SUPERADMIN_PERMISSIONS = Arrays.stream(Permissions.values()).toList();
+    public static final List<Permissions> SUPER_ADMIN_PERMISSIONS = Arrays.stream(Permissions.values()).toList();
     public static final List<Permissions> ADMIN_PERMISSIONS = Arrays.asList(
             GET_TARIFF,
 

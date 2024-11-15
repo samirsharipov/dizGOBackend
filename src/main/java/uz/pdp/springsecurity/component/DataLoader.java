@@ -63,7 +63,7 @@ public class DataLoader implements CommandLineRunner {
             Set<Branch> branches = new HashSet<>();
 
             Tariff tariff = tariffRepository.save(new Tariff(
-                    "Premium", "Premium tariff", RolePermissions.SUPERADMIN_PERMISSIONS, 10, 0,
+                    "Premium", "Premium tariff", RolePermissions.SUPER_ADMIN_PERMISSIONS, 10, 0,
                     0, 0, Lifetime.MONTH, 0, 1, 100, 0, true, false));
 
             Business business = businessRepository.save(new Business(
@@ -129,7 +129,7 @@ public class DataLoader implements CommandLineRunner {
 
             Role superAdmin = roleRepository.save(new Role(
                     Constants.SUPERADMIN,
-                    RolePermissions.SUPERADMIN_PERMISSIONS,
+                    RolePermissions.SUPER_ADMIN_PERMISSIONS,
                     business));
 
             Role admin = roleRepository.save(new Role(
