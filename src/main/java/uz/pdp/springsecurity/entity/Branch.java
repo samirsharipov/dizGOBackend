@@ -7,6 +7,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
 
 import javax.persistence.*;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -25,4 +26,14 @@ public class Branch extends AbsEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Business business;
 
+    private UUID mainBranchId;
+
+    @ManyToOne
+    private BranchCategory branchCategory;
+
+    public Branch(String name, Address address, Business business) {
+        this.name = name;
+        this.address = address;
+        this.business = business;
+    }
 }
