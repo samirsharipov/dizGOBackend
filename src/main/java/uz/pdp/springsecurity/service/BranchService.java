@@ -59,7 +59,9 @@ public class BranchService {
         branch.setMainBranchId(branchDto.getMainBranchId());
 
         if (user.getBusiness().getMain()) {
-            branchCategoryRepository.findById(branchDto.getCategoryId()).ifPresent(branch::setBranchCategory);
+            if (branchDto.getCategoryId() != null) {
+                branchCategoryRepository.findById(branchDto.getCategoryId()).ifPresent(branch::setBranchCategory);
+            }
         }
 
         branchRepository.save(branch);
@@ -131,7 +133,18 @@ public class BranchService {
 
         Optional<Business> optionalBusiness = businessRepository.findById(branchDto.getBusinessId());
         if (optionalBusiness.isEmpty()) return new ApiResponse("BUSINESS NOT FOUND", false);
-        branch.setBusiness(optionalBusiness.get());
+
+        Business business = optionalBusiness.get();
+        branch.setBusiness(business);
+
+        branch.setMainBranchId(branchDto.getMainBranchId());
+
+        if (business.getMain()) {
+            if (branchDto.getCategoryId() != null) {
+                branchCategoryRepository.findById(branchDto.getCategoryId()).ifPresent(branch::setBranchCategory);
+            }
+        }
+
         branchRepository.save(branch);
         return new ApiResponse("EDITED", true);
     }
