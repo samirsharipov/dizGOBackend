@@ -26,9 +26,11 @@ public class BranchService {
     private final BalanceRepository balanceRepository;
     private final PayMethodRepository payMethodRepository;
     private final SubscriptionRepository subscriptionRepository;
+    private final BranchCategoryRepository branchCategoryRepository;
 
     public ApiResponse addBranch(BranchDto branchDto) {
         Branch branch = new Branch();
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         UUID businessId = branchDto.getBusinessId();
 
@@ -54,8 +56,13 @@ public class BranchService {
         if (optionalBusiness.isEmpty()) return new ApiResponse("BUSINESS NOT FOUND", false);
         branch.setBusiness(optionalBusiness.get());
 
+        branch.setMainBranchId(branchDto.getMainBranchId());
+
+        if (user.getBusiness().getMain()) {
+            branchCategoryRepository.findById(branchDto.getCategoryId()).ifPresent(branch::setBranchCategory);
+        }
+
         branchRepository.save(branch);
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         user.getBranches().add(branch);
         userRepository.save(user);
         invoiceService.create(branch);
