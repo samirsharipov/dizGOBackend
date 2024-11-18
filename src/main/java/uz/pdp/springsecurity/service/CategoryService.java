@@ -16,11 +16,8 @@ import uz.pdp.springsecurity.repository.CategoryRepository;
 import uz.pdp.springsecurity.repository.CategoryTranslateRepository;
 import uz.pdp.springsecurity.repository.LanguageRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import javax.transaction.Transactional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -72,6 +69,7 @@ public class CategoryService {
     }
 
     // Kategoriyani tahrirlash
+    @Transactional
     public ApiResponse edit(UUID id, CategoryDto categoryDto) {
         Optional<Category> optionalCategory = categoryRepository.findById(id);
         if (optionalCategory.isEmpty()) {
@@ -106,23 +104,7 @@ public class CategoryService {
         Optional<CategoryTranslate> optionalCategoryTranslate
                 = categoryTranslateRepository.findByCategory_IdAndLanguage_Code(id, languageCode);
 
-        return new ApiResponse("Category found", true, getGetDto(optionalCategoryTranslate, category));
-    }
-
-    @NotNull
-    private static CategoryGetDto getGetDto(Optional<CategoryTranslate> optionalCategoryTranslate, Category category) {
-        CategoryGetDto categoryGetDto = new CategoryGetDto();
-        if (optionalCategoryTranslate.isPresent()) {
-            CategoryTranslate categoryTranslate = optionalCategoryTranslate.get();
-            categoryGetDto.setId(category.getId());
-            categoryGetDto.setName(categoryTranslate.getName());
-            categoryGetDto.setDescription(categoryTranslate.getDescription());
-        } else {
-            categoryGetDto.setId(category.getId());
-            categoryGetDto.setName(category.getName());
-            categoryGetDto.setDescription(category.getDescription());
-        }
-        return categoryGetDto;
+        return new ApiResponse("Category found", true, getGetDto1(optionalCategoryTranslate, category, category.getParentCategory().getId()));
     }
 
     // Kategoriyani o'chirish
@@ -135,40 +117,34 @@ public class CategoryService {
         return new ApiResponse("Category deleted successfully", true);
     }
 
-    public ApiResponse getAllByBusinessId(UUID businessId, String languageCode) {
-        // Business ID bo'yicha asosiy kategoriyalarni topish
-        List<Category> categories = categoryRepository.findAllByBusiness_IdAndParentCategoryIsNull(businessId);
-        if (categories.isEmpty()) {
-            return new ApiResponse("No categories found", false);
+    public ApiResponse getCategoryTreeByBusiness(UUID businessId, String languageCode) {
+        // Ota kategoriya bo'lmagan (root) kategoriyalarni topish
+        List<CategoryGetDto> categoryTree = buildCategoryTreeByBusiness(null, businessId, languageCode);
+
+        if (categoryTree.isEmpty()) {
+            return new ApiResponse("No categories found for this business", false);
         }
+        return new ApiResponse("Category tree retrieved successfully", true, categoryTree);
+    }
 
-        List<CategoryGetDto> categoryGetDtoList = categories.stream()
-                .map(category -> {
-                    // Har bir kategoriya uchun tarjimani olish
-                    Optional<CategoryTranslate> categoryTranslate = categoryTranslateRepository
-                            .findByCategory_IdAndLanguage_Code(category.getId(), languageCode);
+    private List<CategoryGetDto> buildCategoryTreeByBusiness(UUID parentId, UUID businessId, String languageCode) {
+        // Ota kategoriya bo'yicha bolalarni va biznesni filtrlaymiz
+        List<Category> childCategories = categoryRepository.findAllByParentCategory_IdAndBusiness_Id(parentId, businessId);
 
-                    // Kategoriyaning DTO'sini yaratish
-                    CategoryGetDto categoryGetDto = getGetDto(categoryTranslate, category);
+        // Har bir bola uchun DTO yaratamiz
+        List<CategoryGetDto> categoryTree = new ArrayList<>();
+        for (Category category : childCategories) {
+            Optional<CategoryTranslate> optionalTranslate = categoryTranslateRepository
+                    .findByCategory_IdAndLanguage_Code(category.getId(), languageCode);
 
-                    // Bolalar kategoriyalarini topish
-                    List<Category> childCategories = categoryRepository.findAllByParentCategory_Id(category.getId());
-                    List<CategoryGetDto> childCategoryDtoList = childCategories.stream()
-                            .map(childCategory -> {
-                                // Har bir bola kategoriya uchun tarjimani olish
-                                Optional<CategoryTranslate> childCategoryTranslate = categoryTranslateRepository
-                                        .findByCategory_IdAndLanguage_Code(childCategory.getId(), languageCode);
-                                return getGetDto(childCategoryTranslate, childCategory);
-                            })
-                            .collect(Collectors.toList());
+            // DTO yaratish
+            CategoryGetDto dto = getGetDto1(optionalTranslate, category, parentId);
 
-                    // Bolalar kategoriyalarini qo'shish
-                    categoryGetDto.setChildren(childCategoryDtoList);
-                    return categoryGetDto;
-                })
-                .collect(Collectors.toList());
-
-        return new ApiResponse("Categories found", true, categoryGetDtoList);
+            // Rekursiv ravishda bolalarini qo'shamiz
+            dto.setChildren(buildCategoryTreeByBusiness(category.getId(), businessId, languageCode));
+            categoryTree.add(dto);
+        }
+        return categoryTree;
     }
 
     // Kategoriya ID bo'yicha barcha tarjimalarni olish
@@ -184,6 +160,8 @@ public class CategoryService {
         for (CategoryTranslate translation : optionalCategory.get().getTranslations()) {
             CategoryGetDto categoryGetDto = new CategoryGetDto();
             categoryGetDto.setId(categoryId);
+            categoryGetDto.setLanguageCode(translation.getLanguage().getCode());
+            categoryGetDto.setLanguageId(translation.getLanguage().getId());
             categoryGetDto.setName(translation.getName());
             categoryGetDto.setDescription(translation.getDescription());
             categoryGetDtoList.add(categoryGetDto);
@@ -192,19 +170,45 @@ public class CategoryService {
         return new ApiResponse("Translations found", true, categoryGetDtoList);
     }
 
-    // Bola kategoriyalarini olish
-    public ApiResponse getAllChildCategoriesById(UUID parentId, String languageCode) {
-        List<Category> childCategories = categoryRepository.findAllByParentCategory_Id(parentId);
-        if (childCategories.isEmpty()) {
-            return new ApiResponse("Child categories not found", false);
-        }
+    public ApiResponse getCategoryTree(UUID parentId, String languageCode) {
+        // Ota kategoriya ID bo'yicha bolalarni rekursiv topish
+        List<CategoryGetDto> categoryTree = buildCategoryTree(parentId, languageCode);
 
-        List<CategoryGetDto> categoryGetDtoList = new ArrayList<>();
-        for (Category category : childCategories) {
-            Optional<CategoryTranslate> optionalCategoryTranslate
-                    = categoryTranslateRepository.findByCategory_IdAndLanguage_Code(category.getId(), languageCode);
-            categoryGetDtoList.add(getGetDto(optionalCategoryTranslate, category));
+        if (categoryTree.isEmpty()) {
+            return new ApiResponse("No categories found", false);
         }
-        return new ApiResponse("Child categories found", true, categoryGetDtoList);
+        return new ApiResponse("Category tree retrieved successfully", true, categoryTree);
+    }
+
+    private List<CategoryGetDto> buildCategoryTree(UUID parentId, String languageCode) {
+        // Ota kategoriya bo'yicha bolalar topiladi
+        List<Category> childCategories = categoryRepository.findAllByParentCategory_Id(parentId);
+
+        // Har bir bola uchun DTO yaratamiz
+        List<CategoryGetDto> categoryTree = new ArrayList<>();
+        for (Category category : childCategories) {
+            Optional<CategoryTranslate> optionalTranslate = categoryTranslateRepository
+                    .findByCategory_IdAndLanguage_Code(category.getId(), languageCode);
+
+            // DTO yaratish
+            CategoryGetDto dto = getGetDto1(optionalTranslate, category, parentId);
+
+            // Rekursiv ravishda bolalarini qo'shamiz
+            dto.setChildren(buildCategoryTree(category.getId(), languageCode));
+            categoryTree.add(dto);
+        }
+        return categoryTree;
+    }
+
+    private CategoryGetDto getGetDto1(Optional<CategoryTranslate> optionalTranslate, Category category, UUID parentId) {
+        // CategoryTranslate mavjudligini tekshirish va DTO yaratish
+        CategoryGetDto dto = new CategoryGetDto();
+        dto.setId(category.getId());
+        dto.setParentId(parentId);
+        dto.setName(optionalTranslate.map(CategoryTranslate::getName).orElse(category.getName()));
+        dto.setDescription(optionalTranslate.map(CategoryTranslate::getDescription).orElse(category.getDescription()));
+        dto.setLanguageId(optionalTranslate.map(CategoryTranslate::getLanguage).map(Language::getId).orElse(null));
+        dto.setLanguageCode(optionalTranslate.map(CategoryTranslate::getLanguage).map(Language::getCode).orElse(null));
+        return dto;
     }
 }
