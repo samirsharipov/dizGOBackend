@@ -14,4 +14,6 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
     Optional<Category> findAllByBusiness_IdAndName(UUID business_id, String name);
 
     List<Category> findAllByParentCategory_Id(UUID parentCategoryId);
+
+    List<Category> findAllByParentCategory_IdAndBusiness_Id(UUID parentId, UUID businessId);
 }

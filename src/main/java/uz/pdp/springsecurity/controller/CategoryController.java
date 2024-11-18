@@ -40,26 +40,25 @@ public class CategoryController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
+    @CheckPermission("VIEW_CATEGORY")
+    @GetMapping("get-translate/{id}")
+    public HttpEntity<?> get(@PathVariable UUID id) {
+        ApiResponse apiResponse = categoryService.getAllTranslations(id);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
 
     @CheckPermission("VIEW_CATEGORY_ADMIN")
     @GetMapping("/get-by-businessId/{businessId}/{languageCode}")
     public HttpEntity<?> getAllByBusinessId(@PathVariable UUID businessId, @PathVariable String languageCode) {
-        ApiResponse apiResponse = categoryService.getAllByBusinessId(businessId, languageCode);
+        ApiResponse apiResponse = categoryService.getCategoryTreeByBusiness(businessId, languageCode);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
-    }
-
-    @CheckPermission("VIEW_CATEGORY")
-    @GetMapping("/get-category-translate-by-category/{id}")
-    public HttpEntity<?> getCategoryTranslateByCategoryId(@PathVariable UUID id) {
-        ApiResponse response = categoryService.getAllTranslations(id);
-        return ResponseEntity.status(response.isSuccess() ? 200 : 409).body(response);
     }
 
 
     @CheckPermission("VIEW_CATEGORY")
     @GetMapping("/get-child-category/{id}/{languageCode}")
     public HttpEntity<?> getAllChildCategoryById(@PathVariable UUID id, @PathVariable String languageCode) {
-        ApiResponse response = categoryService.getAllChildCategoriesById(id,languageCode);
+        ApiResponse response = categoryService.getCategoryTree(id,languageCode);
         return ResponseEntity.status(response.isSuccess() ? 200 : 409).body(response);
     }
 
