@@ -40,7 +40,7 @@ public abstract class AbsEntity implements Serializable {
     @LastModifiedBy
     private UUID lastModifiedBy;
 
-    private boolean deleted;
+    private boolean deleted = Boolean.FALSE;
 
-    private boolean active;
+    private boolean active = Boolean.TRUE;
 }

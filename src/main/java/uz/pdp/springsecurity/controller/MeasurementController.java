@@ -36,7 +36,7 @@ public class MeasurementController {
     @CheckPermission("VIEW_MEASUREMENT")
     @GetMapping("/{id}/{languageCode}")
     public HttpEntity<?> get(@PathVariable UUID id, @PathVariable String languageCode) {
-        ApiResponse apiResponse = measurementService.get(id,languageCode);
+        ApiResponse apiResponse = measurementService.get(id, languageCode);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
@@ -44,7 +44,14 @@ public class MeasurementController {
     @CheckPermission("VIEW_MEASUREMENT")
     @GetMapping("/get-by-business/{business_id}/{languageCode}")
     public HttpEntity<?> getAllByBusiness(@PathVariable UUID business_id, @PathVariable String languageCode) {
-        ApiResponse apiResponse = measurementService.getByBusiness(business_id,languageCode);
+        ApiResponse apiResponse = measurementService.getByBusiness(business_id, languageCode);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
+
+    @CheckPermission("VIEW_MEASUREMENT")
+    @GetMapping("/get-translate-measurement/{measurementId}")
+    public HttpEntity<?> getAllTranslate(@PathVariable UUID measurementId) {
+        ApiResponse apiResponse = measurementService.getAllTranslate(measurementId);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 

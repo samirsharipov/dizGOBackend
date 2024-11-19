@@ -1,6 +1,5 @@
 package uz.pdp.springsecurity.repository;
 
-import org.apache.poi.sl.draw.geom.GuideIf;
 import org.springframework.data.jpa.repository.JpaRepository;
 import uz.pdp.springsecurity.entity.Measurement;
 
