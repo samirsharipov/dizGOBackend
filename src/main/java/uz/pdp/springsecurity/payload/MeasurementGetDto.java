@@ -19,4 +19,8 @@ public class MeasurementGetDto {
     private String description;
 
     private UUID businessId;
+
+    private UUID parentMeasurementId;
+
+    private String parentMeasurementName;
 }

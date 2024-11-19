@@ -13,7 +13,7 @@ import java.util.UUID;
 public class MeasurementDto {
     private String name;
     private Double value;
-    private UUID subMeasurementId;
+    private UUID parentId;
     private UUID businessId;
     private List<MeasurementTranslateDto> translations;
 }

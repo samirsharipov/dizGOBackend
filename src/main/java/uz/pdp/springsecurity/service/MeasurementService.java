@@ -41,6 +41,12 @@ public class MeasurementService {
         measurement.setValue(measurementDto.getValue());
         measurement.setBusiness(optionalBusiness.get());
 
+        if (measurementDto.getParentId() != null) {
+            Optional<Measurement> optionalMeasurement = measurementRepository.findById(measurementDto.getParentId());
+            optionalMeasurement.ifPresent(measurement::setParentMeasurement);
+        }
+
+
         // O'lchovlarni saqlash
         measurementRepository.save(measurement);
 
@@ -60,8 +66,8 @@ public class MeasurementService {
         measurement.setValue(measurementDto.getValue());
 
         // O'lchovning sub-o'lchovini yangilash
-        if (measurementDto.getSubMeasurementId() != null) {
-            Optional<Measurement> optionalSubMeasurement = measurementRepository.findById(measurementDto.getSubMeasurementId());
+        if (measurementDto.getParentId() != null) {
+            Optional<Measurement> optionalSubMeasurement = measurementRepository.findById(measurementDto.getParentId());
             optionalSubMeasurement.ifPresent(measurement::setParentMeasurement);
         }
 
@@ -108,15 +114,24 @@ public class MeasurementService {
             measurementGetDto.setBusinessId(measurement.getBusiness().getId());
             measurementGetDto.setName(measurement.getName());
         }
+        if (measurement.getParentMeasurement() != null) {
+            measurementGetDto.setParentMeasurementId(measurement.getParentMeasurement().getId());
+            measurementGetDto.setParentMeasurementName(measurement.getParentMeasurement().getName());
+        }
         return measurementGetDto;
     }
 
     public ApiResponse delete(UUID id) {
-        if (!measurementRepository.existsById(id)) {
+
+        Optional<Measurement> optionalMeasurement = measurementRepository.findById(id);
+        if (optionalMeasurement.isEmpty()) {
             return new ApiResponse("NOT FOUND", false);
         }
+        Measurement measurement = optionalMeasurement.get();
+        measurement.setDeleted(true);
+        measurement.setActive(false);
+        measurementRepository.save(measurement);
 
-        measurementRepository.deleteById(id);
         return new ApiResponse("DELETED", true);
     }
 
@@ -159,5 +174,14 @@ public class MeasurementService {
         if (translations != null && !translations.isEmpty()) {
             addTranslations(translations, measurement);
         }
+    }
+
+    public ApiResponse getAllTranslate(UUID measurementId) {
+        List<MeasurementTranslate> all = measurementTranslateRepository.findByMeasurement_id(measurementId);
+        if (all.isEmpty()) {
+            return new ApiResponse("NOT FOUND", false);
+        }
+
+        return new ApiResponse("FOUND", true, all);
     }
 }
