@@ -16,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.entity.Currency;
 import uz.pdp.springsecurity.enums.CarInvoiceType;
-import uz.pdp.springsecurity.enums.Type;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.ExcelDto;
 import uz.pdp.springsecurity.payload.ExportExcelDto;
@@ -239,9 +238,9 @@ public class ExcelService {
                         ? measurementRepository.findByBusinessIdAndName(business.getId(), excelDto.getMeasurement()).orElse(null)
                         : null;
                 Brand brand = excelDto.getBrand() != null
-                        ? brandRepository.findAllByBusiness_IdAndName(business.getId(), excelDto.getBrand()).orElse(null)
+                        ? brandRepository.findByBusiness_IdAndName(business.getId(), excelDto.getBrand()).orElse(null)
                         : null;
-                Category category = categoryRepository.findAllByBusiness_IdAndName(business.getId(), excelDto.getCategory()).orElse(null);
+                Category category = categoryRepository.findByBusiness_IdAndName(business.getId(), excelDto.getCategory()).orElse(null);
 
                 Product product = new Product();
                 product.setBusiness(business);
