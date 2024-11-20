@@ -18,6 +18,14 @@ import java.util.Objects;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(
+        name = "product",
+        indexes = {
+                @Index(name = "idx_product_barcode", columnList = "barcode"),
+                @Index(name = "idx_product_category_id", columnList = "category_id"),
+                @Index(name = "idx_product_brand_id", columnList = "brand_id")
+        }
+)
 public class Product extends AbsEntity {
 
     // Mahsulotning asosiy ma'lumotlari

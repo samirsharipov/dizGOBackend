@@ -95,3 +95,5 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     List<Product> findAllByBarcode(String barcode);
 }
+
+
