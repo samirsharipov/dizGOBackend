@@ -20,19 +20,31 @@ import java.util.Objects;
 @NoArgsConstructor
 @Table(
         name = "product",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"barcode", "business_id"}),
         indexes = {
                 @Index(name = "idx_product_barcode", columnList = "barcode"),
                 @Index(name = "idx_product_category_id", columnList = "category_id"),
                 @Index(name = "idx_product_brand_id", columnList = "brand_id")
+
         }
+
 )
 public class Product extends AbsEntity {
 
     // Mahsulotning asosiy ma'lumotlari
+    @Column(length = 500)
     private String name;                // Mahsulot nomi
+
+    @Column(length = 500)
     private String description;         // Mahsulot haqidagi qisqa tavsif
+
+    @Column(length = 500)
     private String longDescription;     // Mahsulot haqidagi batafsil tavsif
+
+    @Column(length = 500)
     private String keywords;            // Mahsulotga oid kalit so'zlar
+
+    @Column(length = 500)
     private String attributes;          // Qo'shimcha xususiyatlar
 
     // Mahsulot tarjimalari
@@ -92,7 +104,6 @@ public class Product extends AbsEntity {
     private Boolean kpiPercent = true;   // KPI foiz sifatida
     private Double kpi;                  // KPI qiymati
     private Date expireDate;             // Muddati o'tgan sana
-
 
     private String barcode;           // Mahsulotning barkodi
 

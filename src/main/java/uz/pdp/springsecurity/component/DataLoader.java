@@ -72,9 +72,9 @@ public class DataLoader implements CommandLineRunner {
 
             // Language qo'shish
             List<Language> languages = Arrays.asList(
-                    new Language("Uzbek", "Uzbek language", "uz"),
-                    new Language("Russian", "Russian language", "ru"),
-                    new Language("English", "English language", "en")
+                    new Language("uz", "Uzbek language", "Uzbek"),
+                    new Language("ru", "Russian language", "Russian"),
+                    new Language("en", "English language", "English")
             );
             languageRepository.saveAll(languages);
 

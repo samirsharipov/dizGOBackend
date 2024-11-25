@@ -17,12 +17,21 @@ import javax.persistence.ManyToOne;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductTranslate extends AbsEntity {
-    private String name;
+    // Mahsulotning asosiy ma'lumotlari
+    @Column(length = 500)
+    private String name;                // Mahsulot nomi
 
-    private String description;
-    private String longDescription;
-    private String keywords;
-    private String attributes;
+    @Column(length = 500)
+    private String description;         // Mahsulot haqidagi qisqa tavsif
+
+    @Column(length = 500)
+    private String longDescription;     // Mahsulot haqidagi batafsil tavsif
+
+    @Column(length = 500)
+    private String keywords;            // Mahsulotga oid kalit so'zlar
+
+    @Column(length = 500)
+    private String attributes;          // Qo'shimcha xususiyatlar
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Product product;

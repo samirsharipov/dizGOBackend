@@ -22,4 +22,10 @@ public class Brand extends AbsEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Business business;
 
+    public Brand(Business business, String name, boolean active, boolean delete) {
+        this.business = business;
+        this.name = name;
+        super.setActive(active);
+        super.setDeleted(delete);
+    }
 }

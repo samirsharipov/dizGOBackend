@@ -83,7 +83,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/app/chat.send",
                         "/app/message",
                         "/app/chatroom/public",
-                        "/ws"
+                        "/ws",
+                        "/api/product-excel/**"
                 )
                 .permitAll()
                 .anyRequest()

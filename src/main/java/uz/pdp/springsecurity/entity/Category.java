@@ -35,4 +35,11 @@ public class Category extends AbsEntity {
     @ToString.Exclude
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     private List<CategoryTranslate> translations = new ArrayList<>();
+
+    public Category(Business business, String name, boolean active, boolean delete) {
+        this.business = business;
+        this.name = name;
+        super.setActive(active);
+        super.setDeleted(delete);
+    }
 }
