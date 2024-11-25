@@ -3,6 +3,7 @@ package uz.pdp.springsecurity.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import uz.pdp.springsecurity.entity.Brand;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,5 +15,5 @@ public interface BrandRepository extends JpaRepository<Brand, UUID> {
 
     Optional<Brand> findByName(String brandName);
 
-
+    List<Brand> findByBusiness_Id(UUID businessId);
 }

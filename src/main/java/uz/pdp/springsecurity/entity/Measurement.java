@@ -24,4 +24,11 @@ public class Measurement extends AbsEntity {
 
     @ManyToOne
     private Business business;
+
+    public Measurement(Business business, String name, boolean active, boolean delete) {
+        this.business = business;
+        this.name = name;
+        super.setActive(active);
+        super.setDeleted(delete);
+    }
 }

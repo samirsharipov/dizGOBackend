@@ -10,7 +10,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ProductRepository extends JpaRepository<Product, UUID> {
+
     boolean existsByBarcodeAndBusinessIdAndActiveTrue(String barcode, UUID businessId);
+    boolean existsByBarcodeAndBusinessId(String barcode, UUID businessId);
 
     boolean existsByBarcodeAndBusinessIdAndIdIsNotAndActiveTrue(String barcode, UUID businessId, UUID productId);
 

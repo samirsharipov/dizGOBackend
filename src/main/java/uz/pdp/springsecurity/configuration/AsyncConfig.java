@@ -1,24 +1,19 @@
 package uz.pdp.springsecurity.configuration;
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Configuration
-@EnableAsync // Bu Spring Bootda asinxron ishlashni yoqadi
-public class AsyncConfig implements AsyncConfigurer {
+public class AsyncConfig {
 
-    // Thread poolni yaratish
-    @Override
-    @Bean(name = "taskExecutor")
-    public ThreadPoolTaskExecutor getAsyncExecutor() {
+    @Bean("taskExecutor")
+    public ThreadPoolTaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(10); // Boshlang'ich ishchi to'plami soni
-        executor.setMaxPoolSize(20);  // Maksimal ishchi to'plami soni
-        executor.setQueueCapacity(500); // Ishchi navbatlarining maksimal o'lchami
-        executor.setThreadNamePrefix("Async-Executor-"); // Nom berish
+        executor.setCorePoolSize(10);  // O'zgartirilishi mumkin
+        executor.setMaxPoolSize(20);   // O'zgartirilishi mumkin
+        executor.setQueueCapacity(100); // O'zgartirilishi mumkin
+        executor.setThreadNamePrefix("async-thread-");
         executor.initialize();
         return executor;
     }

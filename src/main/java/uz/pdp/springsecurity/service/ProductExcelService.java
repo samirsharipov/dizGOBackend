@@ -6,14 +6,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.repository.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,62 +25,89 @@ public class ProductExcelService {
     private final BranchRepository branchRepository;
     private final LanguageRepository languageRepository;
     private final ProductTranslateRepository productTranslateRepository;
+    private final EmitterService emitterService;
+
+    private Map<String, Measurement> measurementCache;
+    private Map<String, Category> categoryCache;
+    private Map<String, Brand> brandCache;
+    private Map<String, Language> languageCache;
 
     @Async("taskExecutor")
-    public CompletableFuture<Void> importFromExcelAsync(MultipartFile file, UUID branchId) throws Exception {
-        importFromExcel(file, branchId);  // Asinxron metodni chaqirish
-        return CompletableFuture.completedFuture(null);  // Asinxron jarayonni tugallash
+    public CompletableFuture<Void> importFromExcelAsync(MultipartFile file, UUID branchId, SseEmitter emitter) throws Exception {
+        importFromExcel(file, branchId, emitter);
+        return CompletableFuture.completedFuture(null);
     }
 
-    public void importFromExcel(MultipartFile file, UUID branchId) throws Exception {
-        Optional<Branch> optionalBranch = branchRepository.findById(branchId);
-        if (optionalBranch.isEmpty()) {
-            throw new Exception("Branch not found");
+
+    public void importFromExcel(MultipartFile file, UUID branchId, SseEmitter emitter) throws Exception {
+        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+
+            Branch branch = branchRepository.findById(branchId)
+                    .orElseThrow(() -> new Exception("Branch not found"));
+            UUID businessId = branch.getBusiness().getId();
+
+            // Keshni yuklash
+            loadCaches(businessId);
+
+            Sheet sheet = workbook.getSheetAt(0);
+            int totalRows = sheet.getPhysicalNumberOfRows();
+            int batchSize = Math.min(1000, Math.max(100, totalRows / 100)); // Maksimal 1000 ta batch
+            List<Product> productsBatch = new ArrayList<>();
+            List<ProductTranslate> translationsBatch = new ArrayList<>();
+            int productsUploaded = 0;
+
+            for (int i = 1; i < totalRows; i++) {
+                Row row = sheet.getRow(i);
+                if (row == null) continue;
+
+                try {
+                    List<Product> products = createProductsFromRow(row, branch, translationsBatch);
+                    productsBatch.addAll(products);
+
+                    if (productsBatch.size() >= batchSize) {
+                        saveBatch(productsBatch);
+                        saveBatchTranslations(translationsBatch);
+                        productsUploaded += productsBatch.size();
+                        productsBatch.clear();
+                        translationsBatch.clear();
+                    }
+
+                    if (i % 100 == 0 || i == totalRows - 1) {
+                        int progress = (i * 100) / totalRows;
+//                        sendProgress(emitter, i, totalRows, productsUploaded);
+                        emitterService.sendProgress(branchId, progress, productsUploaded);
+                    }
+
+                } catch (Exception e) {
+                    emitterService.sendError(emitter, "Xatolik yuz berdi: " + e.getMessage());
+                    emitter.completeWithError(e); // Xatolikni yakunlash
+                }
+            }
+
+            if (!productsBatch.isEmpty()) {
+                saveBatch(productsBatch);
+                productsUploaded += productsBatch.size();
+            }
+
+            emitterService.sendCompletion(emitter, "Yuklash tugadi! Jami mahsulotlar: " + productsUploaded);
         }
+    }
 
-        Branch branch = optionalBranch.get();
-        UUID businessId = branch.getBusiness().getId();
+    private List<Product> createProductsFromRow(Row row, Branch branch, List<ProductTranslate> translationsBatch) {
+        List<Product> products = new ArrayList<>();
+        String barcodeCellValue = getCellValue(row, 1); // Barcode ustunini o'qish
 
-        Workbook workbook = new XSSFWorkbook(file.getInputStream());
-        Sheet sheet = workbook.getSheetAt(0);
+        // Barcode ni vergul orqali ajratish
+        String[] barcodes = barcodeCellValue.split(",");
 
-        int batchSize = 1000;
-        List<Product> productsBatch = new ArrayList<>();
-
-        for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-            Row row = sheet.getRow(i);
-            if (row == null) continue;
-
+        for (String barcode : barcodes) {
             try {
-                Product product = new Product();
-
-                Optional<Measurement> optionalMeasurement = measurementRepository.findByBusinessIdAndName(businessId, getCellValue(row, 3));
-                if (optionalMeasurement.isEmpty()) {
-                    System.out.println("Measurement not found for row " + (i + 1));
-                    continue;
-                }
-                Optional<Category> optionalCategory = categoryRepository.findByBusiness_IdAndName(businessId, getCellValue(row, 4));
-                if (optionalCategory.isEmpty()) {
-                    System.out.println("Category not found for row " + (i + 1));
-                    continue;
-                }
-
-                Optional<Brand> optionalBrand = brandRepository.findByBusiness_IdAndName(businessId, getCellValue(row, 6));
-                if (optionalBrand.isEmpty()) {
-                    System.out.println("Brand not found for row " + (i + 1));
-                    continue;
-                }
-
-                Measurement measurement = optionalMeasurement.get();
-                Category category = optionalCategory.get();
-                Brand brand = optionalBrand.get();
-
-                product.setMeasurement(measurement); // O'lchov birligi
-                product.setCategory(category);       // Kategoriya
-                product.setBrand(brand);             // Brend
+                Product product = productRepository
+                        .findByBarcodeAndBusinessId(barcode, branch.getBusiness().getId())
+                        .orElse(new Product());
 
                 product.setName(getCellValue(row, 0));
-                product.setBarcode(getCellValue(row, 1));
+                product.setBarcode(barcode); // Har bir barcode ni alohida tozalash va o'rnatish
                 product.setLangGroup(getCellValue(row, 2));
                 product.setPluCode(getCellValue(row, 5));
                 product.setMXIKCode(getCellValue(row, 7));
@@ -107,67 +133,151 @@ public class ProductExcelService {
                 product.setActive(true);
                 product.setDeleted(false);
 
-                // Tilni o'rnatish va ProductTranslate obyektini yaratish
-                String languageCode = getCellValue(row, 2);  // Bu yerda til kodi olinadi (masalan, "ru", "en", "uz")
-                Optional<Language> optionalLanguage = languageRepository.findByCode(languageCode);
+                product.setBusiness(branch.getBusiness());
 
-                productsBatch.add(product);
-                savedTranslate(optionalLanguage, row);
+                setCategoryMeasurementBrand(product, row, branch);
 
-                if (productsBatch.size() >= batchSize) {
-                    productRepository.saveAll(productsBatch);
-                    productsBatch.clear();  // Partiyani tozalash
+                ProductTranslate productTranslate = saveTranslateIfNeeded(row, product);
+                if (productTranslate != null) {
+                    translationsBatch.add(productTranslate);
                 }
+
+                products.add(product);
             } catch (Exception e) {
-                System.out.println("Error processing row " + (i + 1) + ": " + e.getMessage());
                 continue;
             }
         }
-
-        if (!productsBatch.isEmpty()) {
-            productRepository.saveAll(productsBatch);
-        }
-
-        workbook.close();
+        return products;
     }
 
-    private void savedTranslate(Optional<Language> optionalLanguage, Row row) {
-        if (optionalLanguage.isPresent()) {
-            Language language = optionalLanguage.get();
-            ProductTranslate productTranslate = new ProductTranslate();
-            productTranslate.setLanguage(language);  // Tilni o'rnatish
-            productTranslate.setName(getCellValue(row, 0));  // Mahsulot nomi
-            productTranslate.setDescription(getCellValue(row, 22));  // Ta'rif
-            productTranslate.setLongDescription(getCellValue(row, 23));  // Uzun ta'rif
-
-            productTranslateRepository.save(productTranslate);
+    private void setCategoryMeasurementBrand(Product product, Row row, Branch branch) {
+        String measurementName = getCellValue(row, 3);
+        String categoryName = getCellValue(row, 4);
+        String brandName = getCellValue(row, 6);
+        if (!measurementName.isBlank()) {
+            product.setMeasurement(findOrCreateMeasurement(measurementName, branch));
         }
+        if (!categoryName.isBlank()) {
+            product.setCategory(findOrCreateCategory(categoryName, branch));
+        }
+        if (!brandName.isBlank()) {
+            product.setBrand(findOrCreateBrand(brandName, branch));
+        }
+    }
+
+    private ProductTranslate saveTranslateIfNeeded(Row row, Product product) {
+        String languageCode = getCellValue(row, 2);
+        Language language = findLanguageByCode(languageCode);
+
+        try {
+            ProductTranslate productTranslate = productTranslateRepository
+                    .findByProductIdAndLanguage_Id(product.getId(), language.getId())
+                    .orElse(new ProductTranslate());
+
+            productTranslate.setLanguage(language);
+            productTranslate.setName(getCellValue(row, 0));
+            productTranslate.setDescription(getCellValue(row, 22));
+            productTranslate.setLongDescription(getCellValue(row, 23));
+            productTranslate.setProduct(product);
+            return productTranslate;
+        } catch (Exception e) {
+            return null;
+        }
+
     }
 
     private String getCellValue(Row row, int cellIndex) {
         Cell cell = row.getCell(cellIndex);
-        return cell == null ? null : cell.toString();
+        return cell == null ? "" : cell.toString().trim();
     }
 
     private Double parseDouble(String value) {
         try {
-            return value == null ? null : Double.parseDouble(value);
+            return value.isEmpty() ? null : Double.parseDouble(value);
         } catch (NumberFormatException e) {
             return null;
         }
     }
 
-    public void importMultipleFiles(MultipartFile[] files, UUID branchId) throws Exception {
-        CompletableFuture<Void>[] importTasks = new CompletableFuture[files.length];
+    private void loadCaches(UUID businessId) {
+        measurementCache = measurementRepository.findByBusinessId(businessId)
+                .stream().collect(Collectors.toMap(Measurement::getName, m -> m));
+        categoryCache = categoryRepository.findByBusiness_Id(businessId)
+                .stream().collect(Collectors.toMap(Category::getName, c -> c));
+        brandCache = brandRepository.findByBusiness_Id(businessId)
+                .stream().collect(Collectors.toMap(Brand::getName, b -> b));
+        languageCache = languageRepository.findAll()
+                .stream().collect(Collectors.toMap(Language::getCode, l -> l));
+    }
 
-        for (int i = 0; i < files.length; i++) {
-            importTasks[i] = importFromExcelAsync(files[i], branchId)
-                    .exceptionally(ex -> {
-                        System.out.println("Error importing file: " + ex.getMessage());
-                        return null;  // Xatolik bo'lsa, jarayonni davom ettirish
-                    });
+    private Measurement findOrCreateMeasurement(String name, Branch branch) {
+        return measurementCache.computeIfAbsent(name, n -> {
+            Measurement newMeasurement = new Measurement(branch.getBusiness(), n, true, false);
+            return measurementRepository.save(newMeasurement);
+        });
+    }
+
+    private Category findOrCreateCategory(String name, Branch branch) {
+        return categoryCache.computeIfAbsent(name, n -> {
+            Category newCategory = new Category(branch.getBusiness(), n, true, false);
+            return categoryRepository.save(newCategory);
+        });
+    }
+
+    private Brand findOrCreateBrand(String name, Branch branch) {
+        return brandCache.computeIfAbsent(name, n -> {
+            Brand newBrand = new Brand(branch.getBusiness(), n, true, false);
+            return brandRepository.save(newBrand);
+        });
+    }
+
+    private Language findLanguageByCode(String code) {
+        return languageCache.get(code);
+    }
+
+    private void saveBatch(List<Product> productsBatch) {
+        // Mahsulotlarni tekshirib, yangi yoki yangilanadigan mahsulotlarni ajratish
+        Set<String> existingBarcodes = productsBatch.stream()
+                .map(product -> product.getBarcode() + ":" + product.getBusiness().getId()) // barcode va businessId kombinatsiyasi
+                .collect(Collectors.toSet());
+
+        List<Product> productsToSave = new ArrayList<>();
+
+        for (Product product : productsBatch) {
+            String barcodeBusinessIdKey = product.getBarcode() + ":" + product.getBusiness().getId();
+
+            // Agar mahsulot yangi yoki yangilanadigan bo'lsa, uni qo'shish
+            if (existingBarcodes.contains(barcodeBusinessIdKey)) {
+                // Mavjud mahsulotni yangilash
+                boolean existingProduct = productRepository
+                        .existsByBarcodeAndBusinessId(product.getBarcode(), product.getBusiness().getId());
+
+                if (!existingProduct) {
+                    productsToSave.add(product);  // Yangilangan mahsulotni qo'shish
+                }
+                existingBarcodes.remove(barcodeBusinessIdKey);
+            }
         }
 
-        CompletableFuture.allOf(importTasks).join();
+        // Mahsulotlarni saqlash
+        if (!productsToSave.isEmpty()) {
+            productRepository.saveAll(productsToSave); // Yangi va yangilangan mahsulotlarni saqlash
+        }
+    }
+
+    private void saveBatchTranslations(List<ProductTranslate> translationsBatch) {
+        List<ProductTranslate> saveToBatchTranslations = new ArrayList<>();
+        for (ProductTranslate batch : translationsBatch) {
+            Product product = productRepository
+                    .findByBarcodeAndBusinessId(batch.getProduct().getBarcode(), batch.getProduct().getBusiness().getId())
+                    .orElse(null);
+            if (product != null) {
+                batch.setProduct(product);
+                saveToBatchTranslations.add(batch);
+            }
+        }
+        if (!saveToBatchTranslations.isEmpty()) {
+            productTranslateRepository.saveAll(saveToBatchTranslations);
+        }
     }
 }

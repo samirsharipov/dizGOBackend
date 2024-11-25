@@ -3,6 +3,8 @@ package uz.pdp.springsecurity.enums;
 
 public enum Permissions {
 
+    SUPER_ADMIN,
+
     ADD_BUSINESS,
     EDIT_BUSINESS,
     VIEW_BUSINESS,
