@@ -11,6 +11,7 @@ import javax.persistence.ManyToOne;
 @Setter
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
 public class MeasurementTranslate extends AbsEntity {
 
     private String name; // Tarjimasi o'lchov nomi
