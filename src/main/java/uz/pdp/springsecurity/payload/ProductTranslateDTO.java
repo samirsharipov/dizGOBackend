@@ -9,9 +9,10 @@ import java.util.UUID;
 @Getter
 @Setter
 public class ProductTranslateDTO {
-
+    private UUID id;
     private UUID languageId;
-
+    private String languageCode;
+    private String languageName;
     private String name;
     private String description;
     private String longDescription;

@@ -71,10 +71,14 @@ public class ProductGetDto {
 
     // Bog'lanishlar
     private String brandName;
+    private UUID brandId;
     private String categoryName;
+    private UUID categoryId;
     private String measurementUnit;
+    private UUID measurementUnitId;
     private String businessName;
     private List<String> branches;
+    private List<UUID> branchIds;
     private List<String> rastaList;
     private UUID photoId;
 
@@ -83,4 +87,8 @@ public class ProductGetDto {
     private double quantity;
     private Boolean isGlobal;
     private boolean main;
+
+    private String mxikCode;
+
+    List<ProductTranslateDTO> translates;
 }

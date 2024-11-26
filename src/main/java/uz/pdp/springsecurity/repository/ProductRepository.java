@@ -2,6 +2,7 @@ package uz.pdp.springsecurity.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import uz.pdp.springsecurity.entity.Product;
 
@@ -12,6 +13,7 @@ import java.util.UUID;
 public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     boolean existsByBarcodeAndBusinessIdAndActiveTrue(String barcode, UUID businessId);
+
     boolean existsByBarcodeAndBusinessId(String barcode, UUID businessId);
 
     boolean existsByBarcodeAndBusinessIdAndIdIsNotAndActiveTrue(String barcode, UUID businessId, UUID productId);
@@ -96,6 +98,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     Page<Product> findAllByRastaList_IdAndActiveTrue(UUID rastaListId, Pageable pageable);
 
     List<Product> findAllByBarcode(String barcode);
+
+    Page<Product> findAll(Specification<Product> spec, Pageable pageable);
 }
 
 

@@ -6,12 +6,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.pdp.springsecurity.entity.*;
+import uz.pdp.springsecurity.mapper.converts.ProductConvert;
 import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
+import uz.pdp.springsecurity.repository.specifications.ProductSpecifications;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,14 +37,15 @@ public class ProductService {
     private final FifoCalculationRepository fifoCalculationRepository;
     private final LanguageRepository languageRepository;
     private final ProductTranslateRepository productTranslateRepository;
+    private final ProductConvert productConvert;
 
     @Transactional
     public ApiResponse editProduct(UUID productId, ProductEditDto productEditDto) {
         // Mahsulotni topish
         Product product = findByIdOrThrow(productRepository, productId, "Product");
-        Category category = findByIdOrThrow(categoryRepository, product.getId(), "Category");
-        Brand brand = findByIdOrThrow(brandRepository, product.getId(), "Brand");
-        Measurement measurement = findByIdOrThrow(measurementRepository, product.getId(), "Measurement");
+        Category category = findByIdOrThrow(categoryRepository, productEditDto.getCategoryId(), "Category");
+        Brand brand = findByIdOrThrow(brandRepository, productEditDto.getBrandId(), "Brand");
+        Measurement measurement = findByIdOrThrow(measurementRepository, productEditDto.getMeasurementId(), "Measurement");
 
         // Mahsulotni yangilash
         product.setName(productEditDto.getName());
@@ -54,6 +58,9 @@ public class ProductService {
         product.setSalePrice(productEditDto.getSalePrice());
         product.setGrossPrice(productEditDto.getGrossPrice());
         product.setMXIKCode(productEditDto.getMXIKCode());
+        product.setKpi(productEditDto.getKpi());
+        product.setMinQuantity(productEditDto.getMinQuantity());
+        product.setGrossPrice(productEditDto.getGrossPrice());
 
         //    product.setBarcode(productEditDto.getBarcode());
 
@@ -63,7 +70,7 @@ public class ProductService {
 
         // Foto ni yangilash
         if (productEditDto.getPhotoId() != null) {
-            Attachment photo = findByIdOrThrow(attachmentRepository, product.getId(), "Photo");
+            Attachment photo = findByIdOrThrow(attachmentRepository, productEditDto.getPhotoId(), "Photo");
             product.setPhoto(photo);
         }
         // Tarjimalarni yangilash
@@ -105,26 +112,20 @@ public class ProductService {
         return barcode;
     }
 
-    public ApiResponse getAll(User user) {
-        Set<Branch> branches = user.getBranches();
-        List<Product> productList = new ArrayList<>();
-        for (Branch branch : branches) {
-            List<Product> all = productRepository.findAllByBranchIdAndActiveIsTrue(branch.getId());
-            if (!all.isEmpty()) {
-                productList.addAll(all);
-            }
-        }
-        if (productList.isEmpty()) {
-            return new ApiResponse("NOT FOUND", false);
-        }
-        return new ApiResponse("FOUND", true, productList);
-    }
-
     public ApiResponse getProduct(UUID id) {
         Optional<Product> optionalProduct = productRepository.findById(id);
 
-        return optionalProduct.map(product -> new ApiResponse("FOUND", true, convertToDto(product)))
-                .orElseGet(() -> new ApiResponse("NOT FOUND", false));
+        return optionalProduct.map(product -> {
+            ProductGetDto productGetDto = productConvert.convertToDto(product);
+            List<ProductTranslateDTO> translates = productTranslateRepository.findAllByProductId(product.getId())
+                    .stream()
+                    .map(this::productTranslateToDto)
+                    .collect(Collectors.toList());
+            if (!translates.isEmpty()) {
+                productGetDto.setTranslates(translates);
+            }
+            return new ApiResponse("found", true, productGetDto);
+        }).orElseGet(() -> new ApiResponse("not found", false));
 
     }
 
@@ -142,47 +143,30 @@ public class ProductService {
         return new ApiResponse("NOT FOUND", false);
     }
 
-    public ApiResponse getByBarcode(String barcode, User user) {
-        Set<Branch> branches = user.getBranches();
-        List<Product> productAllByBarcode = new ArrayList<>();
-        Branch branchGet = null;
-        for (Branch branch : branches) {
-            Optional<Product> optionalProduct = productRepository.findAllByBarcodeAndBranchIdAndActiveTrue(barcode, branch.getId());
-            if (optionalProduct.isPresent()) {
-                Product product = optionalProduct.get();
-                productAllByBarcode.add(product);
-                branchGet = branch;
+    public ApiResponse getByBarcode(String barcode, UUID branchId) {
+        Branch branch = findByIdOrThrow(branchRepository, branchId, "branch");
+        Branch mainBranch = branch.getMainBranchId() != null
+                ? findByIdOrThrow(branchRepository, branch.getMainBranchId(), "product")
+                : branch;
+
+        Optional<Product> optionalProduct = productRepository
+                .findByBarcodeAndBusinessId(barcode, branch.getBusiness().getId())
+                .or(() -> productRepository.findByBarcodeAndBusinessId(barcode, mainBranch.getBusiness().getId()));
+
+        return optionalProduct.map(product -> {
+            ProductGetDto productGetDto = productConvert.convertToDto(product);
+
+            List<ProductTranslateDTO> translates = productTranslateRepository.findAllByProductId(product.getId())
+                    .stream()
+                    .map(this::productTranslateToDto)
+                    .collect(Collectors.toList());
+
+            if (!translates.isEmpty()) {
+                productGetDto.setTranslates(translates);
             }
-        }
 
-
-        List<ProductViewDto> viewDtos = new ArrayList<>();
-        for (Product product : productAllByBarcode) {
-            ProductViewDto productViewDto = new ProductViewDto();
-            productViewDto.setProductId(product.getId());
-            productViewDto.setProductName(product.getName());
-            if (product.getBrand() != null)
-                productViewDto.setBrandName(product.getBrand().getName());
-            productViewDto.setBuyPrice(product.getBuyPrice());
-            productViewDto.setSalePrice(product.getSalePrice());
-            productViewDto.setMinQuantity(product.getMinQuantity());
-            productViewDto.setBranch(product.getBranch());
-            productViewDto.setExpiredDate(product.getExpireDate());
-
-            Optional<Warehouse> optionalWarehouse = warehouseRepository.findByBranchIdAndProductId(branchGet.getId(), product.getId());
-            if (optionalWarehouse.isPresent()) {
-                Warehouse warehouse = optionalWarehouse.get();
-                if (warehouse.getProduct().getId().equals(product.getId())) {
-                    productViewDto.setAmount(warehouse.getAmount());
-                }
-            }
-            viewDtos.add(productViewDto);
-        }
-
-        if (viewDtos.isEmpty()) {
-            return new ApiResponse("NOT FOUND", false);
-        }
-        return new ApiResponse("FOUND", true, viewDtos);
+            return new ApiResponse("FOUND", true, productGetDto);
+        }).orElseGet(() -> new ApiResponse("not found", false));
     }
 
     public ApiResponse getByCategory(UUID category_id, User user) {
@@ -356,52 +340,52 @@ public class ProductService {
         return new ApiResponse("FOUND", true, productViewDtoList);
     }
 
-    public ApiResponse getByBusinessPageable(UUID businessId, UUID branchId, UUID brandId, UUID catId, String search, int page, int size) {
-        if (search.isBlank()) search = null;
-
+    public ApiResponse getByBusinessPageableWithTranslations(UUID businessId, UUID branchId, UUID brandId, UUID catId, String search, int page, int size, String lang) {
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.ASC, "name");
 
-        Page<Product> productPage;
+        // Dinamik filtrlash
+        Specification<Product> spec = Specification
+                .where(ProductSpecifications.isActiveTrue())
+                .and(branchId != null ? ProductSpecifications.belongsToBranch(branchId) : ProductSpecifications.belongsToBusiness(businessId))
+                .and(search != null && !search.isBlank() ? ProductSpecifications.nameOrBarcodeContains(search) : null)
+                .and(catId != null ? ProductSpecifications.belongsToCategory(catId) : null)
+                .and(brandId != null ? ProductSpecifications.belongsToBrand(brandId) : null);
 
-        if (branchId != null) {
-            if (search != null) {
-                productPage = productRepository.findAllByBranch_IdAndNameContainingIgnoreCaseAndActiveTrueOrBusinessIdAndBarcodeContainingIgnoreCaseAndActiveTrue(branchId, search, businessId, search, pageable);
-            } else if (catId != null && brandId != null) {
-                productPage = productRepository.findAllByBranch_IdAndCategoryIdAndBrandIdAndActiveTrue(branchId, catId, brandId, pageable);
-            } else if (catId != null) {
-                productPage = productRepository.findAllByBranch_IdAndCategoryIdAndActiveTrue(branchId, catId, pageable);
-            } else if (brandId != null) {
-                productPage = productRepository.findAllByBranch_IdAndBrandIdAndActiveTrue(branchId, brandId, pageable);
-            } else {
-                productPage = productRepository.findAllByBranch_IdAndActiveTrue(branchId, pageable);
-            }
-        } else {
-            if (search != null) {
-                productPage = productRepository.findAllByBusinessIdAndNameContainingIgnoreCaseAndActiveTrue(businessId, search, pageable);
-            } else if (catId != null && brandId != null) {
-                productPage = productRepository.findAllByBusinessIdAndCategoryIdAndBrandIdAndActiveTrue(businessId, catId, brandId, pageable);
-            } else if (catId != null) {
-                productPage = productRepository.findAllByBusinessIdAndCategoryIdAndActiveTrue(businessId, catId, pageable);
-            } else if (brandId != null) {
-                productPage = productRepository.findAllByBusinessIdAndBrandIdAndActiveTrue(businessId, brandId, pageable);
-            } else {
-                productPage = productRepository.findAllByBusinessIdAndActiveTrue(businessId, pageable);
-            }
-        }
-        List<ProductViewDto> productViewDtoList = new ArrayList<>();
-        getProductMethod(productViewDtoList, productPage.getContent(), branchId);
+        Page<Product> productPage = productRepository.findAll(spec, pageable);
+
+
+        List<ProductGetDto> productViewDtoList = productPage.getContent().stream()
+                .map(product -> {
+                    ProductGetDto dto = productConvert.convertToDto(product);
+                    addTranslationToDto(dto, product, lang);
+                    return dto;
+                })
+                .toList();
+
         if (productViewDtoList.isEmpty()) {
             return new ApiResponse("MA'LUMOT TOPILMADI", false);
         }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("product_list", productViewDtoList);
+        return new ApiResponse(true, Map.of(
+                "product_list", productViewDtoList,
+                "currentPage", productPage.getNumber(),
+                "totalPages", productPage.getTotalPages(),
+                "totalItems", productPage.getTotalElements()
+        ));
+    }
 
-        response.put("currentPage", productPage.getNumber());
-        response.put("totalPages", productPage.getTotalPages());
-        response.put("totalItems", productPage.getTotalElements());
-        return new ApiResponse(true, response);
-
+    private void addTranslationToDto(ProductGetDto dto, Product product, String lang) {
+        if (product.getTranslations() != null && lang != null) {
+            product.getTranslations().stream()
+                    .filter(translation -> lang.equalsIgnoreCase(translation.getLanguage().getCode()))
+                    .findFirst()
+                    .ifPresent(translation -> {
+                        dto.setName(translation.getName() != null ? translation.getName() : dto.getName());
+                        dto.setDescription(translation.getDescription() != null ? translation.getDescription() : dto.getDescription());
+                        dto.setLongDescription(translation.getLongDescription() != null ? translation.getLongDescription() : dto.getLongDescription());
+                        dto.setAttributes(translation.getAttributes() != null ? translation.getAttributes() : dto.getAttributes());
+                    });
+        }
     }
 
     public ApiResponse getByBranchProduct(UUID branchId) {
@@ -690,84 +674,6 @@ public class ProductService {
         return new ApiResponse("all", true, getForPurchaseDtoList);
     }
 
-
-    public ProductGetDto convertToDto(Product product) {
-        ProductGetDto dto = new ProductGetDto();
-
-        // ID va yaratilgan vaqt
-        dto.setId(product.getId());  // UUID dan string ga o'zgartirish
-        dto.setCreatedAt(product.getCreatedAt()); // Yaratilgan vaqt
-
-        // Mahsulot nomi va tavsifi
-        dto.setName(product.getName());
-        dto.setDescription(product.getDescription());
-        dto.setLongDescription(product.getLongDescription());
-        dto.setKeywords(product.getKeywords());
-        dto.setAttributes(product.getAttributes());
-
-        // Mahsulotga oid boshqa ma'lumotlar
-        dto.setUniqueSKU(product.getUniqueSKU());
-        dto.setSalePrice(product.getSalePrice());
-        dto.setBuyPrice(product.getBuyPrice());
-        dto.setSalePriceDollar(product.getSalePriceDollar());
-        dto.setStockAmount(product.getStockAmount());
-        dto.setInStock(product.getInStock());
-        dto.setPreorder(product.getPreorder());
-        dto.setLength(product.getLength());
-        dto.setWidth(product.getWidth());
-        dto.setHeight(product.getHeight());
-        dto.setWeight(product.getWeight());
-
-        // Harmonizatsiya kodlari
-        dto.setHsCode12(product.getHsCode12());
-        dto.setHsCode22(product.getHsCode22());
-        dto.setHsCode32(product.getHsCode32());
-        dto.setHsCode44(product.getHsCode44());
-
-        // Shartnomalar bilan bog'liq ma'lumotlar
-        dto.setAgreementExportsID(product.getAgreementExportsID());
-        dto.setAgreementExportsPID(product.getAgreementExportsPID());
-        dto.setAgreementLocalID(product.getAgreementLocalID());
-        dto.setAgreementLocalPID(product.getAgreementLocalPID());
-
-        // Qo'shimcha ma'lumotlar
-        dto.setLangGroup(product.getLangGroup());
-        dto.setShippingClass(product.getShippingClass());
-        dto.setSoldIndividually(product.getSoldIndividually());
-        dto.setActive(product.isActive());
-        dto.setProfitPercent(product.getProfitPercent());
-        dto.setTax(product.getTax());
-
-        // Ixtiyoriy qiymatlar
-        dto.setGrossPrice(product.getGrossPrice());
-        dto.setGrossPriceDollar(product.getGrossPriceDollar());
-        dto.setGrossPriceMyControl(product.getGrossPriceMyControl());
-        dto.setBuyPriceDollar(product.getBuyPriceDollar());
-        dto.setBuyDollar(product.isBuyDollar());
-        dto.setSaleDollar(product.isSaleDollar());
-        dto.setKpiPercent(product.getKpiPercent());
-        dto.setKpi(product.getKpi());
-        dto.setExpireDate(product.getExpireDate());
-        dto.setBarcode(product.getBarcode());
-        dto.setPluCode(product.getPluCode());
-        dto.setMinQuantity(product.getMinQuantity());
-
-        // Brand, Category va boshqa bog'lanishlar
-        dto.setBrandName(product.getBrand() != null ? product.getBrand().getName() : null); // Brend nomi
-        dto.setCategoryName(product.getCategory() != null ? product.getCategory().getName() : null); // Kategoriya nomi
-        dto.setMeasurementUnit(product.getMeasurement() != null ? product.getMeasurement().getName() : null); // O'lchov birligi
-        dto.setPhotoId(product.getPhoto() != null ? product.getPhoto().getId() : null);
-
-        // Ombor joylari va boshqa bog'lanishlar
-        Optional<Warehouse> optionalWarehouse =
-                warehouseRepository.findByProduct_Id(product.getId());
-        dto.setWarehouseCount(optionalWarehouse.map(Warehouse::getAmount).orElse(0d));
-        dto.setBusinessName(product.getBusiness() != null ? product.getBusiness().getName() : null);
-        dto.setBranches(product.getBranch() != null ? product.getBranch().stream().map(Branch::getName).collect(Collectors.toList()) : null); // Filiallar ro'yxati
-
-        return dto;
-    }
-
     @Transactional
     public ApiResponse createProduct(ProductPostDto productPostDto) {
 
@@ -843,6 +749,9 @@ public class ProductService {
 
     @Transactional
     public void saveProductTranslations(List<ProductTranslateDTO> productTranslateDTOList, Product product) {
+        // Eski tarjimalarni o'chirish
+        productTranslateRepository.deleteAllByProductId(product.getId());
+
         productTranslateDTOList.forEach(translation -> {
             ProductTranslate productTranslate = fromTranslateDto(translation, product);
             productTranslateRepository.save(productTranslate);
@@ -975,5 +884,20 @@ public class ProductService {
         if (existingProduct.isPresent() && !existingProduct.get().getId().equals(productId)) {
             throw new IllegalArgumentException("Ushbu barcode bilan mahsulot allaqachon mavjud!");
         }
+    }
+
+
+    private ProductTranslateDTO productTranslateToDto(ProductTranslate productTranslate) {
+        ProductTranslateDTO translateDTO = new ProductTranslateDTO();
+        translateDTO.setId(productTranslate.getId());
+        translateDTO.setName(productTranslate.getName());
+        translateDTO.setDescription(productTranslate.getDescription());
+        translateDTO.setLongDescription(productTranslate.getLongDescription());
+        translateDTO.setKeywords(productTranslate.getKeywords());
+        translateDTO.setAttributes(productTranslate.getAttributes());
+        translateDTO.setLanguageCode(productTranslate.getLanguage().getCode());
+        translateDTO.setLanguageId(productTranslate.getLanguage().getId());
+        translateDTO.setLanguageName(productTranslate.getLanguage().getName());
+        return translateDTO;
     }
 }

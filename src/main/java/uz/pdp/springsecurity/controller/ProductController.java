@@ -50,6 +50,7 @@ public class ProductController {
         return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
     }
 
+
     @CheckPermission("DELETE_PRODUCT")
     @DeleteMapping("/{id}")
     public HttpEntity<?> deleteOne(@PathVariable UUID id) {
@@ -67,18 +68,19 @@ public class ProductController {
 
 
     @CheckPermission("VIEW_PRODUCT")
-    @GetMapping("/get-by-barcode/{barcode}")
-    public HttpEntity<?> getByBarcode(@PathVariable String barcode, @CurrentUser User user) {
-        ApiResponse apiResponse = productService.getByBarcode(barcode, user);
+    @GetMapping("/get-by-barcode/{barcode}/{branchId}")
+    public HttpEntity<?> getByBarcode(@PathVariable String barcode, @PathVariable UUID branchId) {
+        ApiResponse apiResponse = productService.getByBarcode(barcode, branchId);
         return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
     }
 
-    @CheckPermission("VIEW_PRODUCT")
-    @GetMapping
-    public HttpEntity<?> get(@CurrentUser User user) {
-        ApiResponse apiResponse = productService.getAll(user);
-        return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
-    }
+
+
+
+
+
+
+
 
     @CheckPermission("VIEW_PRODUCT")
     @GetMapping("/get-by-category/{category_id}")
@@ -151,10 +153,11 @@ public class ProductController {
                                                @RequestParam(required = false) UUID brand_id,
                                                @RequestParam(required = false) UUID categoryId,
                                                @RequestParam(required = false) String search,
+                                               @RequestParam(required = false) String language,
                                                @RequestParam(defaultValue = "0", required = false) int page,
                                                @RequestParam(defaultValue = "10", required = false) int size
     ) {
-        ApiResponse apiResponse = productService.getByBusinessPageable(business_id, branch_id, brand_id, categoryId, search, page, size);
+        ApiResponse apiResponse = productService.getByBusinessPageableWithTranslations(business_id, branch_id, brand_id, categoryId, search, page, size, language);
         return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
     }
 

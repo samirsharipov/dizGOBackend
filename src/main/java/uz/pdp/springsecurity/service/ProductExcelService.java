@@ -26,6 +26,7 @@ public class ProductExcelService {
     private final LanguageRepository languageRepository;
     private final ProductTranslateRepository productTranslateRepository;
     private final EmitterService emitterService;
+    private final MeasurementTranslateRepository measurementTranslateRepository;
 
     private Map<String, Measurement> measurementCache;
     private Map<String, Category> categoryCache;
@@ -86,7 +87,10 @@ public class ProductExcelService {
 
             if (!productsBatch.isEmpty()) {
                 saveBatch(productsBatch);
+                saveBatchTranslations(translationsBatch);
                 productsUploaded += productsBatch.size();
+                productsBatch.clear();
+                translationsBatch.clear();
             }
 
             emitterService.sendCompletion(emitter, "Yuklash tugadi! Jami mahsulotlar: " + productsUploaded);
@@ -96,6 +100,8 @@ public class ProductExcelService {
     private List<Product> createProductsFromRow(Row row, Branch branch, List<ProductTranslate> translationsBatch) {
         List<Product> products = new ArrayList<>();
         String barcodeCellValue = getCellValue(row, 1); // Barcode ustunini o'qish
+        List<Branch> branches = new ArrayList<>();
+        branches.add(branch);
 
         // Barcode ni vergul orqali ajratish
         String[] barcodes = barcodeCellValue.split(",");
@@ -132,6 +138,7 @@ public class ProductExcelService {
                 product.setIsGlobal(true);
                 product.setActive(true);
                 product.setDeleted(false);
+                product.setBranch(branches);
 
                 product.setBusiness(branch.getBusiness());
 
@@ -154,11 +161,13 @@ public class ProductExcelService {
         String measurementName = getCellValue(row, 3);
         String categoryName = getCellValue(row, 4);
         String brandName = getCellValue(row, 6);
+        String languageCode = getCellValue(row, 2);
+
         if (!measurementName.isBlank()) {
-            product.setMeasurement(findOrCreateMeasurement(measurementName, branch));
+            product.setMeasurement(findOrCreateMeasurement(measurementName, branch, languageCode));
         }
         if (!categoryName.isBlank()) {
-            product.setCategory(findOrCreateCategory(categoryName, branch));
+            product.setCategory(findOrCreateCategory(categoryName, branch, languageCode));
         }
         if (!brandName.isBlank()) {
             product.setBrand(findOrCreateBrand(brandName, branch));
@@ -168,8 +177,7 @@ public class ProductExcelService {
     private ProductTranslate saveTranslateIfNeeded(Row row, Product product) {
         String languageCode = getCellValue(row, 2);
         Language language = findLanguageByCode(languageCode);
-
-        try {
+        if (language != null) {
             ProductTranslate productTranslate = productTranslateRepository
                     .findByProductIdAndLanguage_Id(product.getId(), language.getId())
                     .orElse(new ProductTranslate());
@@ -180,10 +188,8 @@ public class ProductExcelService {
             productTranslate.setLongDescription(getCellValue(row, 23));
             productTranslate.setProduct(product);
             return productTranslate;
-        } catch (Exception e) {
-            return null;
         }
-
+        return null;
     }
 
     private String getCellValue(Row row, int cellIndex) {
@@ -210,17 +216,23 @@ public class ProductExcelService {
                 .stream().collect(Collectors.toMap(Language::getCode, l -> l));
     }
 
-    private Measurement findOrCreateMeasurement(String name, Branch branch) {
+    private Measurement findOrCreateMeasurement(String name, Branch branch, String languageCode) {
         return measurementCache.computeIfAbsent(name, n -> {
             Measurement newMeasurement = new Measurement(branch.getBusiness(), n, true, false);
-            return measurementRepository.save(newMeasurement);
+            Measurement measurement = measurementRepository.save(newMeasurement);
+            MeasurementTranslate measurementTranslate = new MeasurementTranslate(n, null, measurement, languageCache.get(languageCode));
+            measurementTranslateRepository.save(measurementTranslate);
+            return measurement;
         });
     }
 
-    private Category findOrCreateCategory(String name, Branch branch) {
+    private Category findOrCreateCategory(String name, Branch branch, String languageCode) {
         return categoryCache.computeIfAbsent(name, n -> {
             Category newCategory = new Category(branch.getBusiness(), n, true, false);
-            return categoryRepository.save(newCategory);
+            Category category = categoryRepository.save(newCategory);
+            CategoryTranslate categoryTranslate = new CategoryTranslate(n, null, category, languageCache.get(languageCode));
+            categoryTranslate.setCategory(category);
+            return category;
         });
     }
 
@@ -266,18 +278,48 @@ public class ProductExcelService {
     }
 
     private void saveBatchTranslations(List<ProductTranslate> translationsBatch) {
-        List<ProductTranslate> saveToBatchTranslations = new ArrayList<>();
-        for (ProductTranslate batch : translationsBatch) {
-            Product product = productRepository
-                    .findByBarcodeAndBusinessId(batch.getProduct().getBarcode(), batch.getProduct().getBusiness().getId())
-                    .orElse(null);
+        // Mahsulotning barcha tarjimalarini guruhlash
+        Map<String, List<ProductTranslate>> groupedTranslations = translationsBatch.stream()
+                .collect(Collectors.groupingBy(translation -> translation.getProduct().getBarcode() + ":" + translation.getProduct().getBusiness().getId()));
+
+        List<ProductTranslate> translationsToSave = new ArrayList<>();
+
+        for (Map.Entry<String, List<ProductTranslate>> entry : groupedTranslations.entrySet()) {
+            String barcodeBusinessKey = entry.getKey();
+            List<ProductTranslate> translationList = entry.getValue();
+
+            // Ushbu barcode va businessId uchun mahsulotni topish
+            String[] keys = barcodeBusinessKey.split(":");
+            String barcode = keys[0];
+            UUID businessId = UUID.fromString(keys[1]);
+
+            Product product = productRepository.findByBarcodeAndBusinessId(barcode, businessId).orElse(null);
+
             if (product != null) {
-                batch.setProduct(product);
-                saveToBatchTranslations.add(batch);
+                for (ProductTranslate translation : translationList) {
+                    // Mevjud tarjimani tekshirish yoki yangi tarjima qo'shish
+                    ProductTranslate existingTranslation = productTranslateRepository
+                            .findByProductIdAndLanguage_Id(product.getId(), translation.getLanguage().getId())
+                            .orElse(null);
+
+                    if (existingTranslation != null) {
+                        // Mavjud tarjimani yangilash
+                        existingTranslation.setName(translation.getName());
+                        existingTranslation.setDescription(translation.getDescription());
+                        existingTranslation.setLongDescription(translation.getLongDescription());
+                        translationsToSave.add(existingTranslation);
+                    } else {
+                        // Yangi tarjima qo'shish
+                        translation.setProduct(product);
+                        translationsToSave.add(translation);
+                    }
+                }
             }
         }
-        if (!saveToBatchTranslations.isEmpty()) {
-            productTranslateRepository.saveAll(saveToBatchTranslations);
+
+        // Tarjimalarni saqlash
+        if (!translationsToSave.isEmpty()) {
+            productTranslateRepository.saveAll(translationsToSave);
         }
     }
 }

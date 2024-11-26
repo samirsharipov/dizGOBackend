@@ -27,7 +27,6 @@ import java.util.Objects;
                 @Index(name = "idx_product_brand_id", columnList = "brand_id")
 
         }
-
 )
 public class Product extends AbsEntity {
 
