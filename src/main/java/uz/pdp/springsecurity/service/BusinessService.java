@@ -91,7 +91,8 @@ public class BusinessService {
 
     public ApiResponse edit(UUID id, BusinessEditDto businessEditDto) {
         Optional<Business> optionalBusiness = businessRepository.findById(id);
-        if (optionalBusiness.isEmpty()) return new ApiResponse("BUSINESS NOT FOUND", false);
+        if (optionalBusiness.isEmpty())
+            return new ApiResponse("BUSINESS NOT FOUND", false);
 
         Optional<Business> businessOptional = businessRepository.findByName(businessEditDto.getName());
         if (businessOptional.isPresent()) {
@@ -103,8 +104,8 @@ public class BusinessService {
         Business business = optionalBusiness.get();
         business.setName(businessEditDto.getName());
         business.setDescription(businessEditDto.getDescription());
-//        business.setSaleMinus(businessEditDto.isSaleMinus());
         business.setActive(businessEditDto.isActive());
+        business.setBusinessNumber(businessEditDto.getBusinessNumber());
 
         businessRepository.save(business);
         return new ApiResponse("EDITED", true);
@@ -112,7 +113,9 @@ public class BusinessService {
 
     public ApiResponse getOne(UUID id) {
         Optional<Business> optionalBusiness = businessRepository.findById(id);
-        return optionalBusiness.map(business -> new ApiResponse("FOUND", true, business)).orElseGet(() -> new ApiResponse("not found business", false));
+        return optionalBusiness
+                .map(business -> new ApiResponse("FOUND", true, business))
+                .orElseGet(() -> new ApiResponse("Not found business", false));
     }
 
 
@@ -143,13 +146,16 @@ public class BusinessService {
     }
 
     public ApiResponse getAll() {
-        List<Business> all = businessRepository.findAllByDeleteIsFalse();
-        return new ApiResponse("all business", true, businessMapper.toDtoList(all));
+        return new ApiResponse("all business", true, businessMapper
+                .toDtoList(businessRepository
+                        .findAllByDeleteIsFalse()));
     }
 
     public ApiResponse deActive(UUID businessId) {
         Optional<Business> optionalBusiness = businessRepository.findById(businessId);
-        if (optionalBusiness.isEmpty()) new ApiResponse("not found business", false);
+        if (optionalBusiness.isEmpty())
+            new ApiResponse("not found business", false);
+
         Business business = optionalBusiness.get();
         business.setActive(!business.isActive());
         businessRepository.save(business);

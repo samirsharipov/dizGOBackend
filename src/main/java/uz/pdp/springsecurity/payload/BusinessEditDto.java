@@ -13,11 +13,13 @@ import java.util.UUID;
 public class BusinessEditDto {
     @NotNull(message = "required line")
     private String name;
+
     private String description;
 
     private boolean isActive;
 
     private boolean isDelete;
 
-//    private boolean saleMinus;
+    private String businessNumber;
+
 }

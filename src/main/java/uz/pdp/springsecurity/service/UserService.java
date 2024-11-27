@@ -37,72 +37,96 @@ public class UserService {
 
 
     public ApiResponse add(UserDto userDto, boolean isNewUser) {
-        UUID businessId = userDto.getBusinessId();
-        Optional<Business> optionalBusiness = businessRepository.findById(businessId);
-        if (optionalBusiness.isEmpty()) {
+        // Tekshirish: Business mavjudligi
+        Business business = businessRepository.findById(userDto.getBusinessId())
+                .orElse(null);
+        if (business == null) {
             return new ApiResponse("NOT FOUND BUSINESS", false);
         }
-        Business business = optionalBusiness.get();
 
-        List<User> allUser = userRepository.findAllByBusiness_Id(businessId);
-        int size = allUser.size();
-
-        Optional<Role> optionalRole = roleRepository.findById(userDto.getRoleId());
-        if (optionalRole.isEmpty()) {
-            return new ApiResponse("not found role", false);
+        // Tekshirish: Role mavjudligi
+        Role role = roleRepository.findById(userDto.getRoleId())
+                .orElse(null);
+        if (role == null) {
+            return new ApiResponse("NOT FOUND ROLE", false);
         }
 
+        // Foydalanuvchi mavjudligini tekshirish
+        if (userRepository.existsByUsernameIgnoreCase(userDto.getUsername())) {
+            return new ApiResponse("USER ALREADY EXISTS", false);
+        }
+
+        // Agar yangi foydalanuvchi bo'lmasa, tarif va filiallar tekshiriladi
         if (!isNewUser) {
-            Optional<Subscription> optionalSubscription = subscriptionRepository.findByBusinessIdAndActiveTrue(business.getId());
-            if (optionalSubscription.isEmpty()) {
-                return new ApiResponse("tariff aktiv emas", false);
-            }
-            Subscription subscription = optionalSubscription.get();
-            if (subscription.getTariff().getEmployeeAmount() >= size || subscription.getTariff().getEmployeeAmount() == 0) {
-
-            } else {
-                return new ApiResponse("You have opened a sufficient branch according to the employee", false);
-            }
-
-            Role role = optionalRole.get();
-            if (role.getName().equals(Constants.ADMIN)) {
-                return new ApiResponse("Admin rolelik hodim qo'shaolmaysiz!", false);
+            ApiResponse subscriptionCheckResponse = checkSubscriptionAndRole(business, role);
+            if (!subscriptionCheckResponse.isSuccess()) {
+                return subscriptionCheckResponse;
             }
         }
 
-        boolean b = userRepository.existsByUsernameIgnoreCase(userDto.getUsername());
-        if (b) return new ApiResponse("USER ALREADY EXISTS", false);
-
-
-        HashSet<Branch> branches = new HashSet<>();
-        for (UUID branchId : userDto.getBranchId()) {
-            Optional<Branch> optionalBranch = branchRepository.findById(branchId);
-            if (optionalBranch.isPresent()) {
-                branches.add(optionalBranch.get());
-            } else {
-                return new ApiResponse("BRANCH NOT FOUND", false);
-            }
+        // Branchlarni tekshirish va yig'ish
+        Set<Branch> branches = collectBranches(userDto.getBranchId().stream().toList());
+        if (branches == null) {
+            return new ApiResponse("BRANCH NOT FOUND", false);
         }
 
+        // Userni yaratish va sozlash
         User user = userMapper.toEntity(userDto);
-        if (userDto.getJobId() != null) {
-            Optional<Job> optionalJob = jobRepository.findById(userDto.getJobId());
-            optionalJob.ifPresent(user::setJob);
-        }
-        user.setActive(true);
+        user.setBusiness(business);
+        user.setRole(role);
         user.setBranches(branches);
-        user.setBirthday(userDto.getBirthday());
-        user.setPassportNumber(userDto.getPassportNumber() != null ? userDto.getPassportNumber() : "");
+        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        user.setActive(true);
         user.setDateOfEmployment(userDto.getDateOfEmployment() != null ? userDto.getDateOfEmployment() : new Date());
+        user.setPassportNumber(userDto.getPassportNumber() != null ? userDto.getPassportNumber() : "");
+
+        if (userDto.getJobId() != null) {
+            jobRepository.findById(userDto.getJobId()).ifPresent(user::setJob);
+        }
+
         if (userDto.getPhotoId() != null) {
             user.setPhoto(attachmentRepository.findById(userDto.getPhotoId()).orElseThrow());
         }
-        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        user.setRole(optionalRole.get());
+
         userRepository.save(user);
         agreementService.add(user);
+
         return new ApiResponse("ADDED", true, user.getId());
     }
+
+    private ApiResponse checkSubscriptionAndRole(Business business, Role role) {
+        Optional<Subscription> optionalSubscription = subscriptionRepository.findByBusinessIdAndActiveTrue(business.getId());
+        if (optionalSubscription.isEmpty()) {
+            return new ApiResponse("TARIFF AKTIV EMAS", false);
+        }
+
+        Subscription subscription = optionalSubscription.get();
+        int maxEmployees = subscription.getTariff().getEmployeeAmount();
+        int currentEmployeeCount = userRepository.countByBusiness_Id((business.getId()));
+        if (maxEmployees > 0 && currentEmployeeCount >= maxEmployees) {
+            return new ApiResponse("You have reached the employee limit", false);
+        }
+
+        if (Constants.ADMIN.equals(role.getName())) {
+            return new ApiResponse("Admin rolelik hodim qo'shaolmaysiz!", false);
+        }
+
+        return new ApiResponse("OK", true);
+    }
+
+    private Set<Branch> collectBranches(List<UUID> branchIds) {
+        Set<Branch> branches = new HashSet<>();
+        for (UUID branchId : branchIds) {
+            Optional<Branch> optionalBranch = branchRepository.findById(branchId);
+            if (optionalBranch.isEmpty()) {
+                return null; // Filial topilmasa, null qaytaramiz
+            }
+            branches.add(optionalBranch.get());
+        }
+        return branches;
+    }
+
+
 
     public ApiResponse edit(UUID id, UserDto userDto) {
         Optional<User> optionalUser = userRepository.findById(id);
