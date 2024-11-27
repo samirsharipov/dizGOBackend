@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import uz.pdp.springsecurity.entity.*;
+import uz.pdp.springsecurity.helpers.CreateEntityHelper;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.BranchDto;
 import uz.pdp.springsecurity.repository.*;
@@ -27,6 +28,7 @@ public class BranchService {
     private final PayMethodRepository payMethodRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final BranchCategoryRepository branchCategoryRepository;
+    private final CreateEntityHelper createEntityHelper;
 
     public ApiResponse addBranch(BranchDto branchDto) {
         Branch branch = new Branch();
@@ -80,7 +82,7 @@ public class BranchService {
     }
 
     private void createProjectStatus(Branch branch) {
-        BusinessService.createProjectStatus(branch, projectStatusRepository);
+        createEntityHelper.createProjectStatus(branch, projectStatusRepository);
     }
 
     static void createTaskStatus(Branch branch, TaskStatusRepository taskStatusRepository) {
@@ -103,7 +105,7 @@ public class BranchService {
         taskStatusRepository.save(uncompletedTaskStatus);
     }
 
-    static void createBalance(Branch branch, BalanceRepository balanceRepository, PayMethodRepository payMethodRepository) {
+    public static void createBalance(Branch branch, BalanceRepository balanceRepository, PayMethodRepository payMethodRepository) {
         List<PaymentMethod> allByBusinessId = payMethodRepository.findAllByBusiness_Id(branch.getBusiness().getId());
 
         for (PaymentMethod paymentMethod : allByBusinessId) {

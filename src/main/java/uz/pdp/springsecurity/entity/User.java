@@ -2,7 +2,6 @@ package uz.pdp.springsecurity.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -42,6 +41,7 @@ public class User extends AbsEntity implements UserDetails {
     @ManyToOne
     private Job job;
 
+    @Column(unique = true)
     private String phoneNumber;
 
     private boolean sex;

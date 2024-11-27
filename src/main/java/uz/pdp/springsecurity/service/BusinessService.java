@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.enums.*;
-import uz.pdp.springsecurity.mapper.AddressMapper;
-import uz.pdp.springsecurity.mapper.BranchMapper;
+import uz.pdp.springsecurity.helpers.BusinessHelper;
+import uz.pdp.springsecurity.helpers.CreateEntityHelper;
 import uz.pdp.springsecurity.mapper.BusinessMapper;
 import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
@@ -20,27 +20,20 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class BusinessService {
+
     private final BusinessRepository businessRepository;
     private final ProjectStatusRepository projectStatusRepository;
     private final TaskStatusRepository taskStatusRepository;
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
-    private final TariffRepository tariffRepository;
-    private final UserService userService;
-    private final BranchRepository branchRepository;
-    private final AddressRepository addressRepository;
-    private final BranchMapper branchMapper;
-    private final AddressMapper addressMapper;
     private final SubscriptionRepository subscriptionRepository;
     private final BusinessMapper businessMapper;
     private final PayMethodRepository payMethodRepository;
     private final NotificationRepository notificationRepository;
-    private final LidStatusRepository lidStatusRepository;
-    private final SourceRepository sourceRepository;
-    private final LidFieldRepository lidFieldRepository;
-    private final BalanceRepository balanceRepository;
-    private final SmsService smsService;
     private final ShablonRepository shablonRepository;
+
+    private final BusinessHelper businessHelper;
+    private final CreateEntityHelper createEntityHelper;
 
     private final static LocalDateTime TODAY = LocalDate.now().atStartOfDay();
     private final static LocalDateTime THIS_WEEK = TODAY.minusDays(TODAY.getDayOfWeek().ordinal());
@@ -49,216 +42,51 @@ public class BusinessService {
 
     @Transactional
     public ApiResponse add(BusinessDto businessDto) {
-        if (businessRepository.existsByNameIgnoreCase(businessDto.getName()))
+        if (businessRepository.existsByNameIgnoreCase(businessDto.getName())) {
             return new ApiResponse("A BUSINESS WITH THAT NAME ALREADY EXISTS", false);
-        Business business = new Business();
-        business.setName(businessDto.getName());
-        business.setDescription(businessDto.getDescription());
-        UUID tariffId = businessDto.getTariffId();
-        Optional<Tariff> optionalTariff = tariffRepository.findById(tariffId);
-        Tariff tariff = optionalTariff.get();
-        business.setActive(businessDto.isActive());
-        business.setDelete(false);
-        business = businessRepository.save(business);
+        }
 
-        payMethodRepository.save(new PaymentMethod(
-                "Naqd",
-                business
-        ));
-        payMethodRepository.save(new PaymentMethod(
-                "PlastikKarta",
-                business
-        ));
-        payMethodRepository.save(new PaymentMethod(
-                "BankOrqali",
-                business
-        ));
-        payMethodRepository.save(new PaymentMethod(
-                "Mijoz_balance",
-                business
-        ));
+        // Yangi biznes yaratish
+        Business business = businessHelper.createNewBusiness(businessDto);
 
-        Subscription subscription = new Subscription();
+        // To'lov usullarini saqlash
+        businessHelper.savePaymentMethods(business, payMethodRepository);
 
-        subscription.setBusiness(business);
-        optionalTariff.ifPresent(subscription::setTariff);
-        subscription.setActive(false);
-        subscription.setStatusTariff(StatusTariff.WAITING);
-        subscriptionRepository.save(subscription);
+        // Obuna yaratish
+        createEntityHelper.createSubscription(business, businessDto.getTariffId());
+
+        // Manzil, Filial va Foydalanuvchi yaratish
+        Address address = createEntityHelper.createAddress(businessDto.getAddressDto());
+        Branch branch = createEntityHelper.createBranch(business, address, businessDto.getBranchDto());
+        createEntityHelper.createBalance(branch);
+        createEntityHelper.createAdminRoleAndUser(business, branch, businessDto);
+        createEntityHelper.createShablon(business, shablonRepository);
+
+        // Qo'shimcha ma'lumotlar yaratish
+        businessHelper.createStatusAndOther(business);
+
+        // SuperAdmin'ga xabar yuborish
+        notifySuperAdmin(business);
+
+        // Filialga Task va Project Status qo'shish
+        BranchService.createTaskStatus(branch, taskStatusRepository);
+        createEntityHelper.createProjectStatus(branch, projectStatusRepository);
+
+        return new ApiResponse("Successfully added", true);
+    }
 
 
-        AddressDto addressDto = businessDto.getAddressDto();
-        BranchDto branchDto = businessDto.getBranchDto();
-        UserDto userDto = businessDto.getUserDto();
-
-        Address address = addressRepository.save(addressMapper.toEntity(addressDto));
-
-        createStatusAndOther(business);
-
-        branchDto.setAddressId(address.getId());
-        branchDto.setBusinessId(business.getId());
-        Branch branch = branchRepository.save(branchMapper.toEntity(branchDto));
-        Set<UUID> branchIds = new HashSet<>();
-        branchIds.add(branch.getId());
-        userDto.setBranchId(branchIds);
-
-        BranchService.createBalance(branch, balanceRepository, payMethodRepository);
-
-        Role admin = new Role();
-        admin.setName(Constants.ADMIN);
-        admin.setPermissions(businessDto.getPermissionsList());
-        admin.setBusiness(business);
-        Role newRole = roleRepository.save(admin);
-        userDto.setRoleId(newRole.getId());
-
-        userDto.setBusinessId(business.getId());
-
-        userService.add(userDto, true);
-
-        Optional<User> superAdmin = userRepository.findByUsername("superAdmin");
-
-        if (superAdmin.isPresent()) {
+    private void notifySuperAdmin(Business business) {
+        userRepository.findByUsername("superAdmin").ifPresent(superAdmin -> {
             Notification notification = new Notification();
             notification.setRead(false);
-            notification.setName("Yangi bizness qo'shildi!");
-            notification.setMessage("Yangi User va bizness qo'shildi biznes tarifini aktivlashtishingiz mumkin!");
-            notification.setUserTo(superAdmin.get());
+            notification.setName("Yangi biznes qo'shildi!");
+            notification.setMessage("Yangi User va biznes qo'shildi, biznes tarifini aktivlashtirishingiz mumkin!");
+            notification.setUserTo(superAdmin);
             notification.setType(NotificationType.NEW_BUSINESS);
             notification.setObjectId(business.getId());
             notificationRepository.save(notification);
-        }
-
-        BranchService.createTaskStatus(branch, taskStatusRepository);
-
-        createProjectStatus(branch);
-
-//        try {
-//            smsService.createBusiness(business);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e.getMessage());
-//        }
-
-        return new ApiResponse("ADDED", true);
-    }
-
-    private void createProjectStatus(Branch branch) {
-        createProjectStatus(branch, projectStatusRepository);
-    }
-
-    public static void createProjectStatus(Branch branch, ProjectStatusRepository projectStatusRepository) {
-        ProjectStatus projectStatus1 = new ProjectStatus();
-        projectStatus1.setName("Uncompleted");
-        projectStatus1.setColor("red");
-        projectStatus1.setBranch(branch);
-        projectStatusRepository.save(projectStatus1);
-
-        ProjectStatus projectStatus2 = new ProjectStatus();
-        projectStatus2.setColor("yellow");
-        projectStatus2.setName("Process");
-        projectStatus2.setBranch(branch);
-        projectStatusRepository.save(projectStatus2);
-
-        ProjectStatus projectStatus3 = new ProjectStatus();
-        projectStatus3.setColor("green");
-        projectStatus3.setName("Completed");
-        projectStatus3.setBranch(branch);
-        projectStatusRepository.save(projectStatus3);
-    }
-
-    private void createStatusAndOther(Business business) {
-        LidField lidField = new LidField();
-        lidField.setName("FIO");
-        lidField.setBusiness(business);
-        lidField.setValueType(ValueType.STRING);
-        lidField.setTanlangan(false);
-        lidFieldRepository.save(lidField);
-
-        LidField lidField1 = new LidField();
-        lidField1.setName("Phone number");
-        lidField1.setBusiness(business);
-        lidField1.setValueType(ValueType.INTEGER);
-        lidField1.setTanlangan(false);
-        lidFieldRepository.save(lidField1);
-
-        Source source = new Source();
-        source.setBusiness(business);
-        source.setName("Telegram");
-        sourceRepository.save(source);
-        Source source1 = new Source();
-        source1.setBusiness(business);
-        source1.setName("Facebook");
-        sourceRepository.save(source1);
-        Source source2 = new Source();
-        source2.setBusiness(business);
-        source2.setName("Instagram");
-        sourceRepository.save(source2);
-
-        Source source3 = new Source();
-        source3.setBusiness(business);
-        source3.setName("HandleWrite");
-        sourceRepository.save(source3);
-
-        addLidStatus(business);
-    }
-
-    private void addLidStatus(Business business) {
-        LidStatus newStatus = new LidStatus();
-        newStatus.setName("New");
-        newStatus.setIncrease(true);
-        newStatus.setColor("rang");
-        newStatus.setSort(1);
-        newStatus.setBusiness(business);
-        lidStatusRepository.save(newStatus);
-
-        LidStatus progressStatus = new LidStatus();
-        progressStatus.setName("Progress");
-        progressStatus.setIncrease(true);
-        progressStatus.setColor("rang");
-        progressStatus.setSort(2);
-        progressStatus.setBusiness(business);
-        lidStatusRepository.save(progressStatus);
-
-        LidStatus rejectionStatus = new LidStatus();
-        rejectionStatus.setName("Rejection");
-        rejectionStatus.setIncrease(true);
-        rejectionStatus.setOrginalName("Rejection");
-        rejectionStatus.setColor("rang");
-        rejectionStatus.setSort(3);
-        rejectionStatus.setBusiness(business);
-        lidStatusRepository.save(rejectionStatus);
-
-        LidStatus doneStatus = new LidStatus();
-        doneStatus.setName("Done");
-        doneStatus.setIncrease(true);
-        doneStatus.setOrginalName("Done");
-        doneStatus.setColor("rang");
-        doneStatus.setSaleStatus(true);
-        doneStatus.setSort(4);
-        doneStatus.setBusiness(business);
-        lidStatusRepository.save(doneStatus);
-
-
-        Shablon shablon = new Shablon();
-        shablon.setName("Tug'ilgan kun uchun");
-        shablon.setOriginalName("bithday");
-        shablon.setMessage("Hurmatli {ism} tugilgan kuningiz bilan");
-        shablon.setBusiness(business);
-        shablonRepository.save(shablon);
-
-        Shablon shablon2 = new Shablon();
-        shablon2.setName("Mijozlar qarzi");
-        shablon2.setOriginalName("debtCustomer");
-        shablon2.setMessage("Hurmatli mijoz qarzingiz bor");
-        shablon2.setBusiness(business);
-        shablonRepository.save(shablon2);
-
-        Shablon shablon3 = new Shablon();
-        shablon3.setName("Task qo'shilganda");
-        shablon3.setOriginalName("newTask");
-        shablon3.setMessage("yangi task qoshildi");
-        shablon3.setBusiness(business);
-        shablonRepository.save(shablon3);
-
+        });
     }
 
     public ApiResponse edit(UUID id, BusinessEditDto businessEditDto) {
