@@ -1,7 +1,6 @@
 package uz.pdp.springsecurity.configuration;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +30,6 @@ import java.util.List;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
 
     private final AuthService authService;
 
@@ -84,7 +82,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/app/message",
                         "/app/chatroom/public",
                         "/ws",
-                        "/api/product-excel/**"
+                        "/api/product-excel/**",
+                        "/api/language/**"
                 )
                 .permitAll()
                 .anyRequest()

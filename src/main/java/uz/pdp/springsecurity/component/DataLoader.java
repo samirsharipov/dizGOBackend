@@ -9,6 +9,8 @@ import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.entity.Currency;
 import uz.pdp.springsecurity.entity.template.RolePermissions;
 import uz.pdp.springsecurity.enums.*;
+import uz.pdp.springsecurity.helpers.BusinessHelper;
+import uz.pdp.springsecurity.helpers.CreateEntityHelper;
 import uz.pdp.springsecurity.repository.*;
 import uz.pdp.springsecurity.service.AgreementService;
 import uz.pdp.springsecurity.service.BusinessService;
@@ -48,6 +50,8 @@ public class DataLoader implements CommandLineRunner {
     private final InvoiceService invoiceService;
     private final BalanceRepository balanceRepository;
     private final LanguageRepository languageRepository;
+    private final CreateEntityHelper createEntityHelper;
+    private final BusinessHelper businessHelper;
 
     @Value("${spring.sql.init.mode}")
     private String initMode;
@@ -79,42 +83,18 @@ public class DataLoader implements CommandLineRunner {
             languageRepository.saveAll(languages);
 
 
-            //Lid field lar qo'shish
-            List<LidField> lidFields = Arrays.asList(
-                    new LidField("FIO", false, ValueType.STRING, business),
-                    new LidField("PhoneNumber", false, ValueType.INTEGER, business)
-            );
-            lidFieldRepository.saveAll(lidFields);
-
-            // Source qo'shish
-            List<Source> sources = Arrays.asList(
-                    new Source("Telegram", business),
-                    new Source("Facebook", business),
-                    new Source("Instagram", business),
-                    new Source("HandleWrite", business)
-            );
-            sourceRepository.saveAll(sources);
+            // Qo'shimcha ma'lumotlar yaratish
+            businessHelper.createStatusAndOther(business);
 
             //Lid Status qo'shish
-            List<LidStatus> lidStatuses = Arrays.asList(
-                    new LidStatus("New", "rang", 1, "New", true, business),
-                    new LidStatus("Progress", "rang", 2, "Progress", true, business),
-                    new LidStatus("Rejection", "rang", 3, "Rejection", true, business),
-                    new LidStatus("Done", "rang", 4, "Done", true, true, business)
-            );
-            lidStatusRepository.saveAll(lidStatuses);
+            CreateEntityHelper.saveLidStatus(business, lidStatusRepository);
 
 
             List<Business> all = businessRepository.findAll();
             for (Business business2 : all) {
                 List<Shablon> all1 = shablonRepository.findAllByBusiness_Id(business2.getId());
                 if (all1.isEmpty()) {
-                    List<Shablon> shablons = Arrays.asList(
-                            new Shablon("Tug'ilgan kun uchun", "bithday", "Hurmatli {ism} tugilgan kuningiz bilan", business2),
-                            new Shablon("Mijozlar qarzi", "debtCustomer", "qarzingizni tulash vaqti keldi", business2),
-                            new Shablon("Task qo'shilganda", "newTask", "yangi task qoshildi", business2)
-                    );
-                    shablonRepository.saveAll(shablons);
+                    createEntityHelper.createShablon(business, shablonRepository);
                 }
             }
 
@@ -160,7 +140,7 @@ public class DataLoader implements CommandLineRunner {
             branches.add(mainBranch);
 
             invoiceService.create(mainBranch);
-            BusinessService.createProjectStatus(mainBranch, projectStatusRepository);
+            createEntityHelper.createProjectStatus(mainBranch, projectStatusRepository);
 
             List<TaskStatus> taskStatuses = Arrays.asList(
                     new TaskStatus("Completed", "Completed", 2, true, "#04d227", mainBranch),

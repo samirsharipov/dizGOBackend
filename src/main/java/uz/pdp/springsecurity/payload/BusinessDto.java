@@ -13,9 +13,15 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BusinessDto {
+
     @NotNull(message = "required line")
     private String name;
+
     private String description;
+
+    private String businessName;
+
+    private String businessNumber;
 
     private UUID tariffId;
 

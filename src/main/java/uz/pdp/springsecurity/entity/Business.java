@@ -16,13 +16,15 @@ import javax.persistence.Entity;
 @JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler", "fieldHandler"})
 public class Business extends AbsEntity {
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
 
     private String description;
 
-    // minusga sotish
     private boolean saleMinus = false;
+
+    @Column(unique = true)
+    private String businessNumber;
 
     private boolean isActive;
 
@@ -36,7 +38,7 @@ public class Business extends AbsEntity {
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private boolean grossPriceControl;
 
-    private int editDays = 30; // default 30 days
+    private int editDays = 30;
 
     private Boolean main = Boolean.FALSE;
 
