@@ -73,4 +73,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             @Param("businessId") UUID businessId,
             @Param("startDate") Timestamp startDate,
             @Param("endDate") Timestamp endDate);
+
+    int countByBusiness_Id(UUID businessId);
 }

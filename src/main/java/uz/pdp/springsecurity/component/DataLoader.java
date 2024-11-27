@@ -13,7 +13,6 @@ import uz.pdp.springsecurity.helpers.BusinessHelper;
 import uz.pdp.springsecurity.helpers.CreateEntityHelper;
 import uz.pdp.springsecurity.repository.*;
 import uz.pdp.springsecurity.service.AgreementService;
-import uz.pdp.springsecurity.service.BusinessService;
 import uz.pdp.springsecurity.service.InvoiceService;
 import uz.pdp.springsecurity.utils.Constants;
 
@@ -45,8 +44,6 @@ public class DataLoader implements CommandLineRunner {
     private final SubscriptionRepository subscriptionRepository;
     private final AgreementService agreementService;
     private final LidStatusRepository lidStatusRepository;
-    private final LidFieldRepository lidFieldRepository;
-    private final SourceRepository sourceRepository;
     private final InvoiceService invoiceService;
     private final BalanceRepository balanceRepository;
     private final LanguageRepository languageRepository;
