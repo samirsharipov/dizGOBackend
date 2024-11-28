@@ -22,4 +22,6 @@ public class BusinessEditDto {
 
     private String businessNumber;
 
+    private String status;
+
 }

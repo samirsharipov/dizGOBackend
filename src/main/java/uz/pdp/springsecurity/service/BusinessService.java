@@ -105,6 +105,7 @@ public class BusinessService {
         business.setName(businessEditDto.getName());
         business.setDescription(businessEditDto.getDescription());
         business.setActive(businessEditDto.isActive());
+        business.setStatus(businessEditDto.getStatus());
         business.setBusinessNumber(businessEditDto.getBusinessNumber());
 
         businessRepository.save(business);
@@ -141,6 +142,7 @@ public class BusinessService {
         Business business = optionalBusiness.get();
         business.setDelete(true);
         business.setActive(false);
+        business.setStatus(Constants.ARCHIVED);
         businessRepository.save(business);
         return new ApiResponse("DELETED", true);
     }
@@ -157,7 +159,8 @@ public class BusinessService {
             new ApiResponse("not found business", false);
 
         Business business = optionalBusiness.get();
-        business.setActive(!business.isActive());
+        business.setActive(false);
+        business.setStatus(Constants.BLOCKED);
         businessRepository.save(business);
         return new ApiResponse("SUCCESS", true);
     }

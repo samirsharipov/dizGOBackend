@@ -30,6 +30,8 @@ public class Business extends AbsEntity {
 
     private boolean delete;
 
+    private String status; // active, blocked, archive
+
     private Boolean exchangeProductByConfirmation;
 
     @Column(name = "cheap_selling_price", columnDefinition = "boolean default false", nullable = false)

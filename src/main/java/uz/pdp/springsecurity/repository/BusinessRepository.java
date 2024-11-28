@@ -25,4 +25,16 @@ public interface BusinessRepository extends JpaRepository<Business, UUID> {
 
     @Query("SELECT b.id FROM Business b")
     List<UUID> findAllBusinessIds();
+
+    @Query("SELECT COUNT(b) FROM Business b WHERE b.status = 'active'")
+    long countActive();
+
+    @Query("SELECT COUNT(b) FROM Business b WHERE b.status = 'blocked'")
+    long countBlocked();
+
+    @Query("SELECT COUNT(b) FROM Business b WHERE b.status = 'archive'")
+    long countArchived();
+
+    @Query("SELECT COUNT(b) FROM Business b WHERE b.status = null ")
+    long countNonActive();
 }

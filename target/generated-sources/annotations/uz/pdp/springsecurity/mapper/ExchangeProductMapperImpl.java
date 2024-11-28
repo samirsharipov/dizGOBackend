@@ -12,8 +12,8 @@ import uz.pdp.springsecurity.payload.ExchangeProductDTO;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-11-20T14:57:47+0500",
-    comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.12 (Amazon.com Inc.)"
+    date = "2024-11-28T17:01:24+0500",
+    comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.13 (Amazon.com Inc.)"
 )
 @Component
 public class ExchangeProductMapperImpl implements ExchangeProductMapper {

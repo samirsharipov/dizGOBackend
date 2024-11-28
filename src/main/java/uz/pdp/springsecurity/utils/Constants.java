@@ -8,4 +8,8 @@ public interface Constants {
     String OPERATOR = "Operator";
     String BOT_TOKEN = "6972170183:AAH_M_EYlVzQg9jWStSfR5_1NT91rX69Zrw";
     String CUSTOMER_BOT_TOKEN = "6784268248:AAF5exW_SGXwfSXKU8BiwaudNf1LtdiEwq0";
+
+    String ACTIVE = "active";
+    String BLOCKED = "blocked";
+    String ARCHIVED = "archived";
 }
