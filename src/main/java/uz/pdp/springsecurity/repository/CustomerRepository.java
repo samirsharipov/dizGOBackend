@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import uz.pdp.springsecurity.entity.Customer;
 import uz.pdp.springsecurity.payload.projections.InActiveUserProjection;
 
@@ -90,10 +91,6 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     Page<Customer> findAllByBusinessIdAndNameContainingIgnoreCaseAndDebtAndActiveTrueOrBusinessIdAndPhoneNumberContainingIgnoreCaseAndDebtAndActiveTrue(UUID business_id, String name, double debt, UUID business_id2, String phoneNumber, double debt2, Pageable pageable);
 
-
-
-
-
     List<Customer> findAllByBusiness_IdAndCreatedAtBetween(UUID businessId, Timestamp start, Timestamp end);
 
     @Query(nativeQuery = true, value = "Select sum(debt) as totalOurMoney from customer where debt < 0 and business_id = :businessId")
@@ -101,4 +98,7 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     @Query(nativeQuery = true, value = "Select sum(debt) as totalOurMoney from customer where debt > 0 and business_id = :businessId")
     Double allYourMoney(UUID businessId);
+
+    @Query("select count(c) from Customer c where c.createdAt between :startDate and :endDate")
+    long countTotalBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
 }

@@ -59,4 +59,6 @@ public class ProductPostDto {
 
 
     private Boolean isGlobal;   // Global availability
+
+    private boolean clone;
 }

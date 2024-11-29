@@ -1,11 +1,15 @@
 package uz.pdp.springsecurity.repository;
 
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import uz.pdp.springsecurity.entity.Product;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,8 +30,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     boolean existsByPluCodeAndBusiness_Id(String pluCode, UUID business_id);
 
-    Optional<Product> findAllByBarcodeAndBranchIdAndActiveTrue(String barcode, UUID branch_id);
-
     List<Product> findAllByCategoryIdAndBranchIdAndActiveTrue(UUID category_id, UUID branch_id);
 
     Page<Product> findAllByCategory_IdAndBranch_IdAndActiveTrue(UUID category_id, UUID branch_id, Pageable pageable);
@@ -43,12 +45,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     List<Product> findAllByBranchIdAndActiveIsTrueAndNameContainingIgnoreCaseOrBarcodeContainingIgnoreCase(UUID branch_id, String name, String barcode);
 
     List<Product> findAllByBranchIdAndActiveIsTrueAndBarcodeContainingIgnoreCase(UUID branch_id, String name);
-
-//    Page<Product> findAllByBranchIdAndNameContainingIgnoreCaseOrBranchIdAndBarcodeContainingIgnoreCase(
-//            UUID branchId, String name, UUID branchId2, String barcode, Pageable pageable);
-
-    Page<Product> findAllByBranchIdAndNameContainingIgnoreCaseOrBranchIdAndBarcodeContainingIgnoreCaseOrBranchIdAndCategoryIdAndActiveTrue
-            (UUID branch_id, String name, UUID branch_id2, String barcode, UUID branch_id3, UUID category_id, Pageable pageable);
 
     List<Product> findAllByBranchIdAndBarcodeOrNameAndActiveTrue(UUID branch_id, String barcode, String name);
 
@@ -72,24 +68,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     int countAllByBranchId(UUID branchId);
 
-
-    Page<Product> findAllByBusinessIdAndNameContainingIgnoreCaseAndActiveTrueOrBusinessIdAndBarcodeContainingIgnoreCaseAndActiveTrue(UUID busId1, String name, UUID busId2, String barcode, Pageable pageable);
-
-    Page<Product> findAllByBusinessIdAndNameContainingIgnoreCaseAndActiveTrue(UUID busId1, String name, Pageable pageable);
-
     Page<Product> findAllByBranch_IdAndNameContainingIgnoreCaseAndActiveTrueOrBusinessIdAndBarcodeContainingIgnoreCaseAndActiveTrue(UUID branchId1, String name, UUID branchId2, String barcode, Pageable pageable);
-
-    Page<Product> findAllByBusinessIdAndCategoryIdAndBrandIdAndActiveTrue(UUID businessId, UUID categoryId, UUID brandId, Pageable pageable);
-
-    Page<Product> findAllByBranch_IdAndCategoryIdAndBrandIdAndActiveTrue(UUID branchId, UUID categoryId, UUID brandId, Pageable pageable);
-
-    Page<Product> findAllByBusinessIdAndCategoryIdAndActiveTrue(UUID businessId, UUID categoryId, Pageable pageable);
-
-    Page<Product> findAllByBranch_IdAndCategoryIdAndActiveTrue(UUID branchId, UUID categoryId, Pageable pageable);
-
-    Page<Product> findAllByBusinessIdAndBrandIdAndActiveTrue(UUID businessId, UUID brandId, Pageable pageable);
-
-    Page<Product> findAllByBranch_IdAndBrandIdAndActiveTrue(UUID branchId, UUID brandId, Pageable pageable);
 
     Page<Product> findAllByBusinessIdAndActiveTrue(UUID businessId, Pageable pageable);
 
@@ -100,6 +79,17 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     List<Product> findAllByBarcode(String barcode);
 
     Page<Product> findAll(Specification<Product> spec, Pageable pageable);
+
+
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.createdAt BETWEEN :startDate AND :endDate")
+    long countTotalBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.clone = true AND p.createdAt BETWEEN :startDate AND :endDate")
+    long countCloneBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.isGlobal = false AND p.createdAt BETWEEN :startDate AND :endDate")
+    long countGlobalBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
 }
+
 
 
