@@ -717,6 +717,7 @@ public class ProductService {
         product.setCategory(category);
         product.setBrand(brand);
         product.setBusiness(business);
+        product.setClone(productPostDto.isClone());
 
         // Fotoni o'rnatish
         if (productPostDto.getPhotoId() != null) {

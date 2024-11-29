@@ -75,4 +75,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             @Param("endDate") Timestamp endDate);
 
     int countByBusiness_Id(UUID businessId);
+
+    @Query("select count(u) from users u where u.createdAt between :startDate and :endDate")
+    long countTotalBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
 }

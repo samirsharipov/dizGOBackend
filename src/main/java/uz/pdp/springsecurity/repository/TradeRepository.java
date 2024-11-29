@@ -14,6 +14,7 @@ import uz.pdp.springsecurity.payload.projections.MonthProjection;
 import uz.pdp.springsecurity.payload.projections.ReportForProduct;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -51,19 +52,6 @@ public interface TradeRepository extends JpaRepository<Trade, UUID>, JpaSpecific
                                        "GROUP BY ptp.name, b.id, t.id ")
     List<DataProjection> findAllTradeTypeManyProductByUserId(UUID userId);
 
-    @Query(nativeQuery = true, value = "SELECT Distinct p.name AS productname,\n" +
-                                       "                b.name as branchName,\n" +
-                                       "                t.created_at as createddate,\n" +
-                                       "                SUM(tp.traded_quantity) AS treaderquantity,\n" +
-                                       "                SUM(t.kpi) AS kpi \n" +
-                                       "FROM trade t\n" +
-                                       "         JOIN users u ON t.trader_id = u.id\n" +
-                                       "         JOIN trade_product tp ON tp.trade_id = t.id\n" +
-                                       "         JOIN product p ON tp.product_id = p.id\n" +
-                                       "        JOIN branches b on t.branch_id = b.id\n" +
-                                       "WHERE u.id = :userId and p.id = :productId\n" +
-                                       "GROUP BY p.name, b.id, t.id ")
-    List<DataProjection> findAllByUserIdAndProductId(UUID userId, UUID productId);
 
     @Query(nativeQuery = true, value = "SELECT Distinct p.name AS productname,\n" +
                                        "                b.name as branchName,\n" +
@@ -80,34 +68,6 @@ public interface TradeRepository extends JpaRepository<Trade, UUID>, JpaSpecific
                                        "GROUP BY p.name, b.id, t.id ")
     List<DataProjection> findAllByUserIdAndProductIdAndDateRange(UUID userId, UUID productId, Date startDate, Date endDate);
 
-    @Query(nativeQuery = true, value = "SELECT Distinct ptp.name AS productname,\n" +
-                                       "                b.name as branchName,\n" +
-                                       "                t.created_at as createddate,\n" +
-                                       "                SUM(tp.traded_quantity) AS treaderquantity,\n" +
-                                       "                SUM(t.kpi) AS kpi \n" +
-                                       "FROM trade_product tp\n" +
-                                       "         JOIN product_type_price ptp ON tp.product_type_price_id = ptp.id\n" +
-                                       "         JOIN Product p ON ptp.product_id = p.id\n" +
-                                       "         JOIN Trade t ON tp.trade_id = t.id\n" +
-                                       "         JOIN branches b on t.branch_id = b.id\n" +
-                                       "WHERE t.trader_id = :userId and ptp.id = :productId\n" +
-                                       "GROUP BY ptp.name, b.id, t.id ")
-    List<DataProjection> findAllTradeTypeManyProductByUserIdAndProductId(UUID userId, UUID productId);
-
-    @Query(nativeQuery = true, value = "SELECT Distinct ptp.name AS productname,\n" +
-                                       "                b.name as branchName,\n" +
-                                       "                t.created_at as createddate,\n" +
-                                       "                SUM(tp.traded_quantity) AS treaderquantity,\n" +
-                                       "                SUM(t.kpi) AS kpi \n" +
-                                       "FROM trade_product tp\n" +
-                                       "         JOIN product_type_price ptp ON tp.product_type_price_id = ptp.id\n" +
-                                       "         JOIN Product p ON ptp.product_id = p.id\n" +
-                                       "         JOIN Trade t ON tp.trade_id = t.id\n" +
-                                       "         JOIN branches b on t.branch_id = b.id\n" +
-                                       "WHERE t.trader_id = :userId and ptp.id = :productId\n" +
-                                       "      AND t.created_at BETWEEN :startDate AND :endDate\n" +
-                                       "GROUP BY ptp.name, b.id, t.id ")
-    List<DataProjection> findAllTradeTypeManyProductByUserIdAndProductIdAndDateRange(UUID userId, UUID productId, Date startDate, Date endDate);
 
 
     @Query(nativeQuery = true, value = "SELECT Distinct p.name AS productname,\n" +
@@ -394,6 +354,9 @@ public interface TradeRepository extends JpaRepository<Trade, UUID>, JpaSpecific
     @Query(nativeQuery = true, value = "SELECT t.created_at as arrivaltime FROM trade t JOIN customer c on c.id = t.customer_id where c.branch_id = :branchId order by t.created_at")
     List<MonthProjection> getAllMonths(UUID branchId);
 
+
+    @Query("select count(t) from Trade t where t.createdAt between :startDate and :endDate")
+    long countTotalBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
 
 
 }

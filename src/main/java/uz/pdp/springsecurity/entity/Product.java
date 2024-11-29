@@ -147,6 +147,8 @@ public class Product extends AbsEntity {
     private Boolean isGlobal;            // Global mavjudlik
     private boolean main;                // Asosiy mahsulot ko'rsatkichi
 
+    private boolean clone;
+
 
     private String MXIKCode;             // Soliq uchun mxik kodi
 

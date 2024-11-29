@@ -57,6 +57,8 @@ public class ProductExcelService {
             List<ProductTranslate> translationsBatch = new ArrayList<>();
             int productsUploaded = 0;
 
+
+
             for (int i = 1; i < totalRows; i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
@@ -72,6 +74,8 @@ public class ProductExcelService {
                         productsBatch.clear();
                         translationsBatch.clear();
                     }
+
+
 
                     if (i % 100 == 0 || i == totalRows - 1) {
                         int progress = (i * 100) / totalRows;
@@ -96,6 +100,7 @@ public class ProductExcelService {
             emitterService.sendCompletion(emitter, "Yuklash tugadi! Jami mahsulotlar: " + productsUploaded);
         }
     }
+
 
     private List<Product> createProductsFromRow(Row row, Branch branch, List<ProductTranslate> translationsBatch) {
         List<Product> products = new ArrayList<>();
