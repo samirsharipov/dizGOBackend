@@ -32,12 +32,13 @@ public class StatisticsService {
     }
 
     public BusinessStat getBusinessStat(Timestamp startDate, Timestamp endDate) {
+        long total = businessRepository.countTotalBetween(startDate, endDate);
         long active = businessRepository.countActiveBetween(startDate, endDate);
         long blocked = businessRepository.countBlockedBetween(startDate, endDate);
         long archived = businessRepository.countArchivedBetween(startDate, endDate);
         long nonActive = businessRepository.countNonActiveBetween(startDate, endDate);
 
-        return new BusinessStat(active, blocked, archived, nonActive);
+        return new BusinessStat(total, active, blocked, archived, nonActive);
     }
 
     public ApiResponse productStatistics(String type) {

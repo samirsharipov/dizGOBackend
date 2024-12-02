@@ -41,4 +41,7 @@ public interface BusinessRepository extends JpaRepository<Business, UUID> {
 
     @Query("SELECT COUNT(b) FROM Business b WHERE b.status is null and b.createdAt between :startDate and :endDate")
     long countNonActiveBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+
+    @Query("SELECT COUNT(b) FROM Business b WHERE b.createdAt between :startDate and :endDate")
+    long countTotalBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
 }

@@ -1,62 +1,84 @@
 package uz.pdp.springsecurity.service;
 
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.io.entity.StringEntity;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import uz.pdp.springsecurity.configuration.ApiClient;
 
-import java.io.IOException;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 @Service
 public class SmsSendService {
-    @Value("${sms.api.url}")
-    private String smsApiUrl;
 
-    @Value("${sms.api.username}")
-    private String username;
+    private final ApiClient apiClient;
 
-    @Value("${sms.api.password}")
-    private String password;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    public String sendSms(String recipient, String message) {
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            HttpPost post = new HttpPost(smsApiUrl + "/send");
-
-            // JSON ma'lumotlarini tayyorlash
-            Map<String, Object> smsData = new HashMap<>();
-            smsData.put("messages", new Object[]{
-                    Map.of(
-                            "recipient", recipient,
-                            "message-id", "unique-id-12345",
-                            "content", Map.of("text", message)
-                    )
-            });
-
-            // HTTP so'rovni sozlash
-            StringEntity entity = new StringEntity(objectMapper.writeValueAsString(smsData));
-            post.setEntity(entity);
-            post.setHeader("Content-Type", "application/json");
-            post.setHeader("Authorization", "Basic " +
-                    java.util.Base64.getEncoder().encodeToString((username + ":" + password).getBytes()));
-
-            try (CloseableHttpResponse response = client.execute(post)) {
-                if (response.getCode() == 200) {
-                    return "SMS successfully sent!";
-                } else {
-                    return "Failed to send SMS. Status code: " + response.getCode();
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "Error occurred while sending SMS.";
-        }
+    public SmsSendService(ApiClient apiClient) {
+        this.apiClient = apiClient;
     }
+
+    /**
+     * SMS yuborish
+     * @param recipient Qabul qiluvchining telefon raqami
+     * @param messageId Yuborilgan xabar uchun unikal ID
+     * @param content Xabar matni
+     * @return SMS yuborilganligi haqida xabar
+     */
+    public String sendSms(String recipient, String messageId, String content) {
+        String endpoint = "/send"; // API endpoint
+
+        // JSON ma'lumotlarini tayyorlash
+        Map<String, Object> requestBody = Map.of(
+                "messages", List.of(
+                        Map.of(
+                                "recipient", recipient,
+                                "message-id", messageId,
+                                "sms", Map.of(
+                                        "originator", "3700", // Yuboruvchining nomi yoki raqami
+                                        "content", Map.of("text", content) // Xabar mazmuni
+                                )
+                        )
+                )
+        );
+
+        // API'ga so'rov yuborish
+        return apiClient.sendRequest(endpoint, HttpMethod.POST, requestBody, String.class);
+    }
+
+    /**
+     * SMS holatini tekshirish
+     * @param messageId SMS yuborilgan xabar ID'si
+     * @return Xabar holati
+     */
+    public String checkSmsStatus(String messageId) {
+        String endpoint = "/status"; // API endpoint for status check
+
+        // Statusni tekshirish uchun JSON ma'lumotlari
+        Map<String, Object> requestBody = Map.of(
+                "messages", List.of(
+                        Map.of(
+                                "message-id", messageId,
+                                "channel", "sms" // SMS kanalini ko'rsatish
+                        )
+                )
+        );
+
+        // API'ga status so'rovini yuborish
+        return apiClient.sendRequest(endpoint, HttpMethod.POST, requestBody, String.class);
+    }
+
+
+
+        public String generateMessageId() {
+            // Hozirgi vaqtni olish (timestamp)
+            long timestamp = System.currentTimeMillis();
+
+            // Tasodifiy raqam yaratish
+            Random random = new Random();
+            int randomNumber = random.nextInt(1000); // 0-999 gacha tasodifiy raqam
+
+            // timestamp va random raqamni birlashtirish
+            return "msg-" + timestamp + "-" + randomNumber;
+        }
+
 }

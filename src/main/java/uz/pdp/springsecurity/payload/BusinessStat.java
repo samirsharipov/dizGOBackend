@@ -10,8 +10,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BusinessStat implements Serializable {
-    private static final long serialVersionUID = 1L;
 
+    private long total;
     private long activeCount;
     private long blockedCount;
     private long archivedCount;

@@ -1,34 +1,39 @@
 package uz.pdp.springsecurity.controller;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import uz.pdp.springsecurity.payload.ApiResponse;
-import uz.pdp.springsecurity.payload.SmsDto;
+import org.springframework.web.bind.annotation.*;
 import uz.pdp.springsecurity.service.SmsSendService;
-import uz.pdp.springsecurity.service.SmsService;
-
-import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/sms")
-@RequiredArgsConstructor
 public class SmsController {
-
-    private final SmsService smsService;
 
     private final SmsSendService smsSendService;
 
-
-    @PostMapping
-    public HttpEntity<?> sendSms(@Valid @RequestBody SmsDto smsDto) {
-        ApiResponse apiResponse = smsService.add(smsDto);
-        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    public SmsController(SmsSendService smsSendService) {
+        this.smsSendService = smsSendService;
     }
 
+    /**
+     * SMS yuborish
+     * @param recipient Qabul qiluvchining telefon raqami
+     * @param messageId Yuborilgan xabar uchun unikal ID
+     * @param content Xabar matni
+     * @return SMS yuborilganligi haqida xabar
+     */
+    @PostMapping("/send")
+    public String sendSms(@RequestParam String recipient,
+                          @RequestParam String messageId,
+                          @RequestParam String content) {
+        return smsSendService.sendSms(recipient, messageId, content);
+    }
 
+    /**
+     * SMS holatini tekshirish
+     * @param messageId SMS yuborilgan xabar ID'si
+     * @return Xabar holati
+     */
+    @GetMapping("/status/{messageId}")
+    public String checkSmsStatus(@PathVariable String messageId) {
+        return smsSendService.checkSmsStatus(messageId);
+    }
 }
