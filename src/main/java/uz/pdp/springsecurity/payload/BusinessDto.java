@@ -31,7 +31,8 @@ public class BusinessDto {
 
     private BranchDto branchDto;
 
-    private AddressDto addressDto;
+    //  private AddressDto addressDto;
+    private UUID addressId;
 
     private List<Permissions> permissionsList;
 }

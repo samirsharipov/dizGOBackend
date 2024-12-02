@@ -3,8 +3,8 @@ package uz.pdp.springsecurity.entity;
 import lombok.*;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
 
 @Getter
 @Setter
@@ -12,14 +12,9 @@ import javax.persistence.Entity;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Address extends AbsEntity {
-    @Column(nullable = false)
-    private String city;
 
-    private String district;
+    private String name;
 
-    @Column(nullable = false)
-    private String street;
-
-    @Column(nullable = false)
-    private String home;
+    @ManyToOne
+    private Address parentAddress;
 }

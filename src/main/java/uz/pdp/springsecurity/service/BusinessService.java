@@ -39,6 +39,7 @@ public class BusinessService {
     private final static LocalDateTime THIS_WEEK = TODAY.minusDays(TODAY.getDayOfWeek().ordinal());
     private final static LocalDateTime THIS_MONTH = LocalDateTime.of(TODAY.getYear(), TODAY.getMonth(), 1, 0, 0, 0);
     private final static LocalDateTime THIS_YEAR = LocalDateTime.of(TODAY.getYear(), 1, 1, 0, 0, 0);
+    private final AddressRepository addressRepository;
 
     @Transactional
     public ApiResponse add(BusinessDto businessDto) {
@@ -56,7 +57,12 @@ public class BusinessService {
         createEntityHelper.createSubscription(business, businessDto.getTariffId());
 
         // Manzil, Filial va Foydalanuvchi yaratish
-        Address address = createEntityHelper.createAddress(businessDto.getAddressDto());
+//        Address address = createEntityHelper.createAddress(businessDto.getAddressDto());
+        Address address = new Address();
+        Optional<Address> optionalAddress = addressRepository.findById(businessDto.getAddressId());
+        if (optionalAddress.isPresent()) {
+            address = optionalAddress.get();
+        }
         Branch branch = createEntityHelper.createBranch(business, address, businessDto.getBranchDto());
         createEntityHelper.createBalance(branch);
         createEntityHelper.createAdminRoleAndUser(business, branch, businessDto);
