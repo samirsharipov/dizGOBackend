@@ -1,14 +1,21 @@
 package uz.pdp.springsecurity.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 import uz.pdp.springsecurity.entity.Address;
 import uz.pdp.springsecurity.payload.AddressDto;
+import uz.pdp.springsecurity.payload.AddressGetDto;
 
-@Mapper(componentModel = "spring")
+import java.util.List;
+
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface AddressMapper {
-    @Mapping(target = "updateAt", ignore = true)
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    Address toEntity(AddressDto addressDto);
+
+    @Mapping(target = "parentId", source = "parentAddress.id")
+    @Mapping(target = "parentName", source = "parentAddress.name")
+    AddressGetDto toDto(Address address);
+
+    List<AddressGetDto> toDtoList(List<Address> addresses);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateEntityFromDto(AddressDto addressDto, @MappingTarget Address address);
 }

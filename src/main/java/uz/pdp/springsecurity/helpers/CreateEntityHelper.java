@@ -44,9 +44,6 @@ public class CreateEntityHelper {
         subscriptionRepository.save(subscription);
     }
 
-    public Address createAddress(AddressDto addressDto) {
-        return addressRepository.save(addressMapper.toEntity(addressDto));
-    }
 
     public Branch createBranch(Business business, Address address, BranchDto branchDto) {
         branchDto.setAddressId(address.getId());

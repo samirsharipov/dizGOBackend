@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.SmsDto;
+import uz.pdp.springsecurity.service.SmsSendService;
 import uz.pdp.springsecurity.service.SmsService;
 
 import javax.validation.Valid;
@@ -17,10 +18,17 @@ import javax.validation.Valid;
 @RequestMapping("/api/sms")
 @RequiredArgsConstructor
 public class SmsController {
+
     private final SmsService smsService;
+
+    private final SmsSendService smsSendService;
+
+
     @PostMapping
     public HttpEntity<?> sendSms(@Valid @RequestBody SmsDto smsDto) {
         ApiResponse apiResponse = smsService.add(smsDto);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
+
+
 }

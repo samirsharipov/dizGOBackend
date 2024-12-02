@@ -3,11 +3,13 @@ package uz.pdp.springsecurity.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uz.pdp.springsecurity.entity.Address;
+import uz.pdp.springsecurity.mapper.AddressMapper;
 import uz.pdp.springsecurity.payload.AddressDto;
+import uz.pdp.springsecurity.payload.AddressGetDto;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.repository.AddressRepository;
 
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -15,43 +17,63 @@ import java.util.UUID;
 public class AddressService {
 
     private final AddressRepository addressRepository;
-    public static final String NOT_FOUND = "ADDRESS NOT FOUND";
+    private final AddressMapper addressMapper;
+    private static final String NOT_FOUND = "ADDRESS NOT FOUND";
 
-    public ApiResponse addAddress(AddressDto addressDto) {
-        Address address = new Address();
-        address.setCity(addressDto.getCity());
-        address.setDistrict(addressDto.getDistrict());
-        address.setStreet(addressDto.getStreet());
-        address.setHome(addressDto.getHome());
-
+    public ApiResponse createAddress(AddressDto addressDto) {
+        Address address = prepareAddressFromDto(new Address(), addressDto);
         addressRepository.save(address);
         return new ApiResponse("ADDED", true);
     }
 
-    public ApiResponse editAddress(UUID id, AddressDto addressDto) {
-        if (!addressRepository.existsById(id)) return new ApiResponse(NOT_FOUND, false);
-        Address address = addressRepository.getById(id);
-        address.setCity(addressDto.getCity());
-        address.setDistrict(addressDto.getDistrict());
-        address.setStreet(addressDto.getStreet());
-        address.setHome(addressDto.getHome());
-
-        addressRepository.save(address);
-        return new ApiResponse("EDITED", true);
+    public ApiResponse updateAddress(UUID id, AddressDto addressDto) {
+        return addressRepository.findById(id)
+                .map(address -> {
+                    Address updatedAddress = prepareAddressFromDto(address, addressDto);
+                    addressRepository.save(updatedAddress);
+                    return new ApiResponse("EDITED", true);
+                })
+                .orElseGet(() -> new ApiResponse(NOT_FOUND, false));
     }
 
     public ApiResponse getAddress(UUID id) {
-        Optional<Address> optionalAddress = addressRepository.findById(id);
-        return optionalAddress.map(address -> new ApiResponse("FOUND", true, address)).orElseGet(() -> new ApiResponse(NOT_FOUND, false));
+        return addressRepository.findById(id)
+                .map(address -> new ApiResponse("FOUND", true, addressMapper.toDto(address)))
+                .orElseGet(() -> new ApiResponse(NOT_FOUND, false));
     }
 
     public ApiResponse getAddresses() {
-        return new ApiResponse("FOUND", true, addressRepository.findAll());
+        List<Address> addresses = addressRepository.findAllByParentAddressIsNull();
+        List<AddressGetDto> addressGetDtoList = addressMapper.toDtoList(addresses);
+        return new ApiResponse("FOUND", true, addressGetDtoList);
     }
 
     public ApiResponse deleteAddress(UUID id) {
-        if (!addressRepository.existsById(id)) return new ApiResponse(NOT_FOUND, false);
-        addressRepository.deleteById(id);
-        return new ApiResponse("DELETED", true);
+        return addressRepository.findById(id)
+                .map(address -> {
+                    address.setActive(false);
+                    addressRepository.save(address);
+                    return new ApiResponse("DELETED", true);
+                })
+                .orElseGet(() -> new ApiResponse(NOT_FOUND, false));
+    }
+
+    public ApiResponse getByParentId(UUID parentId) {
+        List<Address> addresses = addressRepository.findAllByParentAddress_Id(parentId);
+        List<AddressGetDto> addressGetDtoList = addressMapper.toDtoList(addresses);
+        return new ApiResponse("FOUND", true, addressGetDtoList);
+    }
+
+
+    /**
+     * Helper method to prepare Address entity from DTO.
+     */
+    private Address prepareAddressFromDto(Address address, AddressDto addressDto) {
+        addressMapper.updateEntityFromDto(addressDto, address);
+        if (addressDto.getPatientId() != null) {
+            addressRepository.findById(addressDto.getPatientId())
+                    .ifPresent(address::setParentAddress);
+        }
+        return address;
     }
 }
