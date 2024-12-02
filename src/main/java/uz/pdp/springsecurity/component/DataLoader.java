@@ -101,8 +101,8 @@ public class DataLoader implements CommandLineRunner {
             subscriptionRepository.save(new Subscription(business, tariff, startDay, endDay,
                     StatusTariff.CONFIRMED, PayType.OFFLINE, true, true, false));
 
-            Address address = addressRepository.save(new Address(
-                    "Tashkent", "Shayxontuxur", "Gulobod", "1"));
+//            Address address = addressRepository.save(new Address(
+//                    "Tashkent", "Shayxontuxur", "Gulobod", "1"));
 
             Role superAdmin = roleRepository.save(new Role(
                     Constants.SUPERADMIN,
@@ -133,7 +133,7 @@ public class DataLoader implements CommandLineRunner {
 
             currencyRepository.save(new Currency(business, 11400));
 
-            Branch mainBranch = branchRepository.save(new Branch("Bnav Main Branch ", address, business));
+            Branch mainBranch = branchRepository.save(new Branch("Bnav Main Branch ", new Address(), business));
             branches.add(mainBranch);
 
             invoiceService.create(mainBranch);
