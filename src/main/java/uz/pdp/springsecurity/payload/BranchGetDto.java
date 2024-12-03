@@ -12,4 +12,7 @@ import java.util.UUID;
 public class BranchGetDto {
     private UUID id;
     private String name;
+    private UUID addressId;
+    private UUID branchCategoryId;
+    private String branchCategoryName;
 }

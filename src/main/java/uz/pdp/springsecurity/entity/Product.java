@@ -3,6 +3,7 @@ package uz.pdp.springsecurity.entity;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Where;
 import org.hibernate.proxy.HibernateProxy;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
 
@@ -28,6 +29,7 @@ import java.util.Objects;
 
         }
 )
+@Where(clause = "deleted = false AND active = true")
 public class Product extends AbsEntity {
 
     // Mahsulotning asosiy ma'lumotlari

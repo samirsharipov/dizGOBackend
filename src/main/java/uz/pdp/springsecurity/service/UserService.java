@@ -34,9 +34,15 @@ public class UserService {
     private final TaskRepository taskRepository;
     private final TradeRepository tradeRepository;
     private final JobRepository jobRepository;
+    private final VerificationCodeService verificationService;
 
 
     public ApiResponse add(UserDto userDto, boolean isNewUser) {
+
+        boolean isVerified = verificationService.verifyCode(userDto.getPhoneNumber(), userDto.getVerificationCode());
+        if (!isVerified) {
+            return new ApiResponse("Invalid or expired verification code", false);
+        }
         // Tekshirish: Business mavjudligi
         Business business = businessRepository.findById(userDto.getBusinessId())
                 .orElse(null);

@@ -1,6 +1,7 @@
 package uz.pdp.springsecurity.entity;
 
 import lombok.*;
+import org.hibernate.annotations.Where;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
 
 import javax.persistence.Column;
@@ -12,6 +13,7 @@ import java.util.UUID;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Where(clause = "deleted = false AND active = true")
 public class EmploymentDismissalReport extends AbsEntity {
     private UUID businessId;
 

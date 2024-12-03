@@ -7,11 +7,13 @@ import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.helpers.CreateEntityHelper;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.BranchDto;
+import uz.pdp.springsecurity.payload.BranchGetDto;
 import uz.pdp.springsecurity.repository.*;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -166,6 +168,17 @@ public class BranchService {
     public ApiResponse getByBusinessId(UUID business_id) {
         List<Branch> allByBusiness_id = branchRepository.findAllByBusiness_Id(business_id);
         if (allByBusiness_id.isEmpty()) return new ApiResponse("BUSINESS NOT FOUND", false);
-        return new ApiResponse("FOUND", true, allByBusiness_id);
+        return new ApiResponse("FOUND", true, allByBusiness_id.stream().map(this::toDto).collect(Collectors.toList()));
     }
+
+    public BranchGetDto toDto(Branch branch) {
+        return new BranchGetDto(
+                branch.getId(),
+                branch.getName(),
+                branch.getAddress() != null ? branch.getAddress().getId() : null,
+                branch.getBranchCategory() != null ? branch.getBranchCategory().getId() : null,
+                branch.getBranchCategory() != null ? branch.getBranchCategory().getName() : null
+        );
+    }
+
 }

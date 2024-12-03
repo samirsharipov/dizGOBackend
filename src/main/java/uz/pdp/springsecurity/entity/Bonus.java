@@ -3,6 +3,7 @@ package uz.pdp.springsecurity.entity;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Where;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
 
 import javax.persistence.Column;
@@ -14,6 +15,7 @@ import javax.persistence.ManyToOne;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Where(clause = "deleted = false AND active = true")
 public class Bonus extends AbsEntity {
     @Column(nullable = false)
     private String name;

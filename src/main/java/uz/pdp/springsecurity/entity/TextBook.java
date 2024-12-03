@@ -1,6 +1,7 @@
 package uz.pdp.springsecurity.entity;
 
 import lombok.*;
+import org.hibernate.annotations.Where;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
 
 import javax.persistence.Entity;
@@ -14,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Where(clause = "deleted = false AND active = true")
 public class TextBook extends AbsEntity {
     @ManyToOne
     private Role role;

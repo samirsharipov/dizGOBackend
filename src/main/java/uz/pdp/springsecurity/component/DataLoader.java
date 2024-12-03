@@ -133,7 +133,10 @@ public class DataLoader implements CommandLineRunner {
 
             currencyRepository.save(new Currency(business, 11400));
 
-            Branch mainBranch = branchRepository.save(new Branch("Bnav Main Branch ", new Address(), business));
+            Address address = new Address();
+            address.setName("O'zbekiston");
+            addressRepository.save(address);
+            Branch mainBranch = branchRepository.save(new Branch("Bnav Main Branch ", address, business));
             branches.add(mainBranch);
 
             invoiceService.create(mainBranch);
