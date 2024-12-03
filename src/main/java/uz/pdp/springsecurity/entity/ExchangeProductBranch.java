@@ -3,6 +3,7 @@ package uz.pdp.springsecurity.entity;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Where;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
 
 import javax.persistence.*;
@@ -14,6 +15,7 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Where(clause = "deleted = false AND active = true")
 public class ExchangeProductBranch extends AbsEntity {
 
     @OneToOne

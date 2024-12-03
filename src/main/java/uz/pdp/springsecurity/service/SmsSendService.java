@@ -19,12 +19,13 @@ public class SmsSendService {
 
     /**
      * SMS yuborish
+     *
      * @param recipient Qabul qiluvchining telefon raqami
-     * @param messageId Yuborilgan xabar uchun unikal ID
-     * @param content Xabar matni
+     * @param content   Xabar matni
      * @return SMS yuborilganligi haqida xabar
      */
-    public String sendSms(String recipient, String messageId, String content) {
+    public String sendSms(String recipient, String content) {
+        String messageId = generateMessageId();
         String endpoint = "/send"; // API endpoint
 
         // JSON ma'lumotlarini tayyorlash
@@ -47,6 +48,7 @@ public class SmsSendService {
 
     /**
      * SMS holatini tekshirish
+     *
      * @param messageId SMS yuborilgan xabar ID'si
      * @return Xabar holati
      */
@@ -68,17 +70,20 @@ public class SmsSendService {
     }
 
 
+    public String generateMessageId() {
+        // Hozirgi vaqtni olish (timestamp)
+        long timestamp = System.currentTimeMillis();
 
-        public String generateMessageId() {
-            // Hozirgi vaqtni olish (timestamp)
-            long timestamp = System.currentTimeMillis();
+        // Tasodifiy raqam yaratish
+        Random random = new Random();
+        int randomNumber = random.nextInt(1000); // 0-999 gacha tasodifiy raqam
 
-            // Tasodifiy raqam yaratish
-            Random random = new Random();
-            int randomNumber = random.nextInt(1000); // 0-999 gacha tasodifiy raqam
+        // timestamp va random raqamni birlashtirish
+        return "msg-" + timestamp + "-" + randomNumber;
+    }
 
-            // timestamp va random raqamni birlashtirish
-            return "msg-" + timestamp + "-" + randomNumber;
-        }
-
+    public void sendVerificationCode(String phoneNumber, String code) {
+        String message = "Kod dlya vhoda v prilozheniyu Business Navigator: " + code + ". Ne soobshayte danniy kod nikomu!!!";
+        sendSms(phoneNumber, message);
+    }
 }

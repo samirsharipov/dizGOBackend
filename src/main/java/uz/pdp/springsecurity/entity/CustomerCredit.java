@@ -1,6 +1,7 @@
 package uz.pdp.springsecurity.entity;
 
 import lombok.*;
+import org.hibernate.annotations.Where;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
 
 import javax.persistence.Entity;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Where(clause = "deleted = false AND active = true")
 public class CustomerCredit extends AbsEntity {
 
     @ManyToOne(optional = false)

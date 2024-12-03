@@ -15,20 +15,20 @@ public class SmsController {
 
     /**
      * SMS yuborish
+     *
      * @param recipient Qabul qiluvchining telefon raqami
-     * @param messageId Yuborilgan xabar uchun unikal ID
-     * @param content Xabar matni
+     * @param content   Xabar matni
      * @return SMS yuborilganligi haqida xabar
      */
     @PostMapping("/send")
     public String sendSms(@RequestParam String recipient,
-                          @RequestParam String messageId,
                           @RequestParam String content) {
-        return smsSendService.sendSms(recipient, messageId, content);
+        return smsSendService.sendSms(recipient, content);
     }
 
     /**
      * SMS holatini tekshirish
+     *
      * @param messageId SMS yuborilgan xabar ID'si
      * @return Xabar holati
      */

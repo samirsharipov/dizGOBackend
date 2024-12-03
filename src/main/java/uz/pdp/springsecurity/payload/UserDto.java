@@ -30,6 +30,8 @@ public class UserDto {
 
     private String phoneNumber;
 
+    private String verificationCode;
+
     private boolean sex;
 
     private Date birthday;
