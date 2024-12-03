@@ -135,7 +135,6 @@ public class UserService {
     }
 
 
-
     public ApiResponse edit(UUID id, UserDto userDto) {
         Optional<User> optionalUser = userRepository.findById(id);
 
@@ -454,5 +453,20 @@ public class UserService {
         user.setGrossPriceControlOneUser(checked);
         userRepository.save(user);
         return new ApiResponse("UPDATED", true);
+    }
+
+    public ApiResponse forgotPassword(String phoneNumber, String password, String code) {
+        boolean isVerified = verificationService.verifyCode(phoneNumber, code);
+        if (!isVerified) {
+            return new ApiResponse("Invalid or expired verification code", false);
+        }
+        Optional<User> optionalUser = userRepository.findByPhoneNumber(phoneNumber);
+        if (optionalUser.isEmpty()) {
+            return new ApiResponse("NOT FOUND", false);
+        }
+        User user = optionalUser.get();
+        user.setPassword(passwordEncoder.encode(password));
+        userRepository.save(user);
+        return new ApiResponse("OK", true);
     }
 }
