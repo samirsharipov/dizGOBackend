@@ -128,4 +128,11 @@ public class UserController {
         ApiResponse apiResponse = userService.forGrossPriceControlEditeOneState(userId, checked);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
+
+
+    @PutMapping("/forgot-password/{phoneNumber}")
+    public HttpEntity<?> forgotPassword(@PathVariable String phoneNumber, @RequestParam String password, @RequestParam String code) {
+        ApiResponse apiResponse = userService.forgotPassword(phoneNumber, password, code);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
 }
