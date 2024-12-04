@@ -30,7 +30,7 @@ public class Branch extends AbsEntity {
 
     private UUID mainBranchId;
 
-    @ManyToOne
+    @OneToOne
     private BranchCategory branchCategory;
 
     public Branch(String name, Address address, Business business) {

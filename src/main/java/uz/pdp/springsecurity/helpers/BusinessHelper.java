@@ -11,7 +11,6 @@ import uz.pdp.springsecurity.payload.BusinessDto;
 import uz.pdp.springsecurity.repository.LidFieldRepository;
 import uz.pdp.springsecurity.repository.PayMethodRepository;
 import uz.pdp.springsecurity.repository.SourceRepository;
-import uz.pdp.springsecurity.service.BranchService;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,8 +26,8 @@ public class BusinessHelper {
         Business business = new Business();
         business.setName(businessDto.getName());
         business.setBusinessNumber(businessDto.getBusinessNumber());
-        business.setDescription(businessDto.getDescription());
         business.setActive(businessDto.isActive());
+        business.setAddressHome(businessDto.getAddressHome());
         business.setDelete(false);
         return business;
     }

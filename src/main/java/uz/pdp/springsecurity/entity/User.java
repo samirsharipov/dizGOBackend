@@ -95,7 +95,6 @@ public class User extends AbsEntity implements UserDetails {
 
     private Long chatId; // telegram ?
 
-
     private boolean enabled = false;
 
     private boolean accountNonExpired = true;

@@ -1,6 +1,6 @@
 package uz.pdp.springsecurity.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,28 +21,16 @@ import java.sql.Date;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class OutlayService {
-    @Autowired
-    OutlayRepository outlayRepository;
-
-    @Autowired
-    OutlayCategoryRepository outlayCategoryRepository;
-
-    @Autowired
-    BranchRepository branchRepository;
-
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    PayMethodRepository payMethodRepository;
-    @Autowired
-    BalanceService balanceService;
-    @Autowired
-    private BalanceRepository balanceRepository;
-    @Autowired
-    private HistoryRepository historyRepository;
-    @Autowired
-    private OutlayProductRepository outlayProductRepository;
+    private final OutlayRepository outlayRepository;
+    private final OutlayCategoryRepository outlayCategoryRepository;
+    private final BranchRepository branchRepository;
+    private final UserRepository userRepository;
+    private final PayMethodRepository payMethodRepository;
+    private final BalanceService balanceService;
+    private final HistoryRepository historyRepository;
+    private final OutlayProductRepository outlayProductRepository;
 
     public ApiResponse add(OutlayDto outlayDto) {
         Outlay outlay = new Outlay();
@@ -79,8 +67,6 @@ public class OutlayService {
         balanceService.edit(optionalBranch.get().getId(), outlayDto.getTotalSum(), false, outlayDto.getPaymentMethodId(), outlayDto.getDollarOutlay(),"");
 
         Outlay save = outlayRepository.save(outlay);
-//        HISTORY
-
 
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         historyRepository.save(new History(
@@ -260,7 +246,7 @@ public class OutlayService {
     public ApiResponse getOutlaysListByType(OUTLAY_STATUS type, UUID branchId, Integer page, Integer limit, java.util.Date startDate, java.util.Date endDate) {
         if (startDate == null && endDate == null) {
             try {
-                Page<Outlay> outlayPage = outlayRepository.findByBranch_IdAndStatusEqualsOrderByCreatedAtDesc(branchId, type, PageRequest.of(page - 1, limit));
+                Page<Outlay> outlayPage = outlayRepository.findByBranch_IdAndStatusEqualsOrderByCreatedAtDesc(branchId, type, PageRequest.of(page, limit));
                 Map<String, Object> data = new HashMap<>();
                 data.put("totalPages", outlayPage.getTotalPages());
                 data.put("list", outlayPage.getContent());
@@ -272,7 +258,7 @@ public class OutlayService {
             }
         } else {
             try {
-                Page<Outlay> outlayPage = outlayRepository.findByBranch_IdAndStatusEqualsAndCreatedAtBetweenOrderByCreatedAtDesc(branchId, type, PageRequest.of(page - 1, limit), startDate, endDate);
+                Page<Outlay> outlayPage = outlayRepository.findByBranch_IdAndStatusEqualsAndCreatedAtBetweenOrderByCreatedAtDesc(branchId, type, PageRequest.of(page, limit), startDate, endDate);
                 Map<String, Object> data = new HashMap<>();
                 data.put("totalPages", outlayPage.getTotalPages());
                 data.put("list", outlayPage.getContent());

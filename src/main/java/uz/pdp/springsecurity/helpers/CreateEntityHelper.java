@@ -8,6 +8,7 @@ import uz.pdp.springsecurity.mapper.AddressMapper;
 import uz.pdp.springsecurity.mapper.BranchMapper;
 import uz.pdp.springsecurity.payload.BranchDto;
 import uz.pdp.springsecurity.payload.BusinessDto;
+import uz.pdp.springsecurity.payload.UserCreateDto;
 import uz.pdp.springsecurity.payload.UserDto;
 import uz.pdp.springsecurity.repository.*;
 import uz.pdp.springsecurity.service.BranchService;
@@ -62,7 +63,14 @@ public class CreateEntityHelper {
         Role savedRole = roleRepository.save(adminRole);
 
         // Foydalanuvchi ma'lumotlarini sozlash
-        UserDto userDto = businessDto.getUserDto();
+        UserCreateDto userCreateDto = businessDto.getUserDto();
+        UserDto userDto = new UserDto();
+
+        userDto.setUsername(userCreateDto.getUsername());
+        userDto.setPassword(userCreateDto.getPassword());
+        userDto.setFirstName(userCreateDto.getFirstName());
+        userDto.setLastName(userCreateDto.getLastName());
+
         userDto.setBranchId(Set.of(branch.getId()));
         userDto.setRoleId(savedRole.getId());
         userDto.setBusinessId(business.getId());

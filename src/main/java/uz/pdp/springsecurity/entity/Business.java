@@ -28,6 +28,8 @@ public class Business extends AbsEntity {
     @Column(unique = true)
     private String businessNumber;
 
+    private String addressHome;
+
     private boolean isActive;
 
     private boolean delete;

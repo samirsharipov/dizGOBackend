@@ -39,12 +39,12 @@ public class UserService {
 
     public ApiResponse add(UserDto userDto, boolean isNewUser) {
 
-        if (userDto.getVerificationCode() != null) {
-            boolean isVerified = verificationService.verifyCode(userDto.getPhoneNumber(), userDto.getVerificationCode());
-            if (!isVerified) {
-                return new ApiResponse("Invalid or expired verification code", false);
-            }
-        }
+//        if (userDto.getVerificationCode() != null) {
+//            boolean isVerified = verificationService.verifyCode(userDto.getPhoneNumber(), userDto.getVerificationCode());
+//            if (!isVerified) {
+//                return new ApiResponse("Invalid or expired verification code", false);
+//            }
+//        }
         // Tekshirish: Business mavjudligi
         Business business = businessRepository.findById(userDto.getBusinessId())
                 .orElse(null);
@@ -455,8 +455,8 @@ public class UserService {
         return new ApiResponse("UPDATED", true);
     }
 
-    public ApiResponse forgotPassword(String phoneNumber, String password, String code) {
-        boolean isVerified = verificationService.verifyCode(phoneNumber, code);
+    public ApiResponse forgotPassword(String phoneNumber, String password) {
+        boolean isVerified = verificationService.verifyCode(phoneNumber);
         if (!isVerified) {
             return new ApiResponse("Invalid or expired verification code", false);
         }
@@ -467,6 +467,7 @@ public class UserService {
         User user = optionalUser.get();
         user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
+        verificationService.deleteVerificationCode(phoneNumber);
         return new ApiResponse("OK", true);
     }
 }

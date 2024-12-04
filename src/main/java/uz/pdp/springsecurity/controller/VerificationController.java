@@ -18,8 +18,8 @@ public class VerificationController {
     private final ResponseEntityHelper responseEntityHelper;
 
     @PostMapping
-    public HttpEntity<ApiResponse> sendVerificationCode(@RequestParam("phoneNumber") String phoneNumber) {
-        return responseEntityHelper.buildResponse(verificationCodeService.sendVerificationCode(phoneNumber));
+    public HttpEntity<ApiResponse> sendVerificationCode(@RequestParam("phoneNumber") String phoneNumber,boolean refresh) {
+        return responseEntityHelper.buildResponse(verificationCodeService.sendVerificationCode(phoneNumber,refresh));
     }
 
     @GetMapping

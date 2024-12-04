@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import java.time.LocalDateTime;
 
@@ -16,6 +17,7 @@ public class VerificationCode extends AbsEntity {
 
     private String code;
 
+    @Column(unique = true)
     private String phoneNumber;
 
     private boolean verified = false;

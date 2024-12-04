@@ -14,6 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDto {
+
     private UUID id;
 
     private String firstName;
@@ -72,5 +73,7 @@ public class UserDto {
 
     // new fields
     private String passportNumber;
+
+
     private Date dateOfEmployment;
 }

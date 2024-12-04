@@ -31,6 +31,7 @@ public class BusinessService {
     private final PayMethodRepository payMethodRepository;
     private final NotificationRepository notificationRepository;
     private final ShablonRepository shablonRepository;
+    private final BranchRepository branchRepository;
 
     private final BusinessHelper businessHelper;
     private final CreateEntityHelper createEntityHelper;
@@ -57,13 +58,28 @@ public class BusinessService {
         createEntityHelper.createSubscription(business, businessDto.getTariffId());
 
         // Manzil, Filial va Foydalanuvchi yaratish
-//        Address address = createEntityHelper.createAddress(businessDto.getAddressDto());
         Address address = new Address();
         Optional<Address> optionalAddress = addressRepository.findById(businessDto.getAddressId());
         if (optionalAddress.isPresent()) {
             address = optionalAddress.get();
         }
-        Branch branch = createEntityHelper.createBranch(business, address, businessDto.getBranchDto());
+
+        BranchDto branchDto = new BranchDto();
+        branchDto.setName(businessDto.getName());
+
+        try {
+            Optional<Branch> optionalBranch = branchRepository.findByBranchCategory_Id(businessDto.getBranchCategoryId());
+            if (optionalBranch.isEmpty()) {
+                return new ApiResponse("branch category does not exist", false);
+            }
+            Branch branch = optionalBranch.get();
+            branchDto.setMainBranchId(branch.getMainBranchId());
+        } catch (Exception e) {
+            return new ApiResponse(e.getMessage(), false);
+        }
+
+
+        Branch branch = createEntityHelper.createBranch(business, address, branchDto);
         createEntityHelper.createBalance(branch);
         createEntityHelper.createAdminRoleAndUser(business, branch, businessDto);
         createEntityHelper.createShablon(business, shablonRepository);

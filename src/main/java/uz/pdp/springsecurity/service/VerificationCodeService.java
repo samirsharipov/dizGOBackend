@@ -17,7 +17,12 @@ public class VerificationCodeService {
     private final VerificationCodeRepository verificationCodeRepository;
     private final SmsSendService smsService;
 
-    public ApiResponse sendVerificationCode(String phoneNumber) {
+    public ApiResponse sendVerificationCode(String phoneNumber, boolean refresh) {
+
+        if (refresh) {
+            deleteVerificationCode(phoneNumber);
+        }
+
         Optional<VerificationCode> existingCode = verificationCodeRepository
                 .findByPhoneNumberAndVerifiedFalse(phoneNumber);
 
@@ -38,7 +43,11 @@ public class VerificationCodeService {
         verificationCodeRepository.save(verificationCode);
 
         // SMS xizmatidan kodni yuborish
-        smsService.sendVerificationCode(phoneNumber, code);
+        try {
+            smsService.sendVerificationCode(phoneNumber, code);
+        }catch (Exception e){
+            return new ApiResponse(e.getMessage(), false);
+        }
 
         return new ApiResponse("Verification code sent", true);
     }
@@ -55,6 +64,22 @@ public class VerificationCodeService {
             return true;
         }
         return false;
+    }
+
+    public boolean verifyCode(String phoneNumber) {
+        Optional<VerificationCode> optional = verificationCodeRepository.findByPhoneNumber(phoneNumber);
+        if (optional.isEmpty()) {
+            return false;
+        }
+        VerificationCode verificationCode = optional.get();
+        if (verificationCode.getExpiresAt().isAfter(LocalDateTime.now())) {
+            return false;
+        }
+        return verificationCode.isVerified();
+    }
+
+    public void deleteVerificationCode(String phoneNumber) {
+        verificationCodeRepository.deleteByPhoneNumber(phoneNumber);
     }
 
     private String generateCode() {
