@@ -17,21 +17,18 @@ public class BusinessDto {
     @NotNull(message = "required line")
     private String name;
 
-    private String description;
-
-    private String businessName;
-
     private String businessNumber;
+
+    private String addressHome;
 
     private UUID tariffId;
 
     private boolean isActive;
 
-    private UserDto userDto;
+    private UserCreateDto userDto;
 
-    private BranchDto branchDto;
+    private UUID branchCategoryId;
 
-    //  private AddressDto addressDto;
     private UUID addressId;
 
     private List<Permissions> permissionsList;

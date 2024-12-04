@@ -131,8 +131,8 @@ public class UserController {
 
 
     @PutMapping("/forgot-password/{phoneNumber}")
-    public HttpEntity<?> forgotPassword(@PathVariable String phoneNumber, @RequestParam String password, @RequestParam String code) {
-        ApiResponse apiResponse = userService.forgotPassword(phoneNumber, password, code);
+    public HttpEntity<?> forgotPassword(@PathVariable String phoneNumber, @RequestParam String password) {
+        ApiResponse apiResponse = userService.forgotPassword(phoneNumber, password);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 }
