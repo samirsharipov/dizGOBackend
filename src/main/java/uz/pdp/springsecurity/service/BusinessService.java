@@ -1,6 +1,7 @@
 package uz.pdp.springsecurity.service;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.pdp.springsecurity.entity.*;
@@ -8,6 +9,7 @@ import uz.pdp.springsecurity.enums.*;
 import uz.pdp.springsecurity.helpers.BusinessHelper;
 import uz.pdp.springsecurity.helpers.CreateEntityHelper;
 import uz.pdp.springsecurity.mapper.BusinessMapper;
+import uz.pdp.springsecurity.mapper.UserMapper;
 import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
 import uz.pdp.springsecurity.utils.Constants;
@@ -32,7 +34,6 @@ public class BusinessService {
     private final NotificationRepository notificationRepository;
     private final ShablonRepository shablonRepository;
     private final BranchRepository branchRepository;
-
     private final BusinessHelper businessHelper;
     private final CreateEntityHelper createEntityHelper;
 
@@ -44,12 +45,12 @@ public class BusinessService {
 
     @Transactional
     public ApiResponse add(BusinessDto businessDto) {
-        if (businessRepository.existsByNameIgnoreCase(businessDto.getName())) {
-            return new ApiResponse("A BUSINESS WITH THAT NAME ALREADY EXISTS", false);
-        }
+
+        ApiResponse apiResponse = checkValidations(businessDto);
+        if (apiResponse != null) return apiResponse;
 
         // Yangi biznes yaratish
-        Business business = businessHelper.createNewBusiness(businessDto);
+        Business business = businessRepository.save(businessHelper.createNewBusiness(businessDto));
 
         // To'lov usullarini saqlash
         businessHelper.savePaymentMethods(business, payMethodRepository);
@@ -81,7 +82,10 @@ public class BusinessService {
 
         Branch branch = createEntityHelper.createBranch(business, address, branchDto);
         createEntityHelper.createBalance(branch);
+
+        // User Role yaratish
         createEntityHelper.createAdminRoleAndUser(business, branch, businessDto);
+
         createEntityHelper.createShablon(business, shablonRepository);
 
         // Qo'shimcha ma'lumotlar yaratish
@@ -95,6 +99,20 @@ public class BusinessService {
         createEntityHelper.createProjectStatus(branch, projectStatusRepository);
 
         return new ApiResponse("Successfully added", true);
+    }
+
+    @Nullable
+    private ApiResponse checkValidations(BusinessDto businessDto) {
+        if (businessRepository.existsByNameIgnoreCase(businessDto.getName())) {
+            return new ApiResponse("A BUSINESS WITH THAT NAME ALREADY EXISTS", false);
+        }
+        if (businessRepository.existsByBusinessNumberIgnoreCase(businessDto.getBusinessNumber())) {
+            return new ApiResponse("A BUSINESS WITH THAT NUMBER ALREADY EXISTS", false);
+        }
+        if (userRepository.existsByUsernameIgnoreCase(businessDto.getUserDto().getUsername())) {
+            return new ApiResponse("A BUSINESS WITH USER ALREADY EXISTS", false);
+        }
+        return null;
     }
 
 
@@ -122,6 +140,12 @@ public class BusinessService {
                 return new ApiResponse("A BUSINESS WITH THAT NAME ALREADY EXISTS", false);
             }
         }
+        Optional<Business> optional = businessRepository.findByBusinessNumber(businessEditDto.getBusinessNumber());
+        if (optional.isPresent()) {
+            if (!optional.get().getId().equals(id)) {
+                return new ApiResponse("BUSINESS WITH THAT NUMBER ALREADY EXISTS", false);
+            }
+        }
 
         Business business = optionalBusiness.get();
         business.setName(businessEditDto.getName());
@@ -137,13 +161,13 @@ public class BusinessService {
     public ApiResponse getOne(UUID id) {
         Optional<Business> optionalBusiness = businessRepository.findById(id);
         return optionalBusiness
-                .map(business -> new ApiResponse("FOUND", true, business))
+                .map(business -> new ApiResponse("FOUND", true, businessMapper.toGetOneDto(business)))
                 .orElseGet(() -> new ApiResponse("Not found business", false));
     }
 
 
     public ApiResponse getAllPartners() {
-        Optional<Role> optionalRole = roleRepository.findByName(Constants.SUPERADMIN);
+        Optional<Role> optionalRole = roleRepository.findByName(Constants.SUPER_ADMIN);
         if (optionalRole.isEmpty()) return new ApiResponse("NOT FOUND", false);
         Role superAdmin = optionalRole.get();
 
@@ -151,7 +175,7 @@ public class BusinessService {
         if (optionalAdmin.isEmpty()) return new ApiResponse("NOT FOUND", false);
         Role admin = optionalAdmin.get();
 
-        List<User> userList = userRepository.findAllByRole_IdAndBusiness_Delete(admin.getId(), false);
+        List<User> userList = userRepository.findAllByRole_IdAndBusiness_Deleted(admin.getId(), false);
         if (userList.isEmpty()) return new ApiResponse("NOT FOUND", false);
         return new ApiResponse("FOUND", true, userList);
     }
@@ -162,9 +186,15 @@ public class BusinessService {
             return new ApiResponse("not found business", false);
         }
         Business business = optionalBusiness.get();
-        business.setDelete(true);
-        business.setActive(false);
-        business.setStatus(Constants.ARCHIVED);
+        if (!business.isDeleted()) {
+            business.setDeleted(true);
+            business.setActive(false);
+            business.setStatus(Constants.ARCHIVED);
+        } else {
+            business.setDeleted(false);
+            business.setActive(true);
+            business.setStatus(Constants.ACTIVE);
+        }
         businessRepository.save(business);
         return new ApiResponse("DELETED", true);
     }
@@ -172,7 +202,7 @@ public class BusinessService {
     public ApiResponse getAll() {
         return new ApiResponse("all business", true, businessMapper
                 .toDtoList(businessRepository
-                        .findAllByDeleteIsFalse()));
+                        .findAllByDeletedIsFalse()));
     }
 
     public ApiResponse deActive(UUID businessId) {
@@ -181,8 +211,23 @@ public class BusinessService {
             new ApiResponse("not found business", false);
 
         Business business = optionalBusiness.get();
-        business.setActive(false);
-        business.setStatus(Constants.BLOCKED);
+        if (business.isActive()) {
+            business.setActive(false);
+            business.setStatus(Constants.BLOCKED);
+            userRepository.findAllByBusiness_Id(businessId).forEach(u -> {
+                u.setEnabled(false);
+                userRepository.save(u);
+            });
+        } else {
+            business.setActive(true);
+            business.setStatus(Constants.ACTIVE);
+            userRepository.findAllByBusiness_Id(businessId).forEach(u -> {
+                if (u.isActive() && !u.isEnabled()) {
+                    u.setEnabled(true);
+                    userRepository.save(u);
+                }
+            });
+        }
         businessRepository.save(business);
         return new ApiResponse("SUCCESS", true);
     }
@@ -280,5 +325,11 @@ public class BusinessService {
             business.setEditDays(editDays);
             businessRepository.save(business);
         });
+    }
+
+    public ApiResponse getAllArchive() {
+        return new ApiResponse("all business", true, businessMapper
+                .toDtoList(businessRepository
+                        .findAllByDeletedIsTrue()));
     }
 }

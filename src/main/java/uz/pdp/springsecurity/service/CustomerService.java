@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
@@ -18,6 +19,7 @@ import uz.pdp.springsecurity.payload.projections.MonthProjection;
 import uz.pdp.springsecurity.repository.*;
 import uz.pdp.springsecurity.utils.Constants;
 
+import javax.transaction.Transactional;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.time.*;
@@ -41,6 +43,9 @@ public class CustomerService {
     private final CustomerDebtRepaymentRepository customerDebtRepaymentRepository;
     private final CustomerSupplierRepository customerSupplierRepository;
     private final CustomerSupplierService customerSupplierService;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public ApiResponse add(CustomerDto customerDto) {
         return createEdit(new Customer(), customerDto);
@@ -66,7 +71,6 @@ public class CustomerService {
         phoneNumber = phoneNumber.startsWith("+") ? phoneNumber : "+" + phoneNumber;
         phoneNumber = phoneNumber.replaceAll(" ", "");
         customer.setName(customerDto.getName());
-        customer.setPhoneNumber(phoneNumber);
         customer.setTelegram(customerDto.getTelegram());
         customer.setBirthday(customerDto.getBirthday());
         customer.setDebt(customerDto.getDebt());
@@ -83,6 +87,58 @@ public class CustomerService {
         Customer save = customerRepository.save(customer);
         return new ApiResponse("SUCCESS", true, save);
     }
+
+
+    @Transactional
+    public ApiResponse createCustomer(CustomerRegisterDto customerDto) {
+        try {
+            // 1. Tekshiruv: username va phoneNumber unikal bo'lishi kerak
+            if (userRepository.existsByUsername(customerDto.getPhoneNumber())) {
+                return new ApiResponse("Username already exists", false);
+            }
+            if (userRepository.existsByPhoneNumber(customerDto.getPhoneNumber())) {
+                return new ApiResponse("Phone number already exists", false);
+            }
+
+            // 2. Role o'rnatish (Customer uchun maxsus rol topiladi)
+            Role customerRole = roleRepository.findByName("Customer")
+                    .orElseThrow(() -> new RuntimeException("Customer role not found"));
+
+            // 3. Yangi User yaratish
+            User user = new User();
+            user.setFirstName(customerDto.getFirstName());
+            user.setLastName(customerDto.getLastName());
+            user.setUsername(customerDto.getPhoneNumber());
+            user.setPassword(passwordEncoder.encode(customerDto.getPassword()));
+            user.setPhoneNumber(customerDto.getPhoneNumber());
+            user.setRole(customerRole);
+            user.setEnabled(true); // Akkaunt aktiv
+            user.setActive(true); // Akkaunt faol
+            userRepository.save(user);
+
+            // 4. Customer yaratish va User bilan bog'lash
+            Customer customer = new Customer();
+            customer.setName(customerDto.getFirstName());
+            customer.setPhoneNumber(customerDto.getPhoneNumber());
+            customer.setUsername(customerDto.getPhoneNumber());
+            customer.setPassword(passwordEncoder.encode(customerDto.getPassword()));
+            try {
+                customer.setUniqueCode(generateCode());
+            } catch (Exception e) {
+                customer.setUniqueCode(generateCode());
+            }
+            customer.setUser(user); // User bilan bog'lash
+            customer.setActive(true); // Faol holatda
+            customerRepository.save(customer);
+
+            return new ApiResponse("Customer successfully created", true);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ApiResponse("Error while creating customer", false);
+        }
+    }
+
 
     public ApiResponse get(UUID id) {
         Optional<Customer> optional = customerRepository.findById(id);
@@ -602,7 +658,6 @@ public class CustomerService {
             customerCalendarDtoList.add(new CustomerCalendarDto(
                     customer.getId(),
                     customer.getName(),
-                    customer.getPhoneNumber(),
                     timestampList
             ));
         }
@@ -734,5 +789,18 @@ public class CustomerService {
         response.put("totalPages", all.getTotalPages());
 
         return new ApiResponse("found", true, response);
+    }
+
+
+    public String generateCode() {
+        Random random = new Random();
+        int randomNumber = 100000000 + random.nextInt(900000000); // 100000000-999999999 oralig‘ida
+        return String.valueOf(randomNumber);
+    }
+
+    public ApiResponse getByBarcode(String barcode) {
+        Optional<CustomerGet> optional = customerRepository.findCustomerByUniqueCode(barcode);
+        return optional.map(customerGet -> new ApiResponse("found", true, customerGet))
+                .orElseGet(() -> new ApiResponse("not found", false));
     }
 }

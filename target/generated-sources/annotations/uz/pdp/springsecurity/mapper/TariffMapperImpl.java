@@ -6,11 +6,12 @@ import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 import uz.pdp.springsecurity.entity.Tariff;
 import uz.pdp.springsecurity.enums.Lifetime;
+import uz.pdp.springsecurity.enums.Permissions;
 import uz.pdp.springsecurity.payload.TariffDto;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-12-03T14:32:05+0500",
+    date = "2024-12-05T15:36:13+0500",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.13 (Amazon.com Inc.)"
 )
 @Component
@@ -40,6 +41,10 @@ public class TariffMapperImpl implements TariffMapper {
         tariffDto.setDiscount( tariff.getDiscount() );
         tariffDto.setActive( tariff.isActive() );
         tariffDto.setDelete( tariff.isDelete() );
+        List<Permissions> list = tariff.getPermissions();
+        if ( list != null ) {
+            tariffDto.setPermissions( new ArrayList<Permissions>( list ) );
+        }
 
         return tariffDto;
     }
@@ -93,6 +98,22 @@ public class TariffMapperImpl implements TariffMapper {
 
         tariff.setName( tariffDto.getName() );
         tariff.setDescription( tariffDto.getDescription() );
+        if ( tariff.getPermissions() != null ) {
+            List<Permissions> list = tariffDto.getPermissions();
+            if ( list != null ) {
+                tariff.getPermissions().clear();
+                tariff.getPermissions().addAll( list );
+            }
+            else {
+                tariff.setPermissions( null );
+            }
+        }
+        else {
+            List<Permissions> list = tariffDto.getPermissions();
+            if ( list != null ) {
+                tariff.setPermissions( new ArrayList<Permissions>( list ) );
+            }
+        }
         tariff.setBranchAmount( tariffDto.getBranchAmount() );
         tariff.setProductAmount( tariffDto.getProductAmount() );
         tariff.setEmployeeAmount( tariffDto.getEmployeeAmount() );

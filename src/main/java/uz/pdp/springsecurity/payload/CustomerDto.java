@@ -29,10 +29,6 @@ public class CustomerDto {
 
     private double customerGroupPercent;
 
-    /*private UUID businessId;
-
-    private UUID branchId;*/
-
     @NotNull(message = "required line")
     private List<UUID> branches;
 
@@ -40,13 +36,13 @@ public class CustomerDto {
 
     private Date payDate;
 
-
-
     private Date birthday;
-    private Double latitude;   // Yangi maydon
-    private Double longitude;  // Yangi maydon
-    private String address;  // Yangi qo'shilgan maydon
 
+    private Double latitude;   // Yangi maydon
+
+    private Double longitude;  // Yangi maydon
+
+    private String address;  // Yangi qo'shilgan maydon
 
     @NotNull(message = "required line")
     private Boolean lidCustomer;

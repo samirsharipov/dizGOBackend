@@ -25,8 +25,6 @@ import java.util.UUID;
 public class CreateEntityHelper {
     private final TariffRepository tariffRepository;
     private final SubscriptionRepository subscriptionRepository;
-    private final AddressRepository addressRepository;
-    private final AddressMapper addressMapper;
     private final BranchRepository branchRepository;
     private final BranchMapper branchMapper;
     private final BalanceRepository balanceRepository;
@@ -70,6 +68,7 @@ public class CreateEntityHelper {
         userDto.setPassword(userCreateDto.getPassword());
         userDto.setFirstName(userCreateDto.getFirstName());
         userDto.setLastName(userCreateDto.getLastName());
+        userDto.setEnabled(false);
 
         userDto.setBranchId(Set.of(branch.getId()));
         userDto.setRoleId(savedRole.getId());
@@ -89,7 +88,7 @@ public class CreateEntityHelper {
         projectStatusRepository.saveAll(projectStatusList);
     }
 
-    public  void createShablon(Business business, ShablonRepository shablonRepository) {
+    public void createShablon(Business business, ShablonRepository shablonRepository) {
         List<Shablon> shablonList = Arrays.asList(
                 new Shablon("Tug'ilgan kun uchun", "bithday", "Hurmatli {ism} tugilgan kuningiz bilan", business),
                 new Shablon("Mijozlar qarzi", "debtCustomer", "qarzingizni tulash vaqti keldi", business),

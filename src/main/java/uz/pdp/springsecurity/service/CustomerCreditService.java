@@ -34,8 +34,8 @@ public class CustomerCreditService {
 
         customerCreditGetDto.setId(customerCredit.getId());
         customerCreditGetDto.setCustomerId(customerCredit.getCustomer().getId());
-        customerCreditGetDto.setCustomerNumber(customerCredit.getCustomer().getPhoneNumber());
-        customerCreditGetDto.setName(customerCredit.getCustomer().getName());
+//        customerCreditGetDto.setCustomerNumber(customerCredit.getCustomer().getPhoneNumber());
+//        customerCreditGetDto.setName(customerCredit.getCustomer().getName());
         customerCreditGetDto.setComment(customerCredit.getComment());
         customerCreditGetDto.setAmount(customerCredit.getAmount());
         customerCreditGetDto.setPaymentDate(customerCredit.getPaymentDate());

@@ -14,11 +14,14 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface TariffMapper {
 
-    @Mapping(target = "permissionsList", ignore = true)
     @Mapping(target = "id",source = "id")
     TariffDto toDto(Tariff tariff);
+
     List<TariffDto> toDtoList(List<Tariff> tariffList);
 
+    @Mapping(target = "lastModifiedBy", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "permissions", ignore = true)
     @Mapping(target = "updateAt", ignore = true)
     @Mapping(target = "id", ignore = true)

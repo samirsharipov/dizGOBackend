@@ -28,7 +28,8 @@ public class BusinessHelper {
         business.setBusinessNumber(businessDto.getBusinessNumber());
         business.setActive(businessDto.isActive());
         business.setAddressHome(businessDto.getAddressHome());
-        business.setDelete(false);
+        business.setDeleted(false);
+        business.setActive(false);
         return business;
     }
 

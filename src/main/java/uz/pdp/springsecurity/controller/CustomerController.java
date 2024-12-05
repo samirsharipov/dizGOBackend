@@ -5,8 +5,10 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import uz.pdp.springsecurity.annotations.CheckPermission;
+import uz.pdp.springsecurity.helpers.ResponseEntityHelper;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.CustomerDto;
+import uz.pdp.springsecurity.payload.CustomerRegisterDto;
 import uz.pdp.springsecurity.payload.RepaymentDto;
 import uz.pdp.springsecurity.service.CustomerExcelService;
 import uz.pdp.springsecurity.service.CustomerService;
@@ -23,14 +25,21 @@ import java.util.UUID;
 @RequestMapping("/api/customer")
 @RequiredArgsConstructor
 public class CustomerController {
-    private final CustomerService customerService;
 
+    private final CustomerService customerService;
     private final CustomerExcelService customerExcelService;
+    private final ResponseEntityHelper responseEntityHelper;
 
     @CheckPermission("ADD_CUSTOMER")
     @PostMapping
     public HttpEntity<?> addCustomer(@Valid @RequestBody CustomerDto customerDto) {
         ApiResponse apiResponse = customerService.add(customerDto);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
+
+    @PostMapping("/registration")
+    public HttpEntity<?> register(@Valid @RequestBody CustomerRegisterDto customerDto) {
+        ApiResponse apiResponse = customerService.createCustomer(customerDto);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
@@ -207,5 +216,10 @@ public class CustomerController {
     public HttpEntity<?> getMonth(@PathVariable UUID branchId) {
         ApiResponse apiResponse = customerService.getMonthsByYear(branchId);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
+
+    @GetMapping("/get-by-barcode")
+    public HttpEntity<?> getByBarcode(@RequestParam String barcode) {
+        return responseEntityHelper.buildResponse(customerService.getByBarcode(barcode));
     }
 }

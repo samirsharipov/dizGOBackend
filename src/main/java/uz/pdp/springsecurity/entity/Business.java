@@ -15,7 +15,6 @@ import javax.persistence.Entity;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler", "fieldHandler"})
-@Where(clause = "deleted = false AND active = true")
 public class Business extends AbsEntity {
 
     @Column(nullable = false, unique = true)
@@ -29,10 +28,6 @@ public class Business extends AbsEntity {
     private String businessNumber;
 
     private String addressHome;
-
-    private boolean isActive;
-
-    private boolean delete;
 
     private String status; // active, blocked, archive
 
@@ -51,8 +46,8 @@ public class Business extends AbsEntity {
     public Business(String name, String description, boolean active, boolean delete, boolean main) {
         this.name = name;
         this.description = description;
-        this.isActive = active;
-        this.delete = delete;
+        super.setActive(active);
+        super.setDeleted(delete);
         this.main = main;
     }
 }
