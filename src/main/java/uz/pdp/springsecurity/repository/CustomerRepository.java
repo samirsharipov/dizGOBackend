@@ -108,4 +108,6 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
             "FROM Customer c WHERE c.uniqueCode = :uniqueCode")
     Optional<CustomerGet> findCustomerByUniqueCode(String uniqueCode);
 
+    Optional<Customer> findByUser_Id(UUID user_id);
+
 }
