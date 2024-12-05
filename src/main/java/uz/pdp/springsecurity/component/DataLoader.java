@@ -49,6 +49,7 @@ public class DataLoader implements CommandLineRunner {
     private final LanguageRepository languageRepository;
     private final CreateEntityHelper createEntityHelper;
     private final BusinessHelper businessHelper;
+    private final BranchCategoryRepository branchCategoryRepository;
 
     @Value("${spring.sql.init.mode}")
     private String initMode;
@@ -63,8 +64,12 @@ public class DataLoader implements CommandLineRunner {
             Timestamp endDay = Timestamp.valueOf(date.atStartOfDay());
             Set<Branch> branches = new HashSet<>();
 
-            Tariff tariff = tariffRepository.save(new Tariff(
+            Tariff tariffSuperAdmin = tariffRepository.save(new Tariff(
                     "Premium", "Premium tariff", RolePermissions.SUPER_ADMIN_PERMISSIONS, 10, 0,
+                    0, 0, Lifetime.MONTH, 0, 1, 100, 0, false, true));
+
+            tariffRepository.save(new Tariff(
+                    "Premium", "Freemium tariff", RolePermissions.ADMIN_PERMISSIONS, 10, 0,
                     0, 0, Lifetime.MONTH, 0, 1, 100, 0, true, false));
 
             Business business = businessRepository.save(new Business(
@@ -98,14 +103,14 @@ public class DataLoader implements CommandLineRunner {
             brandRepository.save(new Brand(
                     "brand", business));
 
-            subscriptionRepository.save(new Subscription(business, tariff, startDay, endDay,
+            subscriptionRepository.save(new Subscription(business, tariffSuperAdmin, startDay, endDay,
                     StatusTariff.CONFIRMED, PayType.OFFLINE, true, true, false));
 
 //            Address address = addressRepository.save(new Address(
 //                    "Tashkent", "Shayxontuxur", "Gulobod", "1"));
 
             Role superAdmin = roleRepository.save(new Role(
-                    Constants.SUPERADMIN,
+                    Constants.SUPER_ADMIN,
                     RolePermissions.SUPER_ADMIN_PERMISSIONS,
                     business));
 
@@ -124,6 +129,12 @@ public class DataLoader implements CommandLineRunner {
                     RolePermissions.EMPLOYEE_PERMISSIONS,
                     business));
 
+            roleRepository.save(new Role(
+                    Constants.CUSTOMER,
+                    RolePermissions.CUSTOMER_PERMISSIONS,
+                    business
+            ));
+
             List<PaymentMethod> paymentMethods = Arrays.asList(
                     new PaymentMethod("Naqd", business),
                     new PaymentMethod("PlastikKarta", business),
@@ -136,15 +147,17 @@ public class DataLoader implements CommandLineRunner {
             Address address = new Address();
             address.setName("O'zbekiston");
             addressRepository.save(address);
-            Branch mainBranch = branchRepository.save(new Branch("Bnav Main Branch ", address, business));
-            branches.add(mainBranch);
+            Branch main_branch_ = new Branch("Bnav Main Branch ", address, business);
+            main_branch_.setBranchCategory(branchCategoryRepository.save(new BranchCategory("Oziq ovqat", "asosiy")));
+            branchRepository.save(main_branch_);
+            branches.add(main_branch_);
 
-            invoiceService.create(mainBranch);
-            createEntityHelper.createProjectStatus(mainBranch, projectStatusRepository);
+            invoiceService.create(main_branch_);
+            createEntityHelper.createProjectStatus(main_branch_, projectStatusRepository);
 
             List<TaskStatus> taskStatuses = Arrays.asList(
-                    new TaskStatus("Completed", "Completed", 2, true, "#04d227", mainBranch),
-                    new TaskStatus("Uncompleted", "Uncompleted", 1, true, "#FF0000", mainBranch)
+                    new TaskStatus("Completed", "Completed", 2, true, "#04d227", main_branch_),
+                    new TaskStatus("Uncompleted", "Uncompleted", 1, true, "#FF0000", main_branch_)
             );
             taskStatusRepository.saveAll(taskStatuses);
 
@@ -214,7 +227,7 @@ public class DataLoader implements CommandLineRunner {
         List<Permissions> newPermissionList = Arrays.asList(
                 // TODO: 5/29/2023 write new permissions here
         );
-        Optional<Role> superAdmin = roleRepository.findByName(Constants.SUPERADMIN);
+        Optional<Role> superAdmin = roleRepository.findByName(Constants.SUPER_ADMIN);
         List<Role> adminList = roleRepository.findAllByName(Constants.ADMIN);
         superAdmin.ifPresent(adminList::add);
         updatePermissionHelperRole(adminList, newPermissionList);

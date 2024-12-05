@@ -81,7 +81,7 @@ public class CustomerBot extends TelegramLongPollingBot {
                 Optional<Customer> customer = customerRepository.findByPhoneNumberAndActiveIsTrueOrPhoneNumberAndActiveIsNull(phoneNumber, phoneNumber);
                 execute(new DeleteMessage(chatId.toString(), telegramUser.getMessageId()));
                 if (customer.isPresent()) {
-                    customer.get().setChatId(chatId);
+//                    customer.get().setChatId(chatId);
                     customerRepository.save(customer.get());
                     execute(SendMessage
                             .builder()

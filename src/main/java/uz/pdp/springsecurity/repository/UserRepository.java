@@ -26,7 +26,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     List<User> findAllByRole_Id(UUID role_id);
 
-    List<User> findAllByRole_IdAndBusiness_Delete(UUID role_id, boolean delete);
+    List<User> findAllByRole_IdAndBusiness_Deleted(UUID role_id, boolean delete);
 
     List<User> findAllByBusiness_Id(UUID business_id);
 
@@ -78,4 +78,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     @Query("select count(u) from users u where u.createdAt between :startDate and :endDate")
     long countTotalBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+
+    boolean existsByUsername(String username);
+
+    boolean existsByPhoneNumber(String phoneNumber);
 }

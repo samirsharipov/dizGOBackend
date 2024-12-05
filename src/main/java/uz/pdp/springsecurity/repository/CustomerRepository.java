@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import uz.pdp.springsecurity.entity.Customer;
+import uz.pdp.springsecurity.payload.CustomerGet;
 import uz.pdp.springsecurity.payload.projections.InActiveUserProjection;
 
 import java.sql.Timestamp;
@@ -101,4 +102,10 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     @Query("select count(c) from Customer c where c.createdAt between :startDate and :endDate")
     long countTotalBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+
+
+    @Query("SELECT new uz.pdp.springsecurity.payload.CustomerGet(c.id, c.user.firstName, c.user.lastName) " +
+            "FROM Customer c WHERE c.uniqueCode = :uniqueCode")
+    Optional<CustomerGet> findCustomerByUniqueCode(String uniqueCode);
+
 }

@@ -45,9 +45,9 @@ public class CustomerExcelService {
 
                 try {
                     Customer customer = new Customer();
-                    customer.setName(getStringValueFromCell(row.getCell(0)));
-                    customer.setPhoneNumber(getStringValueFromCell(row.getCell(1)));
-                    customer.setTelegram(getStringValueFromCell(row.getCell(2)));
+//                    customer.setName(getStringValueFromCell(row.getCell(0)));
+//                    customer.setPhoneNumber(getStringValueFromCell(row.getCell(1)));
+//                    customer.setTelegram(getStringValueFromCell(row.getCell(2)));
 
                     Cell debtCell = row.getCell(3);
                     if (debtCell != null && debtCell.getCellType() == CellType.NUMERIC) {
@@ -65,9 +65,9 @@ public class CustomerExcelService {
                         customer.setPayDate(null);
                     }
 
-                    customer.setBusiness(optionalBranch.get().getBusiness());
-                    customer.setBranch(optionalBranch.get());
-                    customer.setBranches(List.of(optionalBranch.get()));
+//                    customer.setBusiness(optionalBranch.get().getBusiness());
+//                    customer.setBranch(optionalBranch.get());
+//                    customer.setBranches(List.of(optionalBranch.get()));
                     customerRepository.save(customer);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -110,9 +110,9 @@ public class CustomerExcelService {
         int rowNum = 1;
         for (Customer customer : customers) {
             Row row = sheet.createRow(rowNum++);
-            row.createCell(0).setCellValue(customer.getName());
-            row.createCell(1).setCellValue(customer.getPhoneNumber() != null ? customer.getPhoneNumber() : "");
-            row.createCell(2).setCellValue(customer.getTelegram() != null ? customer.getTelegram() : "");
+//            row.createCell(0).setCellValue(customer.getName());
+//            row.createCell(1).setCellValue(customer.getPhoneNumber() != null ? customer.getPhoneNumber() : "");
+//            row.createCell(2).setCellValue(customer.getTelegram() != null ? customer.getTelegram() : "");
             row.createCell(3).setCellValue(customer.getDebt() != 0 ? customer.getDebt() : 0);
             Cell payDateCell = row.createCell(4);
             if (customer.getPayDate() != null) {
@@ -122,7 +122,7 @@ public class CustomerExcelService {
             }
             payDateCell.setCellType(CellType.STRING);
             row.createCell(5).setCellValue(customer.getCustomerGroup() != null && customer.getCustomerGroup().getName() != null ? customer.getCustomerGroup().getName() : "");
-            row.createCell(6).setCellValue(customer.getBranch().getName() != null ? customer.getBranch().getName() : "");
+//            row.createCell(6).setCellValue(customer.getBranch().getName() != null ? customer.getBranch().getName() : "");
         }
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

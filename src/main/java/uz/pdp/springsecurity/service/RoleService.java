@@ -24,7 +24,7 @@ public class RoleService {
         if (optionalBusiness.isEmpty()) return new ApiResponse("BUSINESS NOT FOUND", false);
 
         boolean exists = roleRepository.existsByNameIgnoreCaseAndBusinessId(roleDto.getName(), roleDto.getBusinessId());
-        if (exists || roleDto.getName().equalsIgnoreCase(Constants.SUPERADMIN) || roleDto.getName().equalsIgnoreCase(Constants.ADMIN))
+        if (exists || roleDto.getName().equalsIgnoreCase(Constants.SUPER_ADMIN) || roleDto.getName().equalsIgnoreCase(Constants.ADMIN))
             return new ApiResponse("ROLE ALREADY EXISTS", false);
 
         Role role = new Role();
@@ -47,7 +47,7 @@ public class RoleService {
 
         boolean exist = roleRepository.existsByNameIgnoreCaseAndBusinessIdAndIdIsNot(roleDto.getName(), roleDto.getBusinessId(), id);
 
-        if (exist || roleDto.getName().equalsIgnoreCase(Constants.SUPERADMIN) || roleDto.getName().equalsIgnoreCase(Constants.ADMIN))
+        if (exist || roleDto.getName().equalsIgnoreCase(Constants.SUPER_ADMIN) || roleDto.getName().equalsIgnoreCase(Constants.ADMIN))
             return new ApiResponse("ROLE ALREADY EXISTS", false);
 
         Role role = optionalRole.get();
@@ -65,7 +65,7 @@ public class RoleService {
 
 
     public ApiResponse getAllByBusiness(UUID business_id) {
-        List<Role> allByBusiness_id = roleRepository.findAllByBusiness_IdAndNameIsNot(business_id, Constants.SUPERADMIN);
+        List<Role> allByBusiness_id = roleRepository.findAllByBusiness_IdAndNameIsNot(business_id, Constants.SUPER_ADMIN);
 
         List<RoleDto> roleDtoList = new ArrayList<>();
         for (Role role : allByBusiness_id) {
@@ -97,7 +97,7 @@ public class RoleService {
 
 
     public ApiResponse getByBusinessRole(UUID businessId) {
-        List<Role> allByBusiness_id = roleRepository.findAllByBusiness_IdAndNameIsNot(businessId, Constants.SUPERADMIN);
+        List<Role> allByBusiness_id = roleRepository.findAllByBusiness_IdAndNameIsNot(businessId, Constants.SUPER_ADMIN);
         List<RoleGetMetDto> roleGetMetDtoList = new ArrayList<>();
 
         for (Role role : allByBusiness_id) {

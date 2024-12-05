@@ -6,12 +6,10 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Where;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -23,23 +21,43 @@ public class Customer extends AbsEntity {
 
     @Column(nullable = false)
     private String name;
-    private String phoneNumber;
+
     private String telegram;
+
     private String description;
+
+    @Column(unique = true, nullable = false)
+    private String uniqueCode;
+
     private String address;
+
+    @Column(unique = true, nullable = false)
+    private String username;
+
+    @Column(unique = true, nullable = false)
+    private String password;
+
+    @Column(unique = true, nullable = false)
+    private String phoneNumber;
 
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
     private CustomerGroup customerGroup;
+
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Business business;
+
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Branch branch;
+
     @ManyToMany
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Branch> branches;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    private User user;
 
     private Date birthday;
 
@@ -50,8 +68,8 @@ public class Customer extends AbsEntity {
     private Boolean lidCustomer;
 
     private Double latitude;  // Yangi maydon
-    private Double longitude; // Yangi maydon
 
+    private Double longitude; // Yangi maydon
 
     private Boolean active = true;
 

@@ -61,6 +61,13 @@ public class BusinessController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
+    @CheckPermission("VIEW_BUSINESS")
+    @GetMapping("/get-all-archive")
+    public HttpEntity<?> getAllArchive() {
+        ApiResponse apiResponse = businessService.getAllArchive();
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
+
 
     @GetMapping("/myAllBusiness")
     public HttpEntity<?> getMyAllBusiness(@RequestParam UUID userId) {

@@ -13,8 +13,8 @@ public interface TradeLidMapper {
     @Mapping(source = "createdAt", target = "timestamp")
     @Mapping(source = "paymentStatus.status", target = "paymentStatusName")
     @Mapping(source = "payMethod.type", target = "paymentMethodName")
-    @Mapping(source = "customer.phoneNumber", target = "customerPhoneNumber")
-    @Mapping(source = "customer.name", target = "customerName")
+//    @Mapping(source = "customer.phoneNumber", target = "customerPhoneNumber")
+//    @Mapping(source = "customer.name", target = "customerName")
     @Mapping(source = "branch.name", target = "branchName")
     TradeLidDto toDto(Trade trade);
 

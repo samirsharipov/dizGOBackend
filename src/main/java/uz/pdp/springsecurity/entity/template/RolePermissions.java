@@ -503,4 +503,9 @@ public class RolePermissions {
 
             VIEW_DASHBOARD
     );
+
+    public static final List<Permissions> CUSTOMER_PERMISSIONS = Arrays.asList(
+            VIEW_TRADE,
+            EDIT_CUSTOMER
+    );
 }

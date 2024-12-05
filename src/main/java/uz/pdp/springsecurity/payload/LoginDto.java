@@ -14,4 +14,5 @@ public class LoginDto {
     private String username;
     @NotNull(message = "required line")
     private String password;
+
 }

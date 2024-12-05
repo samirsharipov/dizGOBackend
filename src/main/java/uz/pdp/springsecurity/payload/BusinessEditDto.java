@@ -11,14 +11,15 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BusinessEditDto {
+    private UUID id;
     @NotNull(message = "required line")
     private String name;
 
     private String description;
 
-    private boolean isActive;
+    private boolean active;
 
-    private boolean isDelete;
+    private boolean deleted ;
 
     private String businessNumber;
 

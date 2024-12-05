@@ -412,7 +412,7 @@ public class ExcelService {
         List<ExcelCustomerTradeHistory> sales = new ArrayList<>();
         for (Trade trade : tradeList) {
             ExcelCustomerTradeHistory history = new ExcelCustomerTradeHistory();
-            history.setCustomerName(trade.getCustomer().getName());
+//            history.setCustomerName(trade.getCustomer().getName());
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
             String formattedDate = sdf.format(trade.getPayDate());
             history.setDate(formattedDate);

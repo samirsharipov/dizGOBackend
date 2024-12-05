@@ -120,7 +120,7 @@ public class SalaryService {
     }
 
     private void checkBeforeSalary(Branch branch) {
-        Optional<Role> optionalRole = roleRepository.findByName(Constants.SUPERADMIN);
+        Optional<Role> optionalRole = roleRepository.findByName(Constants.SUPER_ADMIN);
         if (optionalRole.isEmpty()) return;
         List<User> userList = userRepository.findAllByBranchesIdAndRoleIsNotAndActiveIsTrue(branch.getId(), optionalRole.get());
         if (userList.isEmpty()) return;

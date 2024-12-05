@@ -1,6 +1,7 @@
 package uz.pdp.springsecurity.entity;
 
 import lombok.*;
+import org.hibernate.annotations.Where;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
 import uz.pdp.springsecurity.enums.Lifetime;
 import uz.pdp.springsecurity.enums.Permissions;

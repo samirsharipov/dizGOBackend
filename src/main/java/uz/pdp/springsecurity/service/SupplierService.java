@@ -27,7 +27,7 @@ public class SupplierService {
     private final SupplierBalanceHistoryRepository supplierBalanceHistoryRepository;
     private final CustomerSupplierRepository customerSupplierRepository;
     private final CustomerSupplierService customerSupplierService;
-    private final CustomerService customerService;
+//    private final CustomerService customerService;
 
     public ApiResponse add(SupplierDto supplierDto) {
         Optional<Business> optionalBusiness = businessRepository.findById(supplierDto.getBusinessId());
@@ -51,13 +51,13 @@ public class SupplierService {
 
         if (supplierDto.getCustomerDto()!=null) {
             CustomerDto customerDto = supplierDto.getCustomerDto();
-            customerDto.setName(supplierDto.getName());
+//            customerDto.setName(supplierDto.getName());
             customerDto.setPhoneNumber(supplierDto.getPhoneNumber());
-            customerDto.setTelegram(supplierDto.getTelegram());
-            ApiResponse apiResponse = customerService.add(customerDto);
+//            customerDto.setTelegram(supplierDto.getTelegram());
+//            ApiResponse apiResponse = customerService.add(customerDto);
             CustomerSupplier customerSupplier = new CustomerSupplier();
             customerSupplier.setSupplier(supplier);
-            customerSupplier.setCustomer((Customer) apiResponse.getObject());
+//            customerSupplier.setCustomer((Customer) apiResponse.getObject());
             customerSupplierRepository.save(customerSupplier);
         }
 

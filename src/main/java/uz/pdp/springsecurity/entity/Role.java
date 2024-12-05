@@ -37,6 +37,7 @@ public class Role extends AbsEntity {
     private Role parentRole;
 
     private String description;
+
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private boolean isOffice;
 
@@ -60,9 +61,4 @@ public class Role extends AbsEntity {
         this.name = name;
         this.permissions = permissions;
     }
-
-    public void addPermission(Permissions permissions){
-        this.permissions.add(permissions);
-    }
-
 }

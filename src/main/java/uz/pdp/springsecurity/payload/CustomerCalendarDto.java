@@ -13,6 +13,5 @@ import java.util.UUID;
 public class CustomerCalendarDto {
     private UUID customerId;
     private String firstName;
-    private String phone;
     List<Timestamp> timestampList;
 }

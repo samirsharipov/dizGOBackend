@@ -5,7 +5,6 @@ import java.util.List;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 import uz.pdp.springsecurity.entity.Branch;
-import uz.pdp.springsecurity.entity.Customer;
 import uz.pdp.springsecurity.entity.PaymentMethod;
 import uz.pdp.springsecurity.entity.PaymentStatus;
 import uz.pdp.springsecurity.entity.Trade;
@@ -14,7 +13,7 @@ import uz.pdp.springsecurity.payload.TradeLidDto;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-12-03T14:32:05+0500",
+    date = "2024-12-05T15:36:13+0500",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.13 (Amazon.com Inc.)"
 )
 @Component
@@ -32,8 +31,6 @@ public class TradeLidMapperImpl implements TradeLidMapper {
         tradeLidDto.setTimestamp( trade.getCreatedAt() );
         tradeLidDto.setPaymentStatusName( tradePaymentStatusStatus( trade ) );
         tradeLidDto.setPaymentMethodName( tradePayMethodType( trade ) );
-        tradeLidDto.setCustomerPhoneNumber( tradeCustomerPhoneNumber( trade ) );
-        tradeLidDto.setCustomerName( tradeCustomerName( trade ) );
         tradeLidDto.setBranchName( tradeBranchName( trade ) );
         tradeLidDto.setId( trade.getId() );
         tradeLidDto.setTotalSum( trade.getTotalSum() );
@@ -100,36 +97,6 @@ public class TradeLidMapperImpl implements TradeLidMapper {
             return null;
         }
         return type;
-    }
-
-    private String tradeCustomerPhoneNumber(Trade trade) {
-        if ( trade == null ) {
-            return null;
-        }
-        Customer customer = trade.getCustomer();
-        if ( customer == null ) {
-            return null;
-        }
-        String phoneNumber = customer.getPhoneNumber();
-        if ( phoneNumber == null ) {
-            return null;
-        }
-        return phoneNumber;
-    }
-
-    private String tradeCustomerName(Trade trade) {
-        if ( trade == null ) {
-            return null;
-        }
-        Customer customer = trade.getCustomer();
-        if ( customer == null ) {
-            return null;
-        }
-        String name = customer.getName();
-        if ( name == null ) {
-            return null;
-        }
-        return name;
     }
 
     private String tradeBranchName(Trade trade) {

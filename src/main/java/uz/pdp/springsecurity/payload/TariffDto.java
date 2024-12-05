@@ -40,5 +40,5 @@ public class TariffDto {
 
     private boolean isDelete;
 
-    private List<Permissions> permissionsList;
+    private List<Permissions> permissions;
 }

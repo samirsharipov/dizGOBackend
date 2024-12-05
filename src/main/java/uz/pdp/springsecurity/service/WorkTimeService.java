@@ -121,7 +121,7 @@ public class WorkTimeService {
     public ApiResponse getOnWork(UUID branchId) {
         Optional<Branch> optionalBranch = branchRepository.findById(branchId);
         if (optionalBranch.isEmpty()) return new ApiResponse("BRANCH NOT FOUND", false);
-        Optional<Role> optionalRole = roleRepository.findByName(Constants.SUPERADMIN);
+        Optional<Role> optionalRole = roleRepository.findByName(Constants.SUPER_ADMIN);
         if (optionalRole.isEmpty()) return new ApiResponse("ERROR", false);
         List<User> userList = userRepository.findAllByBranchesIdAndRoleIsNotAndActiveIsTrue(branchId, optionalRole.get());
         if (userList.isEmpty()) return new ApiResponse("USERS NOT FOUND", false);
@@ -156,7 +156,7 @@ public class WorkTimeService {
         YearMonth yearMonth = YearMonth.of(selectedYear, selectedMonth);
         int thisDay = LocalDate.of(selectedYear, selectedMonth, yearMonth.lengthOfMonth()).getDayOfMonth();
         if (!branchRepository.existsById(branchId)) return new ApiResponse("BRANCH NOT FOUND", false);
-        Optional<Role> optionalRole = roleRepository.findByName(Constants.SUPERADMIN);
+        Optional<Role> optionalRole = roleRepository.findByName(Constants.SUPER_ADMIN);
         if (optionalRole.isEmpty()) return new ApiResponse("ERROR", false);
         List<User> userList = userRepository.findAllByBranchesIdAndRoleIsNotAndActiveIsTrue(branchId, optionalRole.get());
         if (userList.isEmpty()) return new ApiResponse("USERS NOT FOUND", false);

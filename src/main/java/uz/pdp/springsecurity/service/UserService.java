@@ -85,6 +85,7 @@ public class UserService {
         user.setBranches(branches);
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         user.setActive(true);
+        user.setEnabled(userDto.isEnabled());
         user.setDateOfEmployment(userDto.getDateOfEmployment() != null ? userDto.getDateOfEmployment() : new Date());
         user.setPassportNumber(userDto.getPassportNumber() != null ? userDto.getPassportNumber() : "");
 
@@ -228,7 +229,7 @@ public class UserService {
             return new ApiResponse("USER NOT FOUND", false);
 
         User user = optionalUser.get();
-        if (user.getRole().getName().equals(Constants.ADMIN) || user.getRole().getName().equals(Constants.SUPERADMIN))
+        if (user.getRole().getName().equals(Constants.ADMIN) || user.getRole().getName().equals(Constants.SUPER_ADMIN))
             return new ApiResponse("ADMINNI O'CHIRIB BO'LMAYDI", false);
 
         user.setActive(false);
@@ -285,7 +286,7 @@ public class UserService {
     }
 
     public ApiResponse getAllByBusinessId(UUID business_id) {
-        Optional<Role> optionalRole = roleRepository.findByName(Constants.SUPERADMIN);
+        Optional<Role> optionalRole = roleRepository.findByName(Constants.SUPER_ADMIN);
         if (optionalRole.isEmpty()) return new ApiResponse("ERROR", false);
         Role superAdmin = optionalRole.get();
         List<User> allByBusiness_id = userRepository.findAllByBusiness_IdAndRoleIsNotAndActiveIsTrue(business_id, superAdmin);
@@ -304,7 +305,7 @@ public class UserService {
     public ApiResponse getAllByBranchId(UUID branch_id) {
         Optional<Branch> optionalBranch = branchRepository.findById(branch_id);
         if (optionalBranch.isPresent()) {
-            Optional<Role> optionalRole = roleRepository.findByName(Constants.SUPERADMIN);
+            Optional<Role> optionalRole = roleRepository.findByName(Constants.SUPER_ADMIN);
             if (optionalRole.isEmpty()) return new ApiResponse("ERROR", false);
             Role superAdmin = optionalRole.get();
             List<User> allByBranch_id = userRepository.findAllByBranchesIdAndRoleIsNotAndActiveIsTrue(branch_id, superAdmin);
