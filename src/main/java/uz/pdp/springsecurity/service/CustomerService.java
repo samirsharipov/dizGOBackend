@@ -803,4 +803,10 @@ public class CustomerService {
         return optional.map(customerGet -> new ApiResponse("found", true, customerGet))
                 .orElseGet(() -> new ApiResponse("not found", false));
     }
+
+    public ApiResponse getByUserId(UUID userId) {
+        Optional<Customer> optionalCustomer = customerRepository.findByUser_Id(userId);
+        return optionalCustomer.map(customer -> new ApiResponse("found", true, customer))
+                .orElseGet(() -> new ApiResponse("not found", false));
+    }
 }

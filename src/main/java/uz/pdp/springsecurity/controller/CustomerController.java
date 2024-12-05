@@ -222,4 +222,9 @@ public class CustomerController {
     public HttpEntity<?> getByBarcode(@RequestParam String barcode) {
         return responseEntityHelper.buildResponse(customerService.getByBarcode(barcode));
     }
+
+    @GetMapping("get-by-userId/{userId}")
+    public HttpEntity<?> getByUserId(@PathVariable UUID userId) {
+        return responseEntityHelper.buildResponse(customerService.getByUserId(userId));
+    }
 }
