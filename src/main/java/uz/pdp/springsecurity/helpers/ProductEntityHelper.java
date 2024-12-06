@@ -17,6 +17,7 @@ public class ProductEntityHelper {
     private final CategoryRepository categoryRepository;
     private final BrandRepository brandRepository;
     private final MeasurementRepository measurementRepository;
+    private final ProductTranslateRepository productTranslateRepository;
 
     public Product cloneProduct(UUID productId, Branch branch) {
         Product originalProduct = productRepository.findById(productId)
@@ -24,28 +25,41 @@ public class ProductEntityHelper {
 
         Business business = branch.getBusiness();
 
-        Category category = originalProduct.getCategory() != null
-                ? findOrCreate(
+        Category category = findOrCreateEntity(
                 () -> categoryRepository.findByBusiness_IdAndName(business.getId(), originalProduct.getCategory().getName()),
                 () -> createCategory(originalProduct.getCategory(), business),
-                categoryRepository::save)
-                : null;
+                categoryRepository::save);
 
-        Brand brand = originalProduct.getBrand() != null
-                ? findOrCreate(
+        Brand brand = findOrCreateEntity(
                 () -> brandRepository.findByBusiness_IdAndName(business.getId(), originalProduct.getBrand().getName()),
                 () -> createBrand(originalProduct.getBrand(), business),
-                brandRepository::save)
-                : null;
+                brandRepository::save);
 
-        Measurement measurement = originalProduct.getMeasurement() != null
-                ? findOrCreate(
+        Measurement measurement = findOrCreateEntity(
                 () -> measurementRepository.findByBusinessIdAndName(business.getId(), originalProduct.getMeasurement().getName()),
                 () -> createMeasurement(originalProduct.getMeasurement(), business),
-                measurementRepository::save)
-                : null;
+                measurementRepository::save);
 
         Product clonedProduct = new Product();
+        cloneProductFields(originalProduct, clonedProduct, branch, business, category, brand, measurement);
+
+        Optional.ofNullable(originalProduct.getTranslations()).ifPresent(translations ->
+                translations.forEach(translation -> {
+                    ProductTranslate clonedTranslation = new ProductTranslate();
+                    cloneTranslationFields(clonedProduct, translation, clonedTranslation);
+                    productTranslateRepository.save(clonedTranslation);
+                })
+        );
+
+        return clonedProduct;
+    }
+
+    private <T> T findOrCreateEntity(Supplier<Optional<T>> finder, Supplier<T> creator, Function<T, T> saver) {
+        return finder.get().orElseGet(() -> saver.apply(creator.get()));
+    }
+
+    private void cloneProductFields(Product originalProduct, Product clonedProduct, Branch branch, Business business,
+                                    Category category, Brand brand, Measurement measurement) {
         clonedProduct.setName(originalProduct.getName());
         clonedProduct.setDescription(originalProduct.getDescription());
         clonedProduct.setLongDescription(originalProduct.getLongDescription());
@@ -58,15 +72,18 @@ public class ProductEntityHelper {
 
         clonedProduct.setBranch(new ArrayList<>(Collections.singletonList(branch)));
         clonedProduct.setBusiness(business);
-        if (category != null) clonedProduct.setCategory(category);
-        if (brand != null) clonedProduct.setBrand(brand);
-        if (measurement != null) clonedProduct.setMeasurement(measurement);
-
-        return productRepository.save(clonedProduct);
+        Optional.ofNullable(category).ifPresent(clonedProduct::setCategory);
+        Optional.ofNullable(brand).ifPresent(clonedProduct::setBrand);
+        Optional.ofNullable(measurement).ifPresent(clonedProduct::setMeasurement);
+        productRepository.save(clonedProduct);
     }
 
-    private <T> T findOrCreate(Supplier<Optional<T>> finder, Supplier<T> creator, Function<T, T> saver) {
-        return finder.get().orElseGet(() -> saver.apply(creator.get()));
+    private void cloneTranslationFields(Product clonedProduct, ProductTranslate originalTranslation, ProductTranslate clonedTranslation) {
+        clonedTranslation.setProduct(clonedProduct);
+        clonedTranslation.setLanguage(originalTranslation.getLanguage());
+        clonedTranslation.setName(originalTranslation.getName());
+        clonedTranslation.setDescription(originalTranslation.getDescription());
+        clonedTranslation.setLongDescription(originalTranslation.getLongDescription());
     }
 
     private Category createCategory(Category originalCategory, Business business) {
@@ -77,7 +94,7 @@ public class ProductEntityHelper {
         return brandRepository.save(new Brand(originalBrand.getName(), business));
     }
 
-    private Measurement createMeasurement(Measurement orginalMeasurement, Business business) {
-        return measurementRepository.save(new Measurement(orginalMeasurement.getName(), business));
+    private Measurement createMeasurement(Measurement originalMeasurement, Business business) {
+        return measurementRepository.save(new Measurement(originalMeasurement.getName(), business));
     }
 }
