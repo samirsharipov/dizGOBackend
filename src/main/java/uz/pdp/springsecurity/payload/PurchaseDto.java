@@ -15,15 +15,21 @@ import java.util.UUID;
 public class PurchaseDto {
     @NotNull(message = "required line")
     private UUID supplerId;
+
     @NotNull(message = "required line")
     private UUID seller;
+
     @NotNull(message = "required line")
     private UUID purchaseStatusId;
+
     @NotNull(message = "required line")
     private UUID paymentStatusId;
+
     @NotNull(message = "required line")
     private UUID branchId;
+
     private UUID paymentMethodId;
+
     @NotNull(message = "required line")
     private Date date;
 

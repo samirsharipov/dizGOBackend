@@ -31,4 +31,9 @@ public class Measurement extends AbsEntity {
         super.setActive(active);
         super.setDeleted(delete);
     }
+
+    public Measurement(String name, Business business) {
+        this.name = name;
+        this.business = business;
+    }
 }
