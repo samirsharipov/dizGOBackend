@@ -15,12 +15,12 @@ import javax.persistence.*;
 @Where(clause = "deleted = false AND active = true")
 public class Measurement extends AbsEntity {
 
-    private String name;
+    private String name; // dona
 
-    private Double value;
+    private Double value; //10
 
     @ManyToOne
-    private Measurement parentMeasurement;
+    private Measurement parentMeasurement; // quti
 
     @ManyToOne
     private Business business;

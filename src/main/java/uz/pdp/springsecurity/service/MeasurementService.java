@@ -36,7 +36,7 @@ public class MeasurementService {
             return new ApiResponse("BUSINESS NOT FOUND", false);
         }
 
-        Measurement measurement = new Measurement(orginalMeasurement.getName(), business);
+        Measurement measurement = new Measurement();
         measurement.setName(measurementDto.getName());
         measurement.setValue(measurementDto.getValue());
         measurement.setBusiness(optionalBusiness.get());
