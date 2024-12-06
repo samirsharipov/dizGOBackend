@@ -15,7 +15,7 @@ import uz.pdp.springsecurity.utils.AppConstant;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/product")
+@RequestMapping("/api/products")
 @RequiredArgsConstructor
 public class ProductController {
 
@@ -73,6 +73,14 @@ public class ProductController {
         return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
     }
 
+    @CheckPermission("VIEW_PRODUCT")
+    @GetMapping("/search/{branch_id}")
+    public HttpEntity<?> search(@PathVariable UUID branch_id,
+                                @RequestParam String name,
+                                @RequestParam String language) {
+        ApiResponse apiResponse = productService.search(branch_id, name, language);
+        return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
+    }
 
     @CheckPermission("VIEW_PRODUCT")
     @GetMapping("/get-by-category/{category_id}")
@@ -102,12 +110,6 @@ public class ProductController {
         return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
     }
 
-    @CheckPermission("VIEW_PRODUCT")
-    @GetMapping("/search/{branch_id}")
-    public HttpEntity<?> search(@PathVariable UUID branch_id, @RequestParam String name) {
-        ApiResponse apiResponse = productService.search(branch_id, name);
-        return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
-    }
 
     @CheckPermission("VIEW_PRODUCT")
     @GetMapping("/get-by-branch-for-trade/{branch_id}")

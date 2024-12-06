@@ -213,7 +213,6 @@ public class DataLoader implements CommandLineRunner {
 
             List<ExchangeStatus> exchangeStatuses = Arrays.asList(
                     new ExchangeStatus(BUYURTMA_QILINGAN.name()),
-                    new ExchangeStatus(KUTILMOQDA.name()),
                     new ExchangeStatus(QABUL_QILINGAN.name())
             );
             exchangeStatusRepository.saveAll(exchangeStatuses);

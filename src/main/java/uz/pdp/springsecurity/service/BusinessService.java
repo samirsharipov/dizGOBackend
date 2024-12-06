@@ -74,7 +74,7 @@ public class BusinessService {
                 return new ApiResponse("branch category does not exist", false);
             }
             Branch branch = optionalBranch.get();
-            branchDto.setMainBranchId(branch.getMainBranchId());
+            branchDto.setMainBranchId(branch.getId());
         } catch (Exception e) {
             return new ApiResponse(e.getMessage(), false);
         }

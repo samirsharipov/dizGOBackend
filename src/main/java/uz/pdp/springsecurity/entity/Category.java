@@ -44,4 +44,9 @@ public class Category extends AbsEntity {
         super.setActive(active);
         super.setDeleted(delete);
     }
+
+    public Category(String name, Business business) {
+        this.name = name;
+        this.business = business;
+    }
 }

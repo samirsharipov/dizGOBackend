@@ -660,18 +660,41 @@ public class ProductService {
         return new ApiResponse("all", true, response);
     }
 
-    public ApiResponse search(UUID branchId, String name) {
-        List<Product> all = productRepository.findAllByBranchIdAndActiveIsTrueAndNameContainingIgnoreCase(branchId, name);
-        List<Product> allByBarcode = productRepository.findAllByBranchIdAndActiveIsTrueAndBarcodeContainingIgnoreCase(branchId, name);
-        all.addAll(allByBarcode);
-        List<ProductGetForPurchaseDto> getForPurchaseDtoList = new ArrayList<>();
-        Set<Product> allProduct = new HashSet<>(all);
-        all = new ArrayList<>(allProduct);
-        toViewDtoMto(branchId, getForPurchaseDtoList, all);
-        if (getForPurchaseDtoList.isEmpty()) {
+    public ApiResponse search(UUID branchId, String name, String code) {
+        Language language = languageRepository.findByCode(code)
+                .orElseThrow(() -> new RuntimeException("LANGUAGE NOT FOUND"));
+
+        Branch branch = findByIdOrThrow(branchRepository, branchId, "branch");
+        UUID mainBranchBusinessId = branch.getMainBranchId() != null
+                ? findByIdOrThrow(branchRepository, branch.getMainBranchId(), "product").getBusiness().getId()
+                : branch.getBusiness().getId();
+
+        List<Product> products = productRepository.findAllByBusinessAndKeyword(branch.getBusiness().getId(), name);
+        if (products.isEmpty()) {
+            products = productRepository.findAllByBusinessAndKeyword(mainBranchBusinessId, name);
+        }
+
+        if (products.isEmpty()) {
             return new ApiResponse("not found", false);
         }
-        return new ApiResponse("all", true, getForPurchaseDtoList);
+
+        List<ProductGetDto> productGetDtoList = products.stream()
+                .map(product -> {
+                    ProductGetDto productGetDto = productConvert.convertToDto(product);
+
+                    productTranslateRepository.findByProductIdAndLanguage_Id(product.getId(), language.getId())
+                            .ifPresent(translate -> {
+                                productGetDto.setName(translate.getName());
+                                productGetDto.setDescription(translate.getDescription());
+                                productGetDto.setLongDescription(translate.getLongDescription());
+                                productGetDto.setAttributes(translate.getAttributes());
+                            });
+
+                    return productGetDto;
+                })
+                .toList();
+
+        return new ApiResponse("all", true, productGetDtoList);
     }
 
     @Transactional

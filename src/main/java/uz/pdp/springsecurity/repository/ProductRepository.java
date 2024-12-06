@@ -89,6 +89,15 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     @Query("SELECT COUNT(p) FROM Product p WHERE p.isGlobal = false AND p.createdAt BETWEEN :startDate AND :endDate")
     long countGlobalBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+
+    @Query("SELECT p FROM Product p " +
+            "WHERE p.active = true " +
+            "AND (p.business.id = :businessId) " +
+            "AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(p.barcode) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    List<Product> findAllByBusinessAndKeyword(
+            @Param("businessId") UUID businessId,
+            @Param("keyword") String keyword);
 }
 
 

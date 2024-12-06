@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import uz.pdp.springsecurity.entity.Currency;
 import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.enums.HistoryName;
+import uz.pdp.springsecurity.helpers.ProductEntityHelper;
 import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
 import uz.pdp.springsecurity.utils.Constants;
@@ -44,6 +45,7 @@ public class PurchaseService {
     private final CustomerSupplierService customerSupplierService;
     private final PurchaseOutlayCategoryRepository purchaseOutlayCategoryRepository;
     private final PurchaseOutlayRepository purchaseOutlayRepository;
+    private final ProductEntityHelper productEntityHelper;
 
     public ApiResponse add(PurchaseDto purchaseDto) {
         Optional<Purchase> optionalPurchase = purchaseRepository.findFirstByBranchIdOrderByCreatedAtDesc(purchaseDto.getBranchId());
@@ -111,9 +113,8 @@ public class PurchaseService {
         purchase.setBranch(branch);
 
         Optional<PaymentMethod> optionalPaymentMethod = payMethodRepository.findById(purchaseDto.getPaymentMethodId());
-        if (optionalPaymentMethod.isEmpty()) {
-            return new ApiResponse("NOT FOUND PAYMENT METHOD", false);
-        }
+        if (optionalPaymentMethod.isEmpty()) return new ApiResponse("NOT FOUND PAYMENT METHOD", false);
+
         PaymentMethod paymentMethod = optionalPaymentMethod.get();
         purchase.setPaymentMethod(paymentMethod);
 
@@ -165,7 +166,7 @@ public class PurchaseService {
 
         for (PurchaseProductDto purchaseProductDto : purchaseProductDtoList) {
             if (purchaseProductDto.getPurchaseProductId() == null) {
-                PurchaseProduct purchaseProduct = createOrEditPurchaseProduct(new PurchaseProduct(), purchaseProductDto, course);
+                PurchaseProduct purchaseProduct = createOrEditPurchaseProduct(new PurchaseProduct(), purchaseProductDto, course, branch);
                 if (purchaseProduct == null) continue;
                 purchaseProduct.setPurchase(purchase);
                 purchaseProductRepository.save(purchaseProduct);
@@ -183,7 +184,7 @@ public class PurchaseService {
                 if (optionalPurchaseProduct.isEmpty()) continue;
                 PurchaseProduct purchaseProduct = optionalPurchaseProduct.get();
                 double amount = purchaseProductDto.getPurchasedQuantity() - purchaseProduct.getPurchasedQuantity();
-                PurchaseProduct editPurchaseProduct = createOrEditPurchaseProduct(purchaseProduct, purchaseProductDto, course);
+                PurchaseProduct editPurchaseProduct = createOrEditPurchaseProduct(purchaseProduct, purchaseProductDto, course, branch);
                 if (editPurchaseProduct == null) continue;
                 editPurchaseProduct.setPurchase(purchase);
                 purchaseProductList.add(editPurchaseProduct);
@@ -272,12 +273,18 @@ public class PurchaseService {
         }
     }
 
-    private PurchaseProduct createOrEditPurchaseProduct(PurchaseProduct purchaseProduct, PurchaseProductDto purchaseProductDto, double course) {
+    private PurchaseProduct createOrEditPurchaseProduct(PurchaseProduct purchaseProduct, PurchaseProductDto purchaseProductDto, double course, Branch branch) {
 
+        Product product = new Product();
         UUID productId = purchaseProductDto.getProductId();
-        Optional<Product> optional = productRepository.findById(productId);
-        if (optional.isEmpty()) return null;
-        Product product = optional.get();
+
+        if (purchaseProductDto.isNew()) {
+            product = productEntityHelper.cloneProduct(productId, branch);
+        } else {
+            Optional<Product> optional = productRepository.findById(productId);
+            if (optional.isEmpty()) return null;
+            product = optional.get();
+        }
         product.setSalePrice(purchaseProductDto.getSalePrice());
         product.setBuyPrice(purchaseProductDto.getBuyPrice());
         product.setBuyPriceDollar(Math.round(purchaseProductDto.getBuyPrice() / course * 100) / 100.);
@@ -325,8 +332,10 @@ public class PurchaseService {
                     purchaseProduct.getSalePrice(),
                     purchaseProduct.getTotalSum()
             );
-                dto.setName(purchaseProduct.getProduct().getName());
+            dto.setName(purchaseProduct.getProduct().getName());
+            if (purchaseProduct.getProduct().getMeasurement() != null) {
                 dto.setMeasurement(purchaseProduct.getProduct().getMeasurement().getName());
+            }
             double remainQuantity = fifoCalculationRepository.remainQuantityByPurchaseProductId(purchaseProduct.getId());
             remainQuantity = Math.round(remainQuantity * 100) / 100.;
             dto.setSoldQuantity(dto.getQuantity() - remainQuantity);

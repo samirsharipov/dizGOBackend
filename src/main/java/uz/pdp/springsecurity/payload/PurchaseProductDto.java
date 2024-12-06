@@ -14,11 +14,7 @@ public class PurchaseProductDto {
     //USE FOR EDIT OR NULL
     private UUID purchaseProductId;
 
-    //USE FOR SINGLE TYPE
     private UUID productId;
-
-    //USE FOR MANY TYPE
-    private UUID productTypePriceId;
 
     @NotNull(message = "required line")
     private Double purchasedQuantity;
@@ -30,6 +26,8 @@ public class PurchaseProductDto {
     private double salePrice;
 
     private double totalSum;
+
+    private boolean isNew;
 
     private boolean delete = false;
 }
