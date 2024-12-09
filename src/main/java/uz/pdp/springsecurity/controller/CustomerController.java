@@ -223,8 +223,13 @@ public class CustomerController {
         return responseEntityHelper.buildResponse(customerService.getByBarcode(barcode));
     }
 
-    @GetMapping("get-by-userId/{userId}")
+    @GetMapping("/get-by-userId/{userId}")
     public HttpEntity<?> getByUserId(@PathVariable UUID userId) {
         return responseEntityHelper.buildResponse(customerService.getByUserId(userId));
+    }
+
+    @GetMapping("/check-number")
+    public HttpEntity<?> checkNumber(@RequestParam String number) {
+        return responseEntityHelper.buildResponse(customerService.checkNumber(number));
     }
 }

@@ -299,28 +299,31 @@ public class PurchaseService {
     }
 
     public ApiResponse getOne(UUID id) {
-        Optional<Purchase> optionalPurchase = purchaseRepository.findById(id);
-        if (optionalPurchase.isEmpty()) return new ApiResponse("NOT FOUND PURCHASE", false);
-        Purchase purchase = optionalPurchase.get();
-        List<PurchaseProduct> purchaseProductList = purchaseProductRepository.findAllByPurchaseId(purchase.getId());
-        if (purchaseProductList.isEmpty()) return new ApiResponse("NOT FOUND PRODUCTS", false);
-        PurchaseGetOneDto purchaseGetOneDto = new PurchaseGetOneDto(
-                purchase,
-                purchaseProductList
-        );
-        return new ApiResponse("FOUND", true, purchaseGetOneDto);
+        return getPurchaseResponse(id, false);
     }
 
     public ApiResponse view(UUID purchaseId) {
+        return getPurchaseResponse(purchaseId, true);
+    }
+
+    private ApiResponse getPurchaseResponse(UUID purchaseId, boolean includeProducts) {
         Optional<Purchase> optionalPurchase = purchaseRepository.findById(purchaseId);
         if (optionalPurchase.isEmpty()) return new ApiResponse("NOT FOUND PURCHASE", false);
+
         Purchase purchase = optionalPurchase.get();
         List<PurchaseProduct> purchaseProductList = purchaseProductRepository.findAllByPurchaseId(purchase.getId());
+
         if (purchaseProductList.isEmpty()) return new ApiResponse("NOT FOUND PRODUCTS", false);
-        Map<String, Object> response = new HashMap<>();
-        response.put("purchase", purchase);
-        response.put("purchaseProductGetDtoList", toPurchaseProductGetDtoList(purchaseProductList));
-        return new ApiResponse("FOUND", true, response);
+
+        if (includeProducts) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("purchase", purchase);
+            response.put("purchaseProductGetDtoList", toPurchaseProductGetDtoList(purchaseProductList));
+            return new ApiResponse("FOUND", true, response);
+        }
+
+        PurchaseGetOneDto purchaseGetOneDto = new PurchaseGetOneDto(purchase, purchaseProductList);
+        return new ApiResponse("FOUND", true, purchaseGetOneDto);
     }
 
     private List<PurchaseProductGetDto> toPurchaseProductGetDtoList(List<PurchaseProduct> purchaseProductList) {
