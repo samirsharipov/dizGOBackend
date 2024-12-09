@@ -80,6 +80,7 @@ public class CustomerService {
         customer.setAddress(customerDto.getAddress()); // Yangi maydon
         customer.setLatitude(customerDto.getLatitude());
         customer.setLongitude(customerDto.getLongitude());
+        customer.setPassword(passwordEncoder.encode("password"));
 
         customer.setBusiness(branches.get(0).getBusiness()); // TODO: 6/6/2023  delete
         customer.setBranch(branches.get(0)); // TODO: 6/6/2023  delete
@@ -808,5 +809,14 @@ public class CustomerService {
         Optional<Customer> optionalCustomer = customerRepository.findByUser_Id(userId);
         return optionalCustomer.map(customer -> new ApiResponse("found", true, customer))
                 .orElseGet(() -> new ApiResponse("not found", false));
+    }
+
+    public ApiResponse checkNumber(String number) {
+        boolean exists = customerRepository.existsByUsername(number);
+        if (exists) {
+            return new ApiResponse("Customer already exists", true);
+        }
+
+        return new ApiResponse("Customer does not exist", false);
     }
 }

@@ -110,4 +110,6 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     Optional<Customer> findByUser_Id(UUID user_id);
 
+    boolean existsByUsername(String number);
+
 }
