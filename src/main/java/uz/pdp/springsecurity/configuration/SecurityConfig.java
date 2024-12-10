@@ -98,7 +98,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/ws",
                         "/api/product-excel/**",
                         "/api/language/**",
-                        "/api/customer/registration"
+                        "/api/customer/registration",
+                        "/api/verification/**"
                 )
                 .permitAll()
                 .anyRequest()

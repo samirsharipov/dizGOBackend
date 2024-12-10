@@ -82,9 +82,9 @@ public class User extends AbsEntity implements UserDetails {
     @ToString.Exclude
     private List<Bonus> bonuses;//ochirilsin
 
-    private String arrivalTime = "08:00";
+    private String arrivalTime = "09:00";
 
-    private String leaveTime = "16:00";
+    private String leaveTime = "18:00";
 
     private String passportNumber;
 
