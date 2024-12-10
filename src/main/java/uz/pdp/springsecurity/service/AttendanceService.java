@@ -1,0 +1,110 @@
+package uz.pdp.springsecurity.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import uz.pdp.springsecurity.entity.Attendance;
+import uz.pdp.springsecurity.entity.Branch;
+import uz.pdp.springsecurity.entity.Location;
+import uz.pdp.springsecurity.entity.User;
+import uz.pdp.springsecurity.payload.ApiResponse;
+import uz.pdp.springsecurity.repository.AttendanceRepository;
+import uz.pdp.springsecurity.repository.BranchRepository;
+import uz.pdp.springsecurity.repository.LocationRepository;
+import uz.pdp.springsecurity.repository.UserRepository;
+import uz.pdp.springsecurity.service.functions.GeoCheck;
+
+import java.sql.Timestamp;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+@Service
+@RequiredArgsConstructor
+public class AttendanceService {
+
+    private final AttendanceRepository attendanceRepository;
+    private final LocationRepository locationRepository;
+    private final GeoCheck geoCheck;
+    private final BranchRepository branchRepository;
+
+    // QR kod orqali keldi-ketdi tasdiqlash
+    public ApiResponse checkInWithQRCode(UUID branchId, UUID employeeId, String qrCodeData, boolean input) {
+        // QR koddagi ma'lumotlarni tahlil qilamiz
+        String[] qrParts = qrCodeData.split(":");
+        if (qrParts.length != 4) {
+            return new ApiResponse("QR kod noto'g'ri formatda", false);
+        }
+
+        Optional<Branch> optionalBranch = branchRepository.findById(branchId);
+        if (optionalBranch.isEmpty()) {
+            return new ApiResponse("Branch topilmadi", false);
+        }
+
+        UUID qrEmployeeId = UUID.fromString(qrParts[0]);
+        long timestampLong = Long.parseLong(qrParts[1]);
+        Timestamp qrTime = new Timestamp(timestampLong);
+        double qrLatitude = Double.parseDouble(qrParts[2]);
+        double qrLongitude = Double.parseDouble(qrParts[3]);
+
+        if (!qrEmployeeId.equals(employeeId)) {
+            return new ApiResponse("QR kod va xodim ID mos emas", false);
+        }
+
+        // QR time va hozirgi vaqt orasidagi farqni hisoblash
+        long diffInMillies = System.currentTimeMillis() - qrTime.getTime();
+        long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(diffInMillies);
+
+        if (diffInMinutes > 2) {
+            return new ApiResponse("QR kodni yuborish uchun 2 daqiqa vaqt o'tgan", false);
+        }
+
+        // Bugungi sana
+        Timestamp todayStart = Timestamp.valueOf(Timestamp.valueOf(new Timestamp(System.currentTimeMillis()).toLocalDateTime().withHour(0).withMinute(0).withSecond(0)).toLocalDateTime());
+        Timestamp todayEnd = Timestamp.valueOf(Timestamp.valueOf(new Timestamp(System.currentTimeMillis()).toLocalDateTime().withHour(23).withMinute(59).withSecond(59)).toLocalDateTime());
+
+        if (input) {
+            // KIRISH (input = true)
+            Optional<Attendance> existingAttendance = attendanceRepository.findByEmployeeIdAndCheckInTimeBetweenAndIsArrived(
+                    employeeId, todayStart, todayEnd, true
+            );
+
+            if (existingAttendance.isPresent()) {
+                return new ApiResponse("Siz allaqachon ishga keldingiz", false);
+            }
+
+            Optional<Location> locationOpt = locationRepository.findByBranchId(branchId);
+            if (locationOpt.isEmpty()) {
+                return new ApiResponse("Ishxonangiz joylashuvi topilmadi", false);
+            }
+
+            Location location = locationOpt.get();
+            double radius = location.getRadius();
+
+            if (geoCheck.isInsideGeofence(qrLatitude, qrLongitude, location.getLatitude(), location.getLongitude(), radius)) {
+                Attendance attendance = new Attendance();
+                attendance.setEmployeeId(employeeId);
+                attendance.setCheckInTime(new Timestamp(System.currentTimeMillis()));
+                attendance.setIsArrived(true);
+                attendanceRepository.save(attendance);
+                return new ApiResponse("Keldi-ketdi QR kod orqali tasdiqlandi", true);
+            } else {
+                return new ApiResponse("QR kod geo-fencing bilan mos kelmaydi", false);
+            }
+        } else {
+            // CHIQISH (input = false)
+            Optional<Attendance> existingAttendance = attendanceRepository.findByEmployeeIdAndCheckInTimeBetweenAndIsArrived(
+                    employeeId, todayStart, todayEnd, true
+            );
+
+            if (existingAttendance.isPresent()) {
+                Attendance attendance = existingAttendance.get();
+                attendance.setCheckOutTime(new Timestamp(System.currentTimeMillis()));
+                attendance.setIsArrived(false);
+                attendanceRepository.save(attendance);
+                return new ApiResponse("Ishdan chiqish vaqti muvaffaqiyatli yozildi", true);
+            } else {
+                return new ApiResponse("Siz hali bugun ishga kelmagansiz", false);
+            }
+        }
+    }
+}
