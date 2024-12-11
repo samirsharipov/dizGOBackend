@@ -232,4 +232,9 @@ public class CustomerController {
     public HttpEntity<?> checkNumber(@RequestParam String number) {
         return responseEntityHelper.buildResponse(customerService.checkNumber(number));
     }
+
+    @GetMapping("/search-for-trade")
+    public HttpEntity<?> searchForTrade(@RequestParam String query) {
+        return responseEntityHelper.buildResponse(customerService.getForTrade(query));
+    }
 }

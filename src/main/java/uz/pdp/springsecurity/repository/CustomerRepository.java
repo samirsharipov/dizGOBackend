@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import uz.pdp.springsecurity.entity.Customer;
 import uz.pdp.springsecurity.payload.CustomerGet;
+import uz.pdp.springsecurity.payload.CustomerResponseDto;
 import uz.pdp.springsecurity.payload.projections.InActiveUserProjection;
 
 import java.sql.Timestamp;
@@ -110,6 +111,10 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     Optional<Customer> findByUser_Id(UUID user_id);
 
-    boolean existsByUsername(String number);
+    @Query("SELECT new uz.pdp.springsecurity.payload.CustomerResponseDto(c.id, c.name) " +
+            "FROM Customer c WHERE c.phoneNumber = :phoneNumberQuery OR c.uniqueCode = :uniqueCodeQuery")
+    Optional<CustomerResponseDto> findByCustomerPhoneNumberOrUniqueCode(@Param("phoneNumberQuery") String phoneNumber,
+                                                                        @Param("uniqueCodeQuery") String uniqueCode);
 
+    boolean existsByUsername(String number);
 }

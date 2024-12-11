@@ -17,7 +17,7 @@ import uz.pdp.springsecurity.payload.UserDto;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-12-10T12:12:11+0500",
+    date = "2024-12-11T14:21:47+0500",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.13 (Amazon.com Inc.)"
 )
 @Component
@@ -35,21 +35,19 @@ public class UserMapperImpl implements UserMapper {
         user.setId( userDto.getId() );
         user.setFirstName( userDto.getFirstName() );
         user.setLastName( userDto.getLastName() );
-        user.setEmail( userDto.getEmail() );
-        user.setUsername( userDto.getUsername() );
-        user.setPassword( userDto.getPassword() );
-        user.setPhoneNumber( userDto.getPhoneNumber() );
         user.setSex( userDto.isSex() );
         user.setBirthday( userDto.getBirthday() );
-        user.setActive( userDto.isActive() );
+        user.setEmail( userDto.getEmail() );
+        user.setPhoneNumber( userDto.getPhoneNumber() );
+        user.setUsername( userDto.getUsername() );
+        user.setPassword( userDto.getPassword() );
+        user.setPassportNumber( userDto.getPassportNumber() );
         user.setAddress( userDto.getAddress() );
-        user.setDescription( userDto.getDescription() );
-        user.setProbation( userDto.getProbation() );
-        user.setWorkingTime( userDto.getWorkingTime() );
-        user.setSalary( userDto.getSalary() );
         user.setArrivalTime( userDto.getArrivalTime() );
         user.setLeaveTime( userDto.getLeaveTime() );
-        user.setPassportNumber( userDto.getPassportNumber() );
+        user.setProbation( userDto.getProbation() );
+        user.setActive( userDto.isActive() );
+        user.setDescription( userDto.getDescription() );
         user.setDateOfEmployment( userDto.getDateOfEmployment() );
         user.setEnabled( userDto.isEnabled() );
 
@@ -82,8 +80,6 @@ public class UserMapperImpl implements UserMapper {
         userDto.setAddress( user.getAddress() );
         userDto.setDescription( user.getDescription() );
         userDto.setProbation( user.getProbation() );
-        userDto.setWorkingTime( user.getWorkingTime() );
-        userDto.setSalary( user.getSalary() );
         userDto.setArrivalTime( user.getArrivalTime() );
         userDto.setLeaveTime( user.getLeaveTime() );
         userDto.setEnabled( user.isEnabled() );
@@ -119,21 +115,19 @@ public class UserMapperImpl implements UserMapper {
         userDtoToBusiness1( userDto, user.getBusiness() );
         user.setFirstName( userDto.getFirstName() );
         user.setLastName( userDto.getLastName() );
-        user.setEmail( userDto.getEmail() );
-        user.setUsername( userDto.getUsername() );
-        user.setPassword( userDto.getPassword() );
-        user.setPhoneNumber( userDto.getPhoneNumber() );
         user.setSex( userDto.isSex() );
         user.setBirthday( userDto.getBirthday() );
-        user.setActive( userDto.isActive() );
+        user.setEmail( userDto.getEmail() );
+        user.setPhoneNumber( userDto.getPhoneNumber() );
+        user.setUsername( userDto.getUsername() );
+        user.setPassword( userDto.getPassword() );
+        user.setPassportNumber( userDto.getPassportNumber() );
         user.setAddress( userDto.getAddress() );
-        user.setDescription( userDto.getDescription() );
-        user.setProbation( userDto.getProbation() );
-        user.setWorkingTime( userDto.getWorkingTime() );
-        user.setSalary( userDto.getSalary() );
         user.setArrivalTime( userDto.getArrivalTime() );
         user.setLeaveTime( userDto.getLeaveTime() );
-        user.setPassportNumber( userDto.getPassportNumber() );
+        user.setProbation( userDto.getProbation() );
+        user.setActive( userDto.isActive() );
+        user.setDescription( userDto.getDescription() );
         user.setDateOfEmployment( userDto.getDateOfEmployment() );
         user.setEnabled( userDto.isEnabled() );
     }

@@ -32,7 +32,16 @@ public class User extends AbsEntity implements UserDetails {
     @Column(nullable = false)
     private String lastName;
 
+    private String sureName;
+
+    private boolean sex; // true erkak false ayol
+
+    private Date birthday;
+
     private String email;
+
+    @Column(unique = true)
+    private String phoneNumber;
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -40,15 +49,32 @@ public class User extends AbsEntity implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
+    private String passportNumber;
+
+    private String jshshsr;
+
+    private String address;
+
+    @OneToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Attachment photo;
+
+
+    private String department;
+    private String position;
+    private String branch;
+    private String arrivalTime = "09:00";
+    private String leaveTime = "18:00";
+    private Double salaryAmount;
+    private String salaryType;
+    private String pinCode;
+    private String shiftType;
+    private Date probation;
+
+
     @ManyToOne
     private Job job;
-
-    @Column(unique = true)
-    private String phoneNumber;
-
-    private boolean sex;
-
-    private Date birthday;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @ToString.Exclude
@@ -62,31 +88,15 @@ public class User extends AbsEntity implements UserDetails {
     @ToString.Exclude
     private Set<Branch> branches;
 
-    @OneToOne
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Attachment photo;
-
     private boolean active;
-
-    private String address;
 
     private String description;
 
-    private Date probation;
-
-    private String workingTime; //?
-
-    private double salary; // ?
 
     @ManyToMany
     @ToString.Exclude
     private List<Bonus> bonuses;//ochirilsin
 
-    private String arrivalTime = "09:00";
-
-    private String leaveTime = "18:00";
-
-    private String passportNumber;
 
     private Date dateOfEmployment;
 
