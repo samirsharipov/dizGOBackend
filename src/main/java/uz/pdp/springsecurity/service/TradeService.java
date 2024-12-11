@@ -73,11 +73,7 @@ public class TradeService {
         if (optionalBranch.isEmpty()) {
             return new ApiResponse("not found branch", false);
         }
-        UUID businessId = optionalBranch.get().getBusiness().getId();
 
-        if (!subscriptionRepository.existsByBusinessIdAndActiveTrue(businessId)) {
-            return new ApiResponse("NOT FOUND ACTIVE TARIFF", false);
-        }
 
         Optional<Trade> optionalTrade = tradeRepository.findFirstByBranchIdOrderByCreatedAtDesc(tradeDTO.getBranchId());
         int invoice = 0;
@@ -222,9 +218,9 @@ public class TradeService {
         trade.setGross(tradeDTO.getGross());
         trade.setPayDate(tradeDTO.getPayDate());
         trade.setTotalSum(tradeDTO.getTotalSum());
-        trade.setDollarTrade(tradeDTO.getDollarTrade());
+        trade.setDollarTrade(tradeDTO.isDollarTrade());
         trade.setDifferentPayment(tradeDTO.getDifferentPayment() != null && tradeDTO.getDifferentPayment());
-        trade.setTradeDescription(tradeDTO.getTradeDescription());
+        trade.setTradeDescription(tradeDTO.getTradeDescription() != null ? tradeDTO.getTradeDescription() : "");
         trade.setPaidSum(tradeDTO.getPaidSum() + unFrontPayment);
         trade.setDebtSum(tradeDTO.getDebtSum() - unFrontPayment);
         Optional<Currency> optionalCurrency = currencyRepository.findByBusinessId(branch.getBusiness().getId());

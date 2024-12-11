@@ -13,7 +13,7 @@ import uz.pdp.springsecurity.payload.SalaryCountGetDto;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-12-10T12:12:11+0500",
+    date = "2024-12-11T14:21:47+0500",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.13 (Amazon.com Inc.)"
 )
 @Component

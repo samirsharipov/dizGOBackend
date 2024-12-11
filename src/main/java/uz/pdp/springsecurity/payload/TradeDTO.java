@@ -52,7 +52,7 @@ public class TradeDTO {
     private String dollar;
 
     private String gross;
-    private Boolean dollarTrade;
+    private boolean dollarTrade;
     private Double dollarPrice;
     private Integer debdSum;
     private Boolean isSuccess;

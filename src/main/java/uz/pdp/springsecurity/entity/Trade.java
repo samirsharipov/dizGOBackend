@@ -64,10 +64,10 @@ public class Trade extends AbsEntity {
     private String invoice;
 
     private Boolean backing;
-    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+
     private boolean dollarTrade;
-    @Column(nullable = false, columnDefinition = "VARCHAR(255) DEFAULT ''")
+
     private String tradeDescription;
-    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+
     private Boolean differentPayment;
 }

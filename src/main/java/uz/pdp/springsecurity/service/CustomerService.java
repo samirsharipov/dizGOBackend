@@ -819,4 +819,11 @@ public class CustomerService {
 
         return new ApiResponse("Customer does not exist", false);
     }
+
+    public ApiResponse getForTrade(String query) {
+        Optional<CustomerResponseDto> optional = customerRepository.findByCustomerPhoneNumberOrUniqueCode(query,query);
+        return optional
+                .map(customerResponseDto -> new ApiResponse("Customer exists", true, customerResponseDto))
+                .orElseGet(() -> new ApiResponse("Customer does not exist", false));
+    }
 }
