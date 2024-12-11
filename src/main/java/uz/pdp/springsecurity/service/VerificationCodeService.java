@@ -6,6 +6,7 @@ import uz.pdp.springsecurity.entity.VerificationCode;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.repository.VerificationCodeRepository;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
@@ -17,6 +18,7 @@ public class VerificationCodeService {
     private final VerificationCodeRepository verificationCodeRepository;
     private final SmsSendService smsService;
 
+    @Transactional
     public ApiResponse sendVerificationCode(String phoneNumber, boolean refresh) {
 
         if (refresh) {
