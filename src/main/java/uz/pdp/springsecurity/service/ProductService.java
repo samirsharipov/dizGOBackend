@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.pdp.springsecurity.entity.*;
@@ -669,9 +670,9 @@ public class ProductService {
                 ? findByIdOrThrow(branchRepository, branch.getMainBranchId(), "product").getBusiness().getId()
                 : branch.getBusiness().getId();
 
-        List<Product> products = productRepository.findAllByBusinessAndKeyword(branch.getBusiness().getId(), name);
+        List<Product> products = productRepository.findAllProductsWithTranslates(branch.getBusiness().getId(), name);
         if (products.isEmpty()) {
-            products = productRepository.findAllByBusinessAndKeyword(mainBranchBusinessId, name);
+            products = productRepository.findAllProductsWithTranslates(mainBranchBusinessId, name);
         }
 
         if (products.isEmpty()) {
@@ -682,7 +683,9 @@ public class ProductService {
                 .map(product -> {
                     ProductGetDto productGetDto = productConvert.convertToDto(product);
 
-                    productTranslateRepository.findByProductIdAndLanguage_Id(product.getId(), language.getId())
+                    product.getTranslations().stream()
+                            .filter(translate -> translate.getLanguage().getId().equals(language.getId()))
+                            .findFirst()
                             .ifPresent(translate -> {
                                 productGetDto.setName(translate.getName());
                                 productGetDto.setDescription(translate.getDescription());
@@ -923,5 +926,13 @@ public class ProductService {
         translateDTO.setLanguageId(productTranslate.getLanguage().getId());
         translateDTO.setLanguageName(productTranslate.getLanguage().getName());
         return translateDTO;
+    }
+
+    public ApiResponse searchTrade(UUID branchId, String name, String language) {
+        List<ProductResponseDTO> all = productRepository.findProductsByBranchIdAndKeyword(branchId, name, language);
+        if (all.isEmpty()) {
+            return new ApiResponse("Product not found", false);
+        }
+        return new ApiResponse("found", true, all);
     }
 }

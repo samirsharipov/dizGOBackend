@@ -82,6 +82,17 @@ public class ProductController {
         return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
     }
 
+
+    @CheckPermission("VIEW_PRODUCT")
+    @GetMapping("/search-for-trade/{branch_id}")
+    public HttpEntity<?> searchTrade(@PathVariable UUID branch_id,
+                                @RequestParam String name,
+                                @RequestParam String language) {
+        ApiResponse apiResponse = productService.searchTrade(branch_id, name, language);
+        return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
+    }
+
+
     @CheckPermission("VIEW_PRODUCT")
     @GetMapping("/get-by-category/{category_id}")
     public HttpEntity<?> getByCategory(@PathVariable UUID category_id, @CurrentUser User user) {
