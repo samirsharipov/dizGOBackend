@@ -178,8 +178,9 @@ public class DataLoader implements CommandLineRunner {
 
             //vaqtlarni o'rnatish
             users.forEach(user -> {
-                user.setArrivalTime("08:00");
-                user.setLeaveTime("16:00");
+                user.setArrivalTime("09:00");
+                user.setLeaveTime("18:00");
+                user.setPassportNumber("123");
                 userRepository.save(user);
                 agreementService.add(user);
             });

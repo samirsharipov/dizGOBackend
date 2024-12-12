@@ -49,7 +49,6 @@ public class User extends AbsEntity implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
     private String passportNumber;
 
     private String jshshsr;
@@ -64,8 +63,8 @@ public class User extends AbsEntity implements UserDetails {
     private String department;
     private String position;
     private String branch;
-    private String arrivalTime = "09:00";
-    private String leaveTime = "18:00";
+    private String arrivalTime ;
+    private String leaveTime ;
     private Double salaryAmount;
     private String salaryType;
     private String pinCode;
@@ -135,4 +134,3 @@ public class User extends AbsEntity implements UserDetails {
         return grantedAuthorities;
     }
 }
-

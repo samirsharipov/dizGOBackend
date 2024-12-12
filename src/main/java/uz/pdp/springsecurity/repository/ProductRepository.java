@@ -106,7 +106,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     @Query("SELECT new uz.pdp.springsecurity.payload.ProductResponseDTO( " +
             "p.id, " +
             "COALESCE(pt.name, p.name), " +
-            "p.salePrice " +
+            "p.salePrice,p.barcode,p.MXIKCode " +
             ") " +
             "FROM Product p " +
             "LEFT JOIN p.translations pt ON pt.language.code = :languageCode " +

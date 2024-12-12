@@ -795,7 +795,7 @@ public class CustomerService {
 
     public String generateCode() {
         Random random = new Random();
-        int randomNumber = 100000000 + random.nextInt(900000000); // 100000000-999999999 oralig‘ida
+        long randomNumber = 100000000000L + random.nextLong(900000000000L); // 100000000-999999999
         return String.valueOf(randomNumber);
     }
 
