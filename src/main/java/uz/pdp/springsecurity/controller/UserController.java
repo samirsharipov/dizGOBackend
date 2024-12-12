@@ -10,7 +10,7 @@ import uz.pdp.springsecurity.annotations.CurrentUser;
 import uz.pdp.springsecurity.entity.User;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.ProfileDto;
-import uz.pdp.springsecurity.payload.UserDto;
+import uz.pdp.springsecurity.payload.UserDTO;
 import uz.pdp.springsecurity.service.UserService;
 
 import javax.validation.Valid;
@@ -25,14 +25,14 @@ public class UserController {
 
     @CheckPermission("ADD_USER")
     @PostMapping()
-    public HttpEntity<?> add(@Valid @RequestBody UserDto userDto) {
+    public HttpEntity<?> add(@Valid @RequestBody UserDTO userDto) {
         ApiResponse apiResponse = userService.add(userDto, false);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
     @CheckPermission("EDIT_USER")
     @PutMapping("/{id}")
-    public HttpEntity<?> editUser(@PathVariable UUID id, @RequestBody UserDto userDto) {
+    public HttpEntity<?> editUser(@PathVariable UUID id, @RequestBody UserDTO userDto) {
         ApiResponse apiResponse = userService.edit(id, userDto);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
@@ -40,7 +40,7 @@ public class UserController {
     @CheckPermission("VIEW_USER")
     @GetMapping("/{id}")
     public HttpEntity<?> get(@PathVariable UUID id) {
-        ApiResponse apiResponse = userService.get(id);
+        ApiResponse apiResponse = userService.getById(id);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 

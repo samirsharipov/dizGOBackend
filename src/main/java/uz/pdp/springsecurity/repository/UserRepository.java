@@ -82,4 +82,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     boolean existsByUsername(String username);
 
     boolean existsByPhoneNumber(String phoneNumber);
+
+    Page<User> findAllByFirstNameRegexAndBranchesIdAndUsernameNot(String queryName, UUID branchId, String superadmin, Pageable pageable);
 }

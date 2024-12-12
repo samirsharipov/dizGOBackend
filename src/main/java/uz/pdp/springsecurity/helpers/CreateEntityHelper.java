@@ -4,12 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.enums.StatusTariff;
-import uz.pdp.springsecurity.mapper.AddressMapper;
 import uz.pdp.springsecurity.mapper.BranchMapper;
 import uz.pdp.springsecurity.payload.BranchDto;
 import uz.pdp.springsecurity.payload.BusinessDto;
 import uz.pdp.springsecurity.payload.UserCreateDto;
-import uz.pdp.springsecurity.payload.UserDto;
+import uz.pdp.springsecurity.payload.UserDTO;
 import uz.pdp.springsecurity.repository.*;
 import uz.pdp.springsecurity.service.BranchService;
 import uz.pdp.springsecurity.service.UserService;
@@ -62,7 +61,7 @@ public class CreateEntityHelper {
 
         // Foydalanuvchi ma'lumotlarini sozlash
         UserCreateDto userCreateDto = businessDto.getUserDto();
-        UserDto userDto = new UserDto();
+        UserDTO userDto = new UserDTO();
 
         userDto.setUsername(userCreateDto.getUsername());
         userDto.setPassword(userCreateDto.getPassword());
@@ -70,7 +69,7 @@ public class CreateEntityHelper {
         userDto.setLastName(userCreateDto.getLastName());
         userDto.setEnabled(false);
 
-        userDto.setBranchId(Set.of(branch.getId()));
+        userDto.setBranchIds(Set.of(branch.getId()));
         userDto.setRoleId(savedRole.getId());
         userDto.setBusinessId(business.getId());
 

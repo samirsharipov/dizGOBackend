@@ -37,34 +37,23 @@ public class UserService {
     private final VerificationCodeService verificationService;
 
 
-    public ApiResponse add(UserDto userDto, boolean isNewUser) {
-
-//        if (userDto.getVerificationCode() != null) {
-//            boolean isVerified = verificationService.verifyCode(userDto.getPhoneNumber(), userDto.getVerificationCode());
-//            if (!isVerified) {
-//                return new ApiResponse("Invalid or expired verification code", false);
-//            }
-//        }
-        // Tekshirish: Business mavjudligi
-        Business business = businessRepository.findById(userDto.getBusinessId())
-                .orElse(null);
-        if (business == null) {
-            return new ApiResponse("NOT FOUND BUSINESS", false);
+    public ApiResponse add(UserDTO userDto, boolean isNewUser) {
+        // Umumiy validatsiya: Business, Role va Username tekshiriladi
+        ApiResponse validationResponse = validateUser(userDto);
+        if (!validationResponse.isSuccess()) {
+            return validationResponse;
         }
 
-        // Tekshirish: Role mavjudligi
-        Role role = roleRepository.findById(userDto.getRoleId())
-                .orElse(null);
-        if (role == null) {
-            return new ApiResponse("NOT FOUND ROLE", false);
+        Business business = businessRepository.findById(userDto.getBusinessId()).orElse(null);
+        if (business==null) {
+            return new ApiResponse("Business does not exist");
+        }
+        Role role = roleRepository.findById(userDto.getRoleId()).orElse(null);
+        if (role==null) {
+            return new ApiResponse("Role does not exist");
         }
 
-        // Foydalanuvchi mavjudligini tekshirish
-        if (userRepository.existsByUsernameIgnoreCase(userDto.getUsername())) {
-            return new ApiResponse("USER ALREADY EXISTS", false);
-        }
-
-        // Agar yangi foydalanuvchi bo'lmasa, tarif va filiallar tekshiriladi
+        // Agar yangi foydalanuvchi bo'lmasa, obuna va rolni tekshirish
         if (!isNewUser) {
             ApiResponse subscriptionCheckResponse = checkSubscriptionAndRole(business, role);
             if (!subscriptionCheckResponse.isSuccess()) {
@@ -73,34 +62,150 @@ public class UserService {
         }
 
         // Branchlarni tekshirish va yig'ish
-        Set<Branch> branches = collectBranches(userDto.getBranchId().stream().toList());
-        if (branches == null) {
+        Set<Branch> branches = collectBranches(userDto.getBranchIds());
+        if (branches.isEmpty()) {
             return new ApiResponse("BRANCH NOT FOUND", false);
         }
 
-        // Userni yaratish va sozlash
+        // Userni yaratish va mapping qilish (DTO dan Entity ga)
+        User user = createUserFromDto(userDto, business, role, branches);
+        userRepository.save(user);
+
+        // Agreement qo'shish (foydalanuvchi uchun)
+        agreementService.add(user);
+
+        return new ApiResponse("ADDED", true, user.getId());
+    }
+
+    private ApiResponse validateUser(UserDTO userDto) {
+        // Business mavjudligini tekshirish
+        if (businessRepository.findById(userDto.getBusinessId()).isEmpty()) {
+            return new ApiResponse("NOT FOUND BUSINESS", false);
+        }
+
+        // Role mavjudligini tekshirish
+        if (roleRepository.findById(userDto.getRoleId()).isEmpty()) {
+            return new ApiResponse("NOT FOUND ROLE", false);
+        }
+
+        // Username mavjudligini tekshirish
+        if (userRepository.existsByUsernameIgnoreCase(userDto.getUsername())) {
+            return new ApiResponse("USER ALREADY EXISTS", false);
+        }
+
+        return new ApiResponse("VALID", true);
+    }
+
+    private Set<Branch> collectBranches(Set<UUID> branchIds) {
+        Set<Branch> branches = new HashSet<>();
+        for (UUID branchId : branchIds) {
+            branchRepository.findById(branchId).ifPresent(branches::add);
+        }
+        return branches;
+    }
+
+    private User createUserFromDto(UserDTO userDto, Business business, Role role, Set<Branch> branches) {
         User user = userMapper.toEntity(userDto);
         user.setBusiness(business);
         user.setRole(role);
         user.setBranches(branches);
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         user.setActive(true);
-        user.setEnabled(userDto.isEnabled());
+        user.setEnabled(true);
         user.setDateOfEmployment(userDto.getDateOfEmployment() != null ? userDto.getDateOfEmployment() : new Date());
         user.setPassportNumber(userDto.getPassportNumber() != null ? userDto.getPassportNumber() : "");
 
+        // Jobni tekshirish va o'rnatish
         if (userDto.getJobId() != null) {
             jobRepository.findById(userDto.getJobId()).ifPresent(user::setJob);
         }
 
+        // Foto faylni o'rnatish
         if (userDto.getPhotoId() != null) {
             user.setPhoto(attachmentRepository.findById(userDto.getPhotoId()).orElseThrow());
         }
 
-        userRepository.save(user);
-        agreementService.add(user);
+        return user;
+    }
 
-        return new ApiResponse("ADDED", true, user.getId());
+    public ApiResponse edit(UUID id, UserDTO userDto) {
+        // User mavjudligini tekshirish
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty()) {
+            return new ApiResponse("USER NOT FOUND", false);
+        }
+        User user = optionalUser.get();
+
+        // Umumiy validatsiya: Business, Role va Username tekshiriladi
+        ApiResponse validationResponse = validateUser(userDto);
+        if (!validationResponse.isSuccess()) {
+            return validationResponse;
+        }
+
+        // Branchlarni tekshirish va yig'ish
+        Set<Branch> branches = collectBranches(userDto.getBranchIds());
+        if (branches.isEmpty()) {
+            return new ApiResponse("BRANCH NOT FOUND", false);
+        }
+
+        // Userni yangilash
+        updateUserFromDto(user, userDto, branches);
+
+        // Userni saqlash
+        userRepository.save(user);
+
+        return new ApiResponse("UPDATED", true, user.getId());
+    }
+
+    private void updateUserFromDto(User user, UserDTO userDto, Set<Branch> branches) {
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+        user.setSureName(userDto.getSureName());
+        user.setSex(userDto.isSex());
+        user.setBirthday(userDto.getBirthday());
+        user.setEmail(userDto.getEmail());
+        user.setPhoneNumber(userDto.getPhoneNumber());
+        user.setUsername(userDto.getUsername());
+        if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        }
+        user.setPassportNumber(userDto.getPassportNumber());
+        user.setJshshsr(userDto.getJshshsr());
+        user.setAddress(userDto.getAddress());
+        user.setDepartment(userDto.getDepartment());
+        user.setPosition(userDto.getPosition());
+        user.setBranch(userDto.getBranch());
+        user.setArrivalTime(userDto.getArrivalTime());
+        user.setLeaveTime(userDto.getLeaveTime());
+        user.setSalaryAmount(userDto.getSalaryAmount());
+        user.setSalaryType(userDto.getSalaryType());
+        user.setPinCode(userDto.getPinCode());
+        user.setShiftType(userDto.getShiftType());
+        user.setProbation(userDto.getProbation());
+        user.setBranches(branches);
+        user.setActive(userDto.isActive());
+        user.setEnabled(userDto.isEnabled());
+        user.setDateOfEmployment(userDto.getDateOfEmployment() != null ? userDto.getDateOfEmployment() : user.getDateOfEmployment());
+        user.setGrossPriceControlOneUser(userDto.isGrossPriceControlOneUser());
+        user.setContractNumber(userDto.getContractNumber());
+
+        // Jobni tekshirish va o'rnatish
+        if (userDto.getJobId() != null) {
+            jobRepository.findById(userDto.getJobId()).ifPresent(user::setJob);
+        }
+
+        // Foto faylni o'rnatish
+        if (userDto.getPhotoId() != null) {
+            user.setPhoto(attachmentRepository.findById(userDto.getPhotoId()).orElse(null));
+        }
+
+        if (userDto.getRoleId() != null) {
+            roleRepository.findById(userDto.getRoleId()).ifPresent(user::setRole);
+        }
+
+        if (userDto.getBusinessId() != null) {
+            businessRepository.findById(userDto.getBusinessId()).ifPresent(user::setBusiness);
+        }
     }
 
     private ApiResponse checkSubscriptionAndRole(Business business, Role role) {
@@ -123,104 +228,19 @@ public class UserService {
         return new ApiResponse("OK", true);
     }
 
-    private Set<Branch> collectBranches(List<UUID> branchIds) {
-        Set<Branch> branches = new HashSet<>();
-        for (UUID branchId : branchIds) {
-            Optional<Branch> optionalBranch = branchRepository.findById(branchId);
-            if (optionalBranch.isEmpty()) {
-                return null; // Filial topilmasa, null qaytaramiz
-            }
-            branches.add(optionalBranch.get());
-        }
-        return branches;
-    }
-
-
-    public ApiResponse edit(UUID id, UserDto userDto) {
+    public ApiResponse getById(UUID id) {
         Optional<User> optionalUser = userRepository.findById(id);
 
-        if (optionalUser.isEmpty()) return new ApiResponse("USER NOT FOUND", false);
-
-        if (!optionalUser.get().getUsername().equals(userDto.getUsername())) {
-            boolean b = userRepository.existsByUsernameIgnoreCase(userDto.getUsername());
-            if (b) return new ApiResponse("USERNAME ALREADY EXISTS", false);
-        }
-
-
-        Optional<Role> optionalRole = roleRepository.findById(userDto.getRoleId());
-
-        User user = optionalUser.get();
-        userMapper.update(userDto, user);
-        assert userDto.getPassword() != null;
-        if (!userDto.getPassword().isEmpty()) {
-            if (userDto.getPassword().length() > 2) {
-                user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-            }
-        }
-
-        optionalRole.ifPresent(user::setRole);
-
-        if (userDto.getJobId() != null) {
-            Optional<Job> optionalJob = jobRepository.findById(userDto.getJobId());
-            if (optionalJob.isPresent()) {
-                optionalJob.ifPresent(user::setJob);
-            }
-        }
-
-        Set<Branch> branches = new HashSet<>();
-        for (UUID branchId : userDto.getBranchId()) {
-            Optional<Branch> byId = branchRepository.findById(branchId);
-            if (byId.isPresent()) {
-                branches.add(byId.get());
-            } else {
-                return new ApiResponse("BRANCH NOT FOUND", false);
-            }
-        }
-        List<Branch> sortedList = new ArrayList<>(branches);
-        sortedList.sort(Comparator.comparing(Branch::getCreatedAt));
-        user.setBranches(branches);
-
-        if (businessRepository.findById(userDto.getBusinessId()).isEmpty()) {
-            return new ApiResponse("BUSINESS NOT FOUND", false);
-        }
-
-        UUID photoId = userDto.getPhotoId();
-        if (photoId != null) {
-            Optional<Attachment> optionalPhoto = attachmentRepository.findById(photoId);
-            if (optionalPhoto.isEmpty()) return new ApiResponse("PHOTO NOT FOUND", false);
-            user.setPhoto(optionalPhoto.get());
-        }
-
-        if (userDto.getDateOfEmployment() != null) {
-            user.setDateOfEmployment(userDto.getDateOfEmployment());
-        }
-        user.setPassportNumber(userDto.getPassportNumber());
-
-        userRepository.save(user);
-        return new ApiResponse("EDITED", true);
-    }
-
-    public ApiResponse get(UUID id) {
-        Optional<User> optionalUser = userRepository.findById(id);
+        // Foydalanuvchi topilmasa, xatolik qaytarish
         if (optionalUser.isEmpty()) {
-            return new ApiResponse("NOT FOUND", false);
+            return new ApiResponse("USER NOT FOUND", false);
         }
-
         User user = optionalUser.get();
-        UserDto dto = userMapper.toDto(user);
-        if (user.getPhoto() != null) {
-            dto.setPhotoId(user.getPhoto().getId());
-        }
-        Set<BranchGetDto> branchGetDtos = new HashSet<>();
-        for (Branch branch : user.getBranches()) {
-            BranchGetDto branchGetDto = new BranchGetDto();
-            branchGetDto.setId(branch.getId());
-            branchGetDto.setName(branch.getName());
-            branchGetDtos.add(branchGetDto);
-        }
-        dto.setBranches(branchGetDtos);
 
-        return new ApiResponse("FOUND", true, dto);
+        // User entity ni UserDTO ga aylantirish
+        UserDTO userDTO = userMapper.toDto(user);
+
+        return new ApiResponse("SUCCESS", true, userDTO);
     }
 
     public ApiResponse delete(UUID id) {
@@ -285,20 +305,37 @@ public class UserService {
         return new ApiResponse("FOUND", true, userMapper.toDto(allByRoleId));
     }
 
-    public ApiResponse getAllByBusinessId(UUID business_id) {
+
+    public ApiResponse getAllByBusinessId(UUID businessId) {
+        // SUPER_ADMIN roli mavjudligini tekshirish
         Optional<Role> optionalRole = roleRepository.findByName(Constants.SUPER_ADMIN);
-        if (optionalRole.isEmpty()) return new ApiResponse("ERROR", false);
+        if (optionalRole.isEmpty()) {
+            return new ApiResponse("ERROR", false);
+        }
+
         Role superAdmin = optionalRole.get();
-        List<User> allByBusiness_id = userRepository.findAllByBusiness_IdAndRoleIsNotAndActiveIsTrue(business_id, superAdmin);
-        if (allByBusiness_id.isEmpty()) return new ApiResponse("BUSINESS NOT FOUND", false);
-        List<UserDto> dtoList = new ArrayList<>();
-        for (User user : allByBusiness_id) {
-            UserDto userDto = userMapper.toDto(user);
+
+        // Foydalanuvchilarni olish (Business ID va SUPER_ADMIN roli bo'lmagan, aktiv foydalanuvchilar)
+        List<User> allByBusinessId = userRepository.findAllByBusiness_IdAndRoleIsNotAndActiveIsTrue(businessId, superAdmin);
+
+        // Agar foydalanuvchilar topilmasa
+        if (allByBusinessId.isEmpty()) {
+            return new ApiResponse("BUSINESS NOT FOUND", false);
+        }
+
+        // Foydalanuvchilarni DTO ga aylantirish
+        List<UserDTO> dtoList = new ArrayList<>();
+        for (User user : allByBusinessId) {
+            UserDTO userDto = userMapper.toDto(user);
+
+            // Agar foydalanuvchida foto mavjud bo'lsa, PhotoId ni qo'shish
             if (user.getPhoto() != null) {
                 userDto.setPhotoId(user.getPhoto().getId());
             }
+
             dtoList.add(userDto);
         }
+
         return new ApiResponse("FOUND", true, dtoList);
     }
 
@@ -313,7 +350,6 @@ public class UserService {
         }
         return new ApiResponse("NOT FOUND", false);
     }
-
 
     public ApiResponse getByPatron(UUID userId) {
         User user = userRepository.findById(userId).orElse(null);
@@ -384,32 +420,43 @@ public class UserService {
 
     public ApiResponse getAllByName(UUID branchId, String name, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
+
+        // Foydalanuvchi nomini split qilib, barcha so'zlarni bitta qidiruvga birlashtirish
         String[] words = name.split("\\s+");
-        Page<User> users = null;
-        for (String word : words) {
-            users = userRepository.findAllByFirstNameContainingIgnoreCaseAndBranchesIdAndUsernameNot(word, branchId, "superadmin", pageable);
-        }
-        if (users == null) {
+        // Qidiruvga bo'lingan so'zlarni birlashtirish
+        String queryName = String.join("|", words);  // so'zlar orasiga "|" qo'yish orqali regex shaklida birlashtiramiz
+
+        // Userlarni qidirish (nomi branch bilan mos va "superadmin" bo'lmagan)
+        Page<User> users = userRepository.findAllByFirstNameRegexAndBranchesIdAndUsernameNot(queryName, branchId, "superadmin", pageable);
+
+        // Agar foydalanuvchilar topilmasa
+        if (users.isEmpty()) {
             return new ApiResponse("Not found", false);
         }
+
+        // Userlarni DTO ga aylantirish
         List<User> userList = users.getContent();
-        List<UserDto> userDtoList = userMapper.toDto(userList);
-        Page<UserDto> pages = new PageImpl<>(userDtoList, pageable, userDtoList.size());
+        List<UserDTO> userDtoList = userMapper.toDto(userList);
+
+        // User DTOlar bilan Page obyektini yaratish
+        Page<UserDTO> pages = new PageImpl<>(userDtoList, pageable, users.getTotalElements());
+
         return new ApiResponse("Found", true, pages);
     }
 
     public ApiResponse search(String username) {
+        // Username bo'yicha qidiruv
         List<User> all = userRepository.findAllByUsernameContainingIgnoreCase(username);
-        Set<User> userSet = new HashSet<>(all);
 
-        List<UserDto> dtoList = new ArrayList<>();
-        for (User user : userSet) {
-            UserDto userDto = userMapper.toDto(user);
-            dtoList.add(userDto);
+        // Qidirilgan foydalanuvchilarni DTO formatida olish
+        List<UserDTO> dtoList = userMapper.toDto(all);
+
+        // Natijani qaytarish
+        if (dtoList.isEmpty()) {
+            return new ApiResponse("No users found", false);
         }
-        return new ApiResponse("found", true, dtoList);
+        return new ApiResponse("Found", true, dtoList);
     }
-
 
     public ApiResponse editPassword(UUID id, String password) {
         Optional<User> optionalUser = userRepository.findById(id);
