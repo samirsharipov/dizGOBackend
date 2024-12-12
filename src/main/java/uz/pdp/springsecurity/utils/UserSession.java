@@ -5,7 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import uz.pdp.springsecurity.entity.User;
 import uz.pdp.springsecurity.mapper.UserMapper;
-import uz.pdp.springsecurity.payload.UserDto;
+import uz.pdp.springsecurity.payload.UserDTO;
 
 @Component
 public class UserSession {
@@ -15,8 +15,8 @@ public class UserSession {
     public UserSession(UserMapper userMapper) {
         this.userMapper = userMapper;
     }
-    public UserDto getUser(){
-        UserDto userDto = null;
+    public UserDTO getUser(){
+        UserDTO userDto = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof User) {
             userDto = userMapper.toDto((User) authentication.getPrincipal());

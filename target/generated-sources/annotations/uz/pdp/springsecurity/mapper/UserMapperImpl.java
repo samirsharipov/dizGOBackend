@@ -1,40 +1,37 @@
 package uz.pdp.springsecurity.mapper;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
-import uz.pdp.springsecurity.entity.Branch;
 import uz.pdp.springsecurity.entity.Business;
+import uz.pdp.springsecurity.entity.EmergencyContact;
 import uz.pdp.springsecurity.entity.Job;
 import uz.pdp.springsecurity.entity.Role;
 import uz.pdp.springsecurity.entity.User;
-import uz.pdp.springsecurity.payload.BranchGetDto;
-import uz.pdp.springsecurity.payload.UserDto;
+import uz.pdp.springsecurity.payload.EmergencyContactDTO;
+import uz.pdp.springsecurity.payload.UserDTO;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-12-11T14:21:47+0500",
+    date = "2024-12-12T15:29:52+0500",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.13 (Amazon.com Inc.)"
 )
 @Component
 public class UserMapperImpl implements UserMapper {
 
     @Override
-    public User toEntity(UserDto userDto) {
+    public User toEntity(UserDTO userDto) {
         if ( userDto == null ) {
             return null;
         }
 
         User user = new User();
 
-        user.setBusiness( userDtoToBusiness( userDto ) );
-        user.setId( userDto.getId() );
         user.setFirstName( userDto.getFirstName() );
         user.setLastName( userDto.getLastName() );
+        user.setSureName( userDto.getSureName() );
         user.setSex( userDto.isSex() );
         user.setBirthday( userDto.getBirthday() );
         user.setEmail( userDto.getEmail() );
@@ -42,60 +39,78 @@ public class UserMapperImpl implements UserMapper {
         user.setUsername( userDto.getUsername() );
         user.setPassword( userDto.getPassword() );
         user.setPassportNumber( userDto.getPassportNumber() );
+        user.setJshshsr( userDto.getJshshsr() );
         user.setAddress( userDto.getAddress() );
+        user.setDepartment( userDto.getDepartment() );
+        user.setPosition( userDto.getPosition() );
+        user.setBranch( userDto.getBranch() );
         user.setArrivalTime( userDto.getArrivalTime() );
         user.setLeaveTime( userDto.getLeaveTime() );
+        user.setSalaryAmount( userDto.getSalaryAmount() );
+        user.setSalaryType( userDto.getSalaryType() );
+        user.setPinCode( userDto.getPinCode() );
+        user.setShiftType( userDto.getShiftType() );
         user.setProbation( userDto.getProbation() );
-        user.setActive( userDto.isActive() );
         user.setDescription( userDto.getDescription() );
         user.setDateOfEmployment( userDto.getDateOfEmployment() );
-        user.setEnabled( userDto.isEnabled() );
+        user.setContractNumber( userDto.getContractNumber() );
+        user.setEmergencyContacts( emergencyContactDTOListToEmergencyContactList( userDto.getEmergencyContacts() ) );
 
         return user;
     }
 
     @Override
-    public UserDto toDto(User user) {
+    public UserDTO toDto(User user) {
         if ( user == null ) {
             return null;
         }
 
-        UserDto userDto = new UserDto();
+        UserDTO userDTO = new UserDTO();
 
-        userDto.setRoleName( userRoleName( user ) );
-        userDto.setRoleId( userRoleId( user ) );
-        userDto.setJobId( userJobId( user ) );
-        userDto.setBusinessId( userBusinessId( user ) );
-        userDto.setId( user.getId() );
-        userDto.setFirstName( user.getFirstName() );
-        userDto.setLastName( user.getLastName() );
-        userDto.setEmail( user.getEmail() );
-        userDto.setUsername( user.getUsername() );
-        userDto.setPassword( user.getPassword() );
-        userDto.setPhoneNumber( user.getPhoneNumber() );
-        userDto.setSex( user.isSex() );
-        userDto.setBirthday( user.getBirthday() );
-        userDto.setBranches( branchSetToBranchGetDtoSet( user.getBranches() ) );
-        userDto.setActive( user.isActive() );
-        userDto.setAddress( user.getAddress() );
-        userDto.setDescription( user.getDescription() );
-        userDto.setProbation( user.getProbation() );
-        userDto.setArrivalTime( user.getArrivalTime() );
-        userDto.setLeaveTime( user.getLeaveTime() );
-        userDto.setEnabled( user.isEnabled() );
-        userDto.setPassportNumber( user.getPassportNumber() );
-        userDto.setDateOfEmployment( user.getDateOfEmployment() );
+        userDTO.setRoleId( userRoleId( user ) );
+        userDTO.setJobId( userJobId( user ) );
+        userDTO.setBusinessId( userBusinessId( user ) );
+        userDTO.setId( user.getId() );
+        userDTO.setFirstName( user.getFirstName() );
+        userDTO.setLastName( user.getLastName() );
+        userDTO.setSureName( user.getSureName() );
+        userDTO.setSex( user.isSex() );
+        userDTO.setBirthday( user.getBirthday() );
+        userDTO.setEmail( user.getEmail() );
+        userDTO.setPhoneNumber( user.getPhoneNumber() );
+        userDTO.setUsername( user.getUsername() );
+        userDTO.setPassword( user.getPassword() );
+        userDTO.setPassportNumber( user.getPassportNumber() );
+        userDTO.setJshshsr( user.getJshshsr() );
+        userDTO.setAddress( user.getAddress() );
+        userDTO.setDepartment( user.getDepartment() );
+        userDTO.setPosition( user.getPosition() );
+        userDTO.setBranch( user.getBranch() );
+        userDTO.setArrivalTime( user.getArrivalTime() );
+        userDTO.setLeaveTime( user.getLeaveTime() );
+        userDTO.setSalaryAmount( user.getSalaryAmount() );
+        userDTO.setSalaryType( user.getSalaryType() );
+        userDTO.setPinCode( user.getPinCode() );
+        userDTO.setShiftType( user.getShiftType() );
+        userDTO.setProbation( user.getProbation() );
+        userDTO.setDescription( user.getDescription() );
+        userDTO.setDateOfEmployment( user.getDateOfEmployment() );
+        userDTO.setContractNumber( user.getContractNumber() );
+        userDTO.setEmergencyContacts( emergencyContactListToEmergencyContactDTOList( user.getEmergencyContacts() ) );
+        userDTO.setActive( user.isActive() );
+        userDTO.setEnabled( user.isEnabled() );
+        userDTO.setGrossPriceControlOneUser( user.isGrossPriceControlOneUser() );
 
-        return userDto;
+        return userDTO;
     }
 
     @Override
-    public List<UserDto> toDto(List<User> users) {
+    public List<UserDTO> toDto(List<User> users) {
         if ( users == null ) {
             return null;
         }
 
-        List<UserDto> list = new ArrayList<UserDto>( users.size() );
+        List<UserDTO> list = new ArrayList<UserDTO>( users.size() );
         for ( User user : users ) {
             list.add( toDto( user ) );
         }
@@ -104,7 +119,7 @@ public class UserMapperImpl implements UserMapper {
     }
 
     @Override
-    public void update(UserDto userDto, User user) {
+    public void update(UserDTO userDto, User user) {
         if ( userDto == null ) {
             return;
         }
@@ -112,9 +127,10 @@ public class UserMapperImpl implements UserMapper {
         if ( user.getBusiness() == null ) {
             user.setBusiness( new Business() );
         }
-        userDtoToBusiness1( userDto, user.getBusiness() );
+        userDTOToBusiness( userDto, user.getBusiness() );
         user.setFirstName( userDto.getFirstName() );
         user.setLastName( userDto.getLastName() );
+        user.setSureName( userDto.getSureName() );
         user.setSex( userDto.isSex() );
         user.setBirthday( userDto.getBirthday() );
         user.setEmail( userDto.getEmail() );
@@ -122,41 +138,65 @@ public class UserMapperImpl implements UserMapper {
         user.setUsername( userDto.getUsername() );
         user.setPassword( userDto.getPassword() );
         user.setPassportNumber( userDto.getPassportNumber() );
+        user.setJshshsr( userDto.getJshshsr() );
         user.setAddress( userDto.getAddress() );
+        user.setDepartment( userDto.getDepartment() );
+        user.setPosition( userDto.getPosition() );
+        user.setBranch( userDto.getBranch() );
         user.setArrivalTime( userDto.getArrivalTime() );
         user.setLeaveTime( userDto.getLeaveTime() );
+        user.setSalaryAmount( userDto.getSalaryAmount() );
+        user.setSalaryType( userDto.getSalaryType() );
+        user.setPinCode( userDto.getPinCode() );
+        user.setShiftType( userDto.getShiftType() );
         user.setProbation( userDto.getProbation() );
         user.setActive( userDto.isActive() );
         user.setDescription( userDto.getDescription() );
         user.setDateOfEmployment( userDto.getDateOfEmployment() );
+        user.setContractNumber( userDto.getContractNumber() );
+        if ( user.getEmergencyContacts() != null ) {
+            List<EmergencyContact> list = emergencyContactDTOListToEmergencyContactList( userDto.getEmergencyContacts() );
+            if ( list != null ) {
+                user.getEmergencyContacts().clear();
+                user.getEmergencyContacts().addAll( list );
+            }
+            else {
+                user.setEmergencyContacts( null );
+            }
+        }
+        else {
+            List<EmergencyContact> list = emergencyContactDTOListToEmergencyContactList( userDto.getEmergencyContacts() );
+            if ( list != null ) {
+                user.setEmergencyContacts( list );
+            }
+        }
         user.setEnabled( userDto.isEnabled() );
     }
 
-    protected Business userDtoToBusiness(UserDto userDto) {
-        if ( userDto == null ) {
+    protected EmergencyContact emergencyContactDTOToEmergencyContact(EmergencyContactDTO emergencyContactDTO) {
+        if ( emergencyContactDTO == null ) {
             return null;
         }
 
-        Business business = new Business();
+        EmergencyContact emergencyContact = new EmergencyContact();
 
-        business.setId( userDto.getBusinessId() );
+        emergencyContact.setName( emergencyContactDTO.getName() );
+        emergencyContact.setPhoneNumber( emergencyContactDTO.getPhoneNumber() );
 
-        return business;
+        return emergencyContact;
     }
 
-    private String userRoleName(User user) {
-        if ( user == null ) {
+    protected List<EmergencyContact> emergencyContactDTOListToEmergencyContactList(List<EmergencyContactDTO> list) {
+        if ( list == null ) {
             return null;
         }
-        Role role = user.getRole();
-        if ( role == null ) {
-            return null;
+
+        List<EmergencyContact> list1 = new ArrayList<EmergencyContact>( list.size() );
+        for ( EmergencyContactDTO emergencyContactDTO : list ) {
+            list1.add( emergencyContactDTOToEmergencyContact( emergencyContactDTO ) );
         }
-        String name = role.getName();
-        if ( name == null ) {
-            return null;
-        }
-        return name;
+
+        return list1;
     }
 
     private UUID userRoleId(User user) {
@@ -204,37 +244,37 @@ public class UserMapperImpl implements UserMapper {
         return id;
     }
 
-    protected BranchGetDto branchToBranchGetDto(Branch branch) {
-        if ( branch == null ) {
+    protected EmergencyContactDTO emergencyContactToEmergencyContactDTO(EmergencyContact emergencyContact) {
+        if ( emergencyContact == null ) {
             return null;
         }
 
-        BranchGetDto branchGetDto = new BranchGetDto();
+        EmergencyContactDTO emergencyContactDTO = new EmergencyContactDTO();
 
-        branchGetDto.setId( branch.getId() );
-        branchGetDto.setName( branch.getName() );
+        emergencyContactDTO.setName( emergencyContact.getName() );
+        emergencyContactDTO.setPhoneNumber( emergencyContact.getPhoneNumber() );
 
-        return branchGetDto;
+        return emergencyContactDTO;
     }
 
-    protected Set<BranchGetDto> branchSetToBranchGetDtoSet(Set<Branch> set) {
-        if ( set == null ) {
+    protected List<EmergencyContactDTO> emergencyContactListToEmergencyContactDTOList(List<EmergencyContact> list) {
+        if ( list == null ) {
             return null;
         }
 
-        Set<BranchGetDto> set1 = new LinkedHashSet<BranchGetDto>( Math.max( (int) ( set.size() / .75f ) + 1, 16 ) );
-        for ( Branch branch : set ) {
-            set1.add( branchToBranchGetDto( branch ) );
+        List<EmergencyContactDTO> list1 = new ArrayList<EmergencyContactDTO>( list.size() );
+        for ( EmergencyContact emergencyContact : list ) {
+            list1.add( emergencyContactToEmergencyContactDTO( emergencyContact ) );
         }
 
-        return set1;
+        return list1;
     }
 
-    protected void userDtoToBusiness1(UserDto userDto, Business mappingTarget) {
-        if ( userDto == null ) {
+    protected void userDTOToBusiness(UserDTO userDTO, Business mappingTarget) {
+        if ( userDTO == null ) {
             return;
         }
 
-        mappingTarget.setId( userDto.getBusinessId() );
+        mappingTarget.setId( userDTO.getBusinessId() );
     }
 }
