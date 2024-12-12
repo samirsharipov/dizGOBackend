@@ -13,4 +13,6 @@ public class ProductResponseDTO {
     private UUID id;
     private String name;
     private double salePrice;
+    private String barcode;
+    private String MXIKCode;
 }

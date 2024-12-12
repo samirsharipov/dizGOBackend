@@ -7,9 +7,8 @@ import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.RoleCategoryDto;
 import uz.pdp.springsecurity.repository.RoleCategoryRepository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,36 +21,22 @@ public class RoleCategoryService {
         if (roleCategoryDto.getBusinessId() == null) {
             return new ApiResponse("business id is not null", false);
         }
-        RoleCategory roleCategory = new RoleCategory();
-        roleCategory.setName(roleCategoryDto.getName());
-        roleCategory.setDescription(roleCategoryDto.getDescription());
-        roleCategoryRepository.save(roleCategory);
 
+        RoleCategory roleCategory = new RoleCategory();
+        setRoleCategory(roleCategoryDto, roleCategory);
         return new ApiResponse("successfully created role category", true);
     }
 
-    public ApiResponse edit(UUID id, RoleCategoryDto roleCategoryDto) {
 
+    public ApiResponse edit(UUID id, RoleCategoryDto roleCategoryDto) {
         Optional<RoleCategory> optionalRoleCategory = roleCategoryRepository.findById(id);
         if (optionalRoleCategory.isEmpty())
             return new ApiResponse("not found", false);
 
         RoleCategory roleCategory = optionalRoleCategory.get();
-        roleCategory.setName(roleCategoryDto.getName());
-        roleCategory.setDescription(roleCategoryDto.getDescription());
-        roleCategoryRepository.save(roleCategory);
+        setRoleCategory(roleCategoryDto, roleCategory);
 
         return new ApiResponse("successfully edited role category", true);
-    }
-
-    public ApiResponse getByBusinessId(UUID businessId) {
-        List<RoleCategory> all =
-                roleCategoryRepository.findAllByBusinessId(businessId);
-
-        if (all.isEmpty())
-            return new ApiResponse("not found", false);
-
-        return new ApiResponse("successfully getByBusinessId", true, toDto(all));
     }
 
     public ApiResponse getById(UUID id) {
@@ -64,7 +49,43 @@ public class RoleCategoryService {
                 .orElseGet(() -> new ApiResponse("not found", false));
     }
 
-    public RoleCategoryDto toDto(RoleCategory roleCategory) {
+
+    public ApiResponse getRoleCategoriesByBusiness(UUID businessId) {
+        // Businessga tegishli barcha RoleCategory-larni olish
+        List<RoleCategory> allCategories = roleCategoryRepository.findAllByBusinessId(businessId);
+
+        // Root (parentRoleCategory = null) bo'lgan bo'limlarni topish
+        List<RoleCategory> rootCategories = allCategories.stream()
+                .filter(roleCategory -> roleCategory.getParentRoleCategory() == null)
+                .toList();
+
+        // Iyerarxiyani yaratish
+        List<Map<String, Object>> hierarchy = rootCategories.stream()
+                .map(rootCategory -> buildHierarchy(rootCategory, allCategories))
+                .collect(Collectors.toList());
+
+        return new ApiResponse("Successfully fetched role categories", true, hierarchy);
+    }
+
+    /**
+     * Iyerarxiya uchun rekursiv metod
+     */
+    private Map<String, Object> buildHierarchy(RoleCategory roleCategory, List<RoleCategory> allCategories) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", roleCategory.getId());
+        data.put("name", roleCategory.getName());
+        data.put("description", roleCategory.getDescription());
+
+        // Farzand bo'limlarni topish (child categories)
+        List<Map<String, Object>> children = allCategories.stream()
+                .filter(child -> child.getParentRoleCategory() != null && child.getParentRoleCategory().getId().equals(roleCategory.getId()))
+                .map(child -> buildHierarchy(child, allCategories)) // Rekursiv chaqirish
+                .collect(Collectors.toList());
+
+        data.put("children", children);
+        return data;
+    }
+     public RoleCategoryDto toDto(RoleCategory roleCategory) {
         RoleCategoryDto roleCategoryDto = new RoleCategoryDto();
         roleCategoryDto.setId(roleCategory.getId());
         roleCategoryDto.setName(roleCategory.getName());
@@ -77,5 +98,16 @@ public class RoleCategoryService {
         return roleCategories.stream()
                 .map(this::toDto)
                 .toList();
+    }
+
+    private void setRoleCategory(RoleCategoryDto roleCategoryDto, RoleCategory roleCategory) {
+        if (roleCategoryDto.getParentRoleCategoryId() != null) {
+            Optional<RoleCategory> optionalRoleCategory = roleCategoryRepository.findById(roleCategoryDto.getParentRoleCategoryId());
+            optionalRoleCategory.ifPresent(roleCategory::setParentRoleCategory);
+        }
+
+        roleCategory.setName(roleCategoryDto.getName());
+        roleCategory.setDescription(roleCategoryDto.getDescription());
+        roleCategoryRepository.save(roleCategory);
     }
 }

@@ -12,8 +12,14 @@ import javax.persistence.ManyToOne;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RoleCategory extends AbsEntity {
+
     private String name;
+
     private String description;
+
     @ManyToOne
     private Business business;
+
+    @ManyToOne
+    private RoleCategory parentRoleCategory;
 }

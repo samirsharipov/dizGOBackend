@@ -14,4 +14,5 @@ public class RoleCategoryDto {
     private String name;
     private String description;
     private UUID businessId;
+    private UUID parentRoleCategoryId;
 }

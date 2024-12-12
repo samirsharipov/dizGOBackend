@@ -213,28 +213,28 @@ public class CustomerController {
     }
 
     @GetMapping("/getAllMonths/{branchId}")
-    public HttpEntity<?> getMonth(@PathVariable UUID branchId) {
+    public HttpEntity<ApiResponse> getMonth(@PathVariable UUID branchId) {
         ApiResponse apiResponse = customerService.getMonthsByYear(branchId);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
     @GetMapping("/get-by-barcode")
-    public HttpEntity<?> getByBarcode(@RequestParam String barcode) {
+    public HttpEntity<ApiResponse> getByBarcode(@RequestParam String barcode) {
         return responseEntityHelper.buildResponse(customerService.getByBarcode(barcode));
     }
 
     @GetMapping("/get-by-userId/{userId}")
-    public HttpEntity<?> getByUserId(@PathVariable UUID userId) {
+    public HttpEntity<ApiResponse> getByUserId(@PathVariable UUID userId) {
         return responseEntityHelper.buildResponse(customerService.getByUserId(userId));
     }
 
     @GetMapping("/check-number")
-    public HttpEntity<?> checkNumber(@RequestParam String number) {
+    public HttpEntity<ApiResponse> checkNumber(@RequestParam String number) {
         return responseEntityHelper.buildResponse(customerService.checkNumber(number));
     }
 
     @GetMapping("/search-for-trade")
-    public HttpEntity<?> searchForTrade(@RequestParam String query) {
+    public HttpEntity<ApiResponse> searchForTrade(@RequestParam String query) {
         return responseEntityHelper.buildResponse(customerService.getForTrade(query));
     }
 }
