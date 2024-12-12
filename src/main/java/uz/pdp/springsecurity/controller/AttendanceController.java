@@ -1,5 +1,6 @@
 package uz.pdp.springsecurity.controller;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,4 +23,5 @@ public class AttendanceController {
     public ResponseEntity<ApiResponse> checkInWithQRCode(@RequestParam UUID employeeId, @RequestParam UUID branchId, @RequestParam String qrCodeData,boolean input) {
         return responseEntityHelper.buildResponse(attendanceService.checkInWithQRCode(branchId, employeeId, qrCodeData,input));
     }
+
 }
