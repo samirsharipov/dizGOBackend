@@ -62,6 +62,17 @@ public class AttendanceService {
         Timestamp todayStart = Timestamp.valueOf(Timestamp.valueOf(new Timestamp(System.currentTimeMillis()).toLocalDateTime().withHour(0).withMinute(0).withSecond(0)).toLocalDateTime());
         Timestamp todayEnd = Timestamp.valueOf(Timestamp.valueOf(new Timestamp(System.currentTimeMillis()).toLocalDateTime().withHour(23).withMinute(59).withSecond(59)).toLocalDateTime());
 
+        Optional<Location> locationOpt = locationRepository.findByBranchId(branchId);
+        if (locationOpt.isEmpty()) {
+            return new ApiResponse("Ishxonangiz joylashuvi topilmadi", false);
+        }
+
+        Location location = locationOpt.get();
+        double radius = location.getRadius();
+
+        double distance = geoCheck.calculateDistance(qrLatitude, qrLongitude, location.getLatitude(), location.getLongitude());
+
+
         if (input) {
             // KIRISH (input = true)
             Optional<Attendance> existingAttendance = attendanceRepository.findByEmployeeIdAndCheckInTimeBetweenAndIsArrived(
@@ -72,23 +83,17 @@ public class AttendanceService {
                 return new ApiResponse("Siz allaqachon ishga keldingiz", false);
             }
 
-            Optional<Location> locationOpt = locationRepository.findByBranchId(branchId);
-            if (locationOpt.isEmpty()) {
-                return new ApiResponse("Ishxonangiz joylashuvi topilmadi", false);
-            }
 
-            Location location = locationOpt.get();
-            double radius = location.getRadius();
-
-            if (geoCheck.isInsideGeofence(qrLatitude, qrLongitude, location.getLatitude(), location.getLongitude(), radius)) {
+            if (geoCheck.checkDistance(distance, radius)) {
                 Attendance attendance = new Attendance();
                 attendance.setEmployeeId(employeeId);
                 attendance.setCheckInTime(new Timestamp(System.currentTimeMillis()));
                 attendance.setIsArrived(true);
+                attendance.setIncomeDistance(distance);
                 attendanceRepository.save(attendance);
-                return new ApiResponse("Keldi-ketdi QR kod orqali tasdiqlandi", true);
+                return new ApiResponse("Ishga kelish vaqti tasdiqlandi", true);
             } else {
-                return new ApiResponse("QR kod geo-fencing bilan mos kelmaydi", false);
+                return new ApiResponse("Ofis lokatsiyasi sizning geo lokatsiyangiz bilan mos kelmadi", false);
             }
         } else {
             // CHIQISH (input = false)
@@ -100,8 +105,9 @@ public class AttendanceService {
                 Attendance attendance = existingAttendance.get();
                 attendance.setCheckOutTime(new Timestamp(System.currentTimeMillis()));
                 attendance.setIsArrived(false);
+                attendance.setOutcomeDistance(distance);
                 attendanceRepository.save(attendance);
-                return new ApiResponse("Ishdan chiqish vaqti muvaffaqiyatli yozildi", true);
+                return new ApiResponse("Ishdan chiqish vaqti tasdiqlandi", true);
             } else {
                 return new ApiResponse("Siz hali bugun ishga kelmagansiz", false);
             }

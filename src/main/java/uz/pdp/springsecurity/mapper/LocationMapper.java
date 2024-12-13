@@ -26,4 +26,11 @@ public class LocationMapper {
         location.setRadius(locationDTO.getRadius());
         return location;
     }
+
+    public void updateLocation(LocationDTO locationDTO, Location location) {
+        location.setBranchId(locationDTO.getBranchId());
+        location.setLatitude(locationDTO.getLatitude());
+        location.setLongitude(locationDTO.getLongitude());
+        location.setRadius(locationDTO.getRadius());
+    }
 }

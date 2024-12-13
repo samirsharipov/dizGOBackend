@@ -21,4 +21,8 @@ public class GeoCheck {
         return distance <= radius; // radius is in meters
     }
 
+    public boolean checkDistance(double distance, double radius) {
+        return distance <= radius;
+    }
+
 }

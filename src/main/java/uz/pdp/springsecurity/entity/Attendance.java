@@ -37,4 +37,8 @@ public class Attendance extends AbsEntity {
 
     @Column(nullable = false)
     private Boolean isArrived = true; // ishga keldi yoki kelmadi
+
+    private Double incomeDistance = 0.0; // kirish radiusi
+
+    private Double outcomeDistance = 0.0; // chiqish radiusi
 }
