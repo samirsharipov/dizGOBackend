@@ -69,7 +69,7 @@ public class DataLoader implements CommandLineRunner {
                     0, 0, Lifetime.MONTH, 0, 1, 100, 0, false, true));
 
             tariffRepository.save(new Tariff(
-                    "Premium", "Freemium tariff", RolePermissions.ADMIN_PERMISSIONS, 10, 0,
+                    "Freemium", "Freemium tariff", RolePermissions.ADMIN_PERMISSIONS, 10, 0,
                     0, 0, Lifetime.MONTH, 0, 1, 100, 0, true, false));
 
             Business business = businessRepository.save(new Business(

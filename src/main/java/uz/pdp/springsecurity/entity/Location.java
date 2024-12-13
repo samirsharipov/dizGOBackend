@@ -17,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Location extends AbsEntity {
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private UUID branchId;
 
     @Column(nullable = false)

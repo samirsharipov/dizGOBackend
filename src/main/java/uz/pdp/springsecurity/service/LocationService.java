@@ -20,6 +20,10 @@ public class LocationService {
 
     // CREATE
     public ApiResponse create(LocationDTO locationDTO) {
+        Optional<Location> optionalBranch = locationRepository.findByBranchId(locationDTO.getBranchId());
+        if (optionalBranch.isPresent()) {
+            return new ApiResponse("Location already exists", false);
+        }
         Location location = locationMapper.toLocation(locationDTO);
         locationRepository.save(location);
         return new ApiResponse("Location muvaffaqiyatli qo'shildi", true);
@@ -38,8 +42,8 @@ public class LocationService {
     public ApiResponse getByBranchId(UUID branchId) {
         Optional<Location> optionalLocation = locationRepository.findByBranchId(branchId);
         return optionalLocation
-                .map(location -> new ApiResponse("Location topilmadi", true, locationMapper.toLocationDTO(location)))
-                .orElse(new ApiResponse("Location muvaffaqiyatli topildi", false));
+                .map(location -> new ApiResponse("Location muvaffaqiyatli topildi ", true, locationMapper.toLocationDTO(location)))
+                .orElse(new ApiResponse("Location topilmadi", false));
     }
 
     // UPDATE
@@ -48,7 +52,8 @@ public class LocationService {
         if (existingLocation.isEmpty()) {
             return new ApiResponse("Location topilmadi", false);
         }
-        Location location = locationMapper.toLocation(locationDTO);
+        Location location = existingLocation.get();
+        locationMapper.updateLocation(locationDTO,location);
         locationRepository.save(location);
         return new ApiResponse("Location muvaffaqiyatli yangilandi", true);
     }

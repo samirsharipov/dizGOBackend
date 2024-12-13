@@ -37,15 +37,17 @@ public class InvoiceService {
         invoice.setName(invoiceDto.getName());
         invoice.setDescription(invoiceDto.getDescription());
         invoice.setFooter(invoiceDto.getFooter());
-        Optional<Attachment> optionalAttachment = attachmentRepository.findById(invoiceDto.getPhotoId());
-        if (optionalAttachment.isPresent()) invoice.setPhoto(optionalAttachment.get());
+        if (invoiceDto.getPhotoId() != null) {
+            Optional<Attachment> optionalAttachment = attachmentRepository.findById(invoiceDto.getPhotoId());
+            optionalAttachment.ifPresent(invoice::setPhoto);
+        }
         invoiceRepository.save(invoice);
         return new ApiResponse("SUCCESS", true);
     }
 
     public ApiResponse getOne(UUID branchId) {
         Optional<Invoice> optionalInvoice = invoiceRepository.findByBranch_Id(branchId);
-        if (optionalInvoice.isEmpty()){
+        if (optionalInvoice.isEmpty()) {
             Optional<Branch> optionalBranch = branchRepository.findById(branchId);
             if (optionalBranch.isEmpty()) return new ApiResponse("BRANCH NOT FOUND", false);
             create(optionalBranch.get());
