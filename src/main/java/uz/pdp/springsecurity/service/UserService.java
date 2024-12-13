@@ -45,11 +45,11 @@ public class UserService {
         }
 
         Business business = businessRepository.findById(userDto.getBusinessId()).orElse(null);
-        if (business==null) {
+        if (business == null) {
             return new ApiResponse("Business does not exist");
         }
         Role role = roleRepository.findById(userDto.getRoleId()).orElse(null);
-        if (role==null) {
+        if (role == null) {
             return new ApiResponse("Role does not exist");
         }
 
@@ -174,7 +174,6 @@ public class UserService {
         user.setAddress(userDto.getAddress());
         user.setDepartment(userDto.getDepartment());
         user.setPosition(userDto.getPosition());
-        user.setBranch(userDto.getBranch());
         user.setArrivalTime(userDto.getArrivalTime());
         user.setLeaveTime(userDto.getLeaveTime());
         user.setSalaryAmount(userDto.getSalaryAmount());
@@ -188,6 +187,8 @@ public class UserService {
         user.setDateOfEmployment(userDto.getDateOfEmployment() != null ? userDto.getDateOfEmployment() : user.getDateOfEmployment());
         user.setGrossPriceControlOneUser(userDto.isGrossPriceControlOneUser());
         user.setContractNumber(userDto.getContractNumber());
+        user.setDateStartContract(userDto.getDateStartContract() != null ? userDto.getDateStartContract() : null);
+        user.setDateEndContract(userDto.getDateEndContract() != null ? userDto.getDateEndContract() : null);
 
         // Jobni tekshirish va o'rnatish
         if (userDto.getJobId() != null) {

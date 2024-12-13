@@ -63,8 +63,6 @@ public class User extends AbsEntity implements UserDetails {
 
     private String position; // Foydalanuvchining lavozimi (masalan, direktor, manager, ishchi)
 
-    private String branch; // Foydalanuvchining qaysi filialga tegishli ekanligi
-
     private String arrivalTime; // Foydalanuvchining kelish vaqti (format: HH:mm)
 
     private String leaveTime; // Foydalanuvchining ketish vaqti (format: HH:mm)
@@ -107,6 +105,9 @@ public class User extends AbsEntity implements UserDetails {
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private boolean grossPriceControlOneUser; // Bu foydalanuvchi uchun narxni boshqarish uchun maxsus bayroq (aniq ma'nosi noaniq)
 
+
+    // shartnoma
+
     private String contractNumber; // Shartnoma raqami
 
     @ManyToOne
@@ -115,7 +116,12 @@ public class User extends AbsEntity implements UserDetails {
     @ElementCollection
     private List<EmergencyContact> emergencyContacts;
 
+    private Date dateStartContract;
 
+    private Date dateEndContract;
+
+
+    // other
     private Long chatId; // Telegram chat identifikatori (Telegram bot uchun ishlatilishi mumkin)
 
     private boolean enabled = false; // Foydalanuvchining akkaunti faol yoki faol emasligini ko‘rsatadi (false bo'lsa, akkaunt bloklanadi)

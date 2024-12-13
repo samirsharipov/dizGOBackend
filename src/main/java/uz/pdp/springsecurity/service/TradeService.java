@@ -13,8 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import uz.pdp.springsecurity.entity.Currency;
 import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.enums.HistoryName;
@@ -432,26 +430,26 @@ public class TradeService {
             Business business = tradeGetOneDto.getTrade().getTrader().getBusiness();
             for (User admin : userRepository.findAllByBusiness_IdAndRoleName(business.getId(), Constants.ADMIN)) {
                 if (admin.getChatId() != null) {
-                    SendMessage sendMessage = SendMessage
-                            .builder()
-                            .text(sendText)
-                            .parseMode(ParseMode.HTML)
-                            .chatId(admin.getChatId())
-                            .build();
-                    RestTemplate restTemplate = new RestTemplate();
-                    restTemplate.postForObject("https://api.telegram.org/bot" + Constants.BOT_TOKEN + "/sendMessage", sendMessage, Object.class);
+//                    SendMessage sendMessage = SendMessage
+//                            .builder()
+//                            .text(sendText)
+//                            .parseMode(ParseMode.HTML)
+//                            .chatId(admin.getChatId())
+//                            .build();
+//                    RestTemplate restTemplate = new RestTemplate();
+//                    restTemplate.postForObject("https://api.telegram.org/bot" + Constants.BOT_TOKEN + "/sendMessage", sendMessage, Object.class);
                 }
             }
             Customer customerX = tradeGetOneDto.getTrade().getCustomer();
             if (customerX != null && customerX.getChatId() != null) {
-                SendMessage sendMessage = SendMessage
-                        .builder()
-                        .text(sendText)
-                        .parseMode(ParseMode.HTML)
-                        .chatId(customerX.getChatId())
-                        .build();
-                RestTemplate restTemplate = new RestTemplate();
-                restTemplate.postForObject("https://api.telegram.org/bot" + Constants.CUSTOMER_BOT_TOKEN + "/sendMessage", sendMessage, Object.class);
+//                SendMessage sendMessage = SendMessage
+//                        .builder()
+//                        .text(sendText)
+//                        .parseMode(ParseMode.HTML)
+//                        .chatId(customerX.getChatId())
+//                        .build();
+//                RestTemplate restTemplate = new RestTemplate();
+//                restTemplate.postForObject("https://api.telegram.org/bot" + Constants.CUSTOMER_BOT_TOKEN + "/sendMessage", sendMessage, Object.class);
             }
         }
         Map<String, Object> response = new HashMap<>();

@@ -49,4 +49,9 @@ public class UserDTO {
     private boolean active;
     private boolean enabled;
     private boolean grossPriceControlOneUser;
+
+    private Date dateStartContract;
+
+    private Date dateEndContract;
+
 }

@@ -37,8 +37,10 @@ public class StatisticsService {
         long blocked = businessRepository.countBlockedBetween(startDate, endDate);
         long archived = businessRepository.countArchivedBetween(startDate, endDate);
         long nonActive = businessRepository.countNonActiveBetween(startDate, endDate);
+        long freemium = businessRepository.countBusinessesByTariffName("Freemium", startDate, endDate);
+        long premium = businessRepository.countBusinessesByTariffName("Premium", startDate, endDate);
 
-        return new BusinessStat(total, active, blocked, archived, nonActive);
+        return new BusinessStat(total, active, blocked, archived, nonActive, freemium, premium);
     }
 
     public ApiResponse productStatistics(String type) {

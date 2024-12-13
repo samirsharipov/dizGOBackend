@@ -8,8 +8,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.enums.StatusName;
 import uz.pdp.springsecurity.mapper.CustomerMapper;
@@ -293,14 +291,14 @@ public class CustomerService {
                                 "<b>TO'LOV SUMMASI: </b>" + repaymentDto.getRepayment() + "UZS" + "\n" +
                                 "<b>TO'LOV TURI: </b>" + optionalPaymentMethod.get().getType() + "\n\n" +
                                 "<b>HOZIRGI " + (customer.getDebt() < 0 ? "HAQINGIZ" : "QARZINGIZ") + "</b>: " + (customer.getDebt() < 0 ? Math.abs(customer.getDebt()) : customer.getDebt());
-                        SendMessage sendMessage = SendMessage
-                                .builder()
-                                .chatId(customer.getChatId())
-                                .text(text)
-                                .parseMode(ParseMode.HTML)
-                                .build();
-                        RestTemplate restTemplate = new RestTemplate();
-                        restTemplate.postForObject("https://api.telegram.org/bot" + Constants.CUSTOMER_BOT_TOKEN + "/sendMessage", sendMessage, Object.class);
+//                        SendMessage sendMessage = SendMessage
+//                                .builder()
+//                                .chatId(customer.getChatId())
+//                                .text(text)
+//                                .parseMode(ParseMode.HTML)
+//                                .build();
+//                        RestTemplate restTemplate = new RestTemplate();
+//                        restTemplate.postForObject("https://api.telegram.org/bot" + Constants.CUSTOMER_BOT_TOKEN + "/sendMessage", sendMessage, Object.class);
                     }
                 } catch (Exception e) {
                     return new ApiResponse("telegram bot send message error", true);

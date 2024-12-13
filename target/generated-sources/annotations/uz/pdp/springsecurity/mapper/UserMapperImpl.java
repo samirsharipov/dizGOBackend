@@ -15,7 +15,7 @@ import uz.pdp.springsecurity.payload.UserDTO;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-12-12T15:29:52+0500",
+    date = "2024-12-13T17:19:34+0500",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.13 (Amazon.com Inc.)"
 )
 @Component
@@ -43,7 +43,6 @@ public class UserMapperImpl implements UserMapper {
         user.setAddress( userDto.getAddress() );
         user.setDepartment( userDto.getDepartment() );
         user.setPosition( userDto.getPosition() );
-        user.setBranch( userDto.getBranch() );
         user.setArrivalTime( userDto.getArrivalTime() );
         user.setLeaveTime( userDto.getLeaveTime() );
         user.setSalaryAmount( userDto.getSalaryAmount() );
@@ -55,6 +54,8 @@ public class UserMapperImpl implements UserMapper {
         user.setDateOfEmployment( userDto.getDateOfEmployment() );
         user.setContractNumber( userDto.getContractNumber() );
         user.setEmergencyContacts( emergencyContactDTOListToEmergencyContactList( userDto.getEmergencyContacts() ) );
+        user.setDateStartContract( userDto.getDateStartContract() );
+        user.setDateEndContract( userDto.getDateEndContract() );
 
         return user;
     }
@@ -85,7 +86,6 @@ public class UserMapperImpl implements UserMapper {
         userDTO.setAddress( user.getAddress() );
         userDTO.setDepartment( user.getDepartment() );
         userDTO.setPosition( user.getPosition() );
-        userDTO.setBranch( user.getBranch() );
         userDTO.setArrivalTime( user.getArrivalTime() );
         userDTO.setLeaveTime( user.getLeaveTime() );
         userDTO.setSalaryAmount( user.getSalaryAmount() );
@@ -100,6 +100,8 @@ public class UserMapperImpl implements UserMapper {
         userDTO.setActive( user.isActive() );
         userDTO.setEnabled( user.isEnabled() );
         userDTO.setGrossPriceControlOneUser( user.isGrossPriceControlOneUser() );
+        userDTO.setDateStartContract( user.getDateStartContract() );
+        userDTO.setDateEndContract( user.getDateEndContract() );
 
         return userDTO;
     }
@@ -142,7 +144,6 @@ public class UserMapperImpl implements UserMapper {
         user.setAddress( userDto.getAddress() );
         user.setDepartment( userDto.getDepartment() );
         user.setPosition( userDto.getPosition() );
-        user.setBranch( userDto.getBranch() );
         user.setArrivalTime( userDto.getArrivalTime() );
         user.setLeaveTime( userDto.getLeaveTime() );
         user.setSalaryAmount( userDto.getSalaryAmount() );
@@ -170,6 +171,8 @@ public class UserMapperImpl implements UserMapper {
                 user.setEmergencyContacts( list );
             }
         }
+        user.setDateStartContract( userDto.getDateStartContract() );
+        user.setDateEndContract( userDto.getDateEndContract() );
         user.setEnabled( userDto.isEnabled() );
     }
 

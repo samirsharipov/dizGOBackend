@@ -1,8 +1,8 @@
 package uz.pdp.springsecurity.repository;
 
-import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import uz.pdp.springsecurity.entity.Business;
 
 import java.sql.Timestamp;
@@ -46,4 +46,9 @@ public interface BusinessRepository extends JpaRepository<Business, UUID> {
 
     @Query("SELECT COUNT(b) FROM Business b WHERE b.createdAt between :startDate and :endDate")
     long countTotalBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+
+    @Query("SELECT COUNT(s.business) " +
+            "FROM Subscription s " +
+            "WHERE s.tariff.name = :tariffName AND s.active = true and s.createdAt between :startDate and :endDate ")
+    long countBusinessesByTariffName(@Param("tariffName") String tariffName, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
 }
