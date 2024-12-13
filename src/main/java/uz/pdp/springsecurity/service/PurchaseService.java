@@ -8,8 +8,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import uz.pdp.springsecurity.entity.Currency;
 import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.enums.HistoryName;
@@ -235,18 +233,18 @@ public class PurchaseService {
                         "<b>To'lov statusi: </b>" + purchase1.getPaymentStatus().getStatus() + "\n" +
                         "<b>Xarid holati: </b>" + purchase1.getPurchaseStatus().getStatus() + "\n\n" +
                         "<b><i>MAHSULOTLAR \uD83D\uDCD1</i></b> \n\n" + products;
-                for (User admin : admins) {
-                    if (admin.getChatId() != null) {
-                        SendMessage sendMessage = SendMessage
-                                .builder()
-                                .text(sendText)
-                                .parseMode(ParseMode.HTML)
-                                .chatId(admin.getChatId())
-                                .build();
-                        RestTemplate restTemplate = new RestTemplate();
-                        restTemplate.postForObject("https://api.telegram.org/bot" + Constants.BOT_TOKEN + "/sendMessage", sendMessage, Object.class);
-                    }
-                }
+//                for (User admin : admins) {
+////                    if (admin.getChatId() != null) {
+////                        SendMessage sendMessage = SendMessage
+////                                .builder()
+////                                .text(sendText)
+////                                .parseMode(ParseMode.HTML)
+////                                .chatId(admin.getChatId())
+////                                .build();
+////                        RestTemplate restTemplate = new RestTemplate();
+////                        restTemplate.postForObject("https://api.telegram.org/bot" + Constants.BOT_TOKEN + "/sendMessage", sendMessage, Object.class);
+////                    }
+//                }
             } else {
                 System.out.println("Purchase or Products not found.");
             }

@@ -6,8 +6,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.enums.HistoryName;
 import uz.pdp.springsecurity.enums.OUTLAY_STATUS;
@@ -82,18 +80,18 @@ public class OutlayService {
                           "<b>To'lov usuli: </b>" + save.getPaymentMethod().getType() + "\n" +
                           "<b>Xarajat: </b>" + save.getTotalSum() + "\n" +
                           "<b>Tavsif: </b>" + save.getDescription() + "\n";
-        for (User admin : userRepository.findAllByBusiness_IdAndRoleName(save.getSpender().getBusiness().getId(), Constants.ADMIN)) {
-            if (admin.getChatId() != null) {
-                SendMessage sendMessage = SendMessage
-                        .builder()
-                        .text(sendText)
-                        .parseMode(ParseMode.HTML)
-                        .chatId(admin.getChatId())
-                        .build();
-                RestTemplate restTemplate = new RestTemplate();
-                restTemplate.postForObject("https://api.telegram.org/bot" + Constants.BOT_TOKEN + "/sendMessage", sendMessage, Object.class);
-            }
-        }
+//        for (User admin : userRepository.findAllByBusiness_IdAndRoleName(save.getSpender().getBusiness().getId(), Constants.ADMIN)) {
+//            if (admin.getChatId() != null) {
+//                SendMessage sendMessage = SendMessage
+//                        .builder()
+//                        .text(sendText)
+//                        .parseMode(ParseMode.HTML)
+//                        .chatId(admin.getChatId())
+//                        .build();
+//                RestTemplate restTemplate = new RestTemplate();
+//                restTemplate.postForObject("https://api.telegram.org/bot" + Constants.BOT_TOKEN + "/sendMessage", sendMessage, Object.class);
+//            }
+//        }
         return new ApiResponse("ADDED", true);
     }
 

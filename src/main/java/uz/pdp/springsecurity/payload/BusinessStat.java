@@ -16,4 +16,6 @@ public class BusinessStat implements Serializable {
     private long blockedCount;
     private long archivedCount;
     private long nonActiveCount;
+    private long premiumCount;
+    private long freemiumCount;
 }
