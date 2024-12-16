@@ -15,7 +15,7 @@ import uz.pdp.springsecurity.payload.UserDTO;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-12-16T10:44:09+0500",
+    date = "2024-12-16T15:45:58+0500",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.13 (Amazon.com Inc.)"
 )
 @Component
@@ -68,6 +68,8 @@ public class UserMapperImpl implements UserMapper {
 
         UserDTO userDTO = new UserDTO();
 
+        userDTO.setRoleName( userRoleName( user ) );
+        userDTO.setRoleParentId( userRoleParentRoleId( user ) );
         userDTO.setRoleId( userRoleId( user ) );
         userDTO.setJobId( userJobId( user ) );
         userDTO.setBusinessId( userBusinessId( user ) );
@@ -200,6 +202,40 @@ public class UserMapperImpl implements UserMapper {
         }
 
         return list1;
+    }
+
+    private String userRoleName(User user) {
+        if ( user == null ) {
+            return null;
+        }
+        Role role = user.getRole();
+        if ( role == null ) {
+            return null;
+        }
+        String name = role.getName();
+        if ( name == null ) {
+            return null;
+        }
+        return name;
+    }
+
+    private UUID userRoleParentRoleId(User user) {
+        if ( user == null ) {
+            return null;
+        }
+        Role role = user.getRole();
+        if ( role == null ) {
+            return null;
+        }
+        Role parentRole = role.getParentRole();
+        if ( parentRole == null ) {
+            return null;
+        }
+        UUID id = parentRole.getId();
+        if ( id == null ) {
+            return null;
+        }
+        return id;
     }
 
     private UUID userRoleId(User user) {

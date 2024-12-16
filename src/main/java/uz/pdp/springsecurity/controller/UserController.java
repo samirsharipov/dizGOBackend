@@ -67,8 +67,10 @@ public class UserController {
 
     @CheckPermission("VIEW_USER_ADMIN")
     @GetMapping("/get-by-business/{business_id}")
-    public HttpEntity<?> getAllByBusinessId(@PathVariable UUID business_id) {
-        ApiResponse apiResponse = userService.getAllByBusinessId(business_id);
+    public HttpEntity<?> getAllByBusinessId(@PathVariable UUID business_id,
+                                            @RequestParam int size,
+                                            @RequestParam int page) {
+        ApiResponse apiResponse = userService.getAllByBusinessId(business_id,size,page);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 

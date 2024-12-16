@@ -55,9 +55,13 @@ public class PayMethodService {
     }
 
     public ApiResponse delete(UUID id) {
-        if (!payMethodRepository.existsById(id)) return new ApiResponse("NOT FOUND", false);
+        Optional<PaymentMethod> optionalPaymentMethod = payMethodRepository.findById(id);
+        if (optionalPaymentMethod.isEmpty()) return new ApiResponse("NOT FOUND", false);
+        PaymentMethod paymentMethod = optionalPaymentMethod.get();
+        paymentMethod.setDeleted(true);
+        paymentMethod.setActive(false);
+        payMethodRepository.save(paymentMethod);
 
-        payMethodRepository.deleteById(id);
         return new ApiResponse("DELETED", true);
     }
 

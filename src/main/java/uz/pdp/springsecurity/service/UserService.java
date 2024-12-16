@@ -16,6 +16,7 @@ import uz.pdp.springsecurity.repository.*;
 import uz.pdp.springsecurity.utils.Constants;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -307,37 +308,50 @@ public class UserService {
     }
 
 
-    public ApiResponse getAllByBusinessId(UUID businessId) {
-        // SUPER_ADMIN roli mavjudligini tekshirish
-        Optional<Role> optionalRole = roleRepository.findByName(Constants.SUPER_ADMIN);
-        if (optionalRole.isEmpty()) {
-            return new ApiResponse("ERROR", false);
-        }
+    public ApiResponse getAllByBusinessId(UUID businessId, int size, int page) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> all = userRepository.findAllByBusinessId(businessId, pageable);
 
-        Role superAdmin = optionalRole.get();
-
-        // Foydalanuvchilarni olish (Business ID va SUPER_ADMIN roli bo'lmagan, aktiv foydalanuvchilar)
-        List<User> allByBusinessId = userRepository.findAllByBusiness_IdAndRoleIsNotAndActiveIsTrue(businessId, superAdmin);
-
-        // Agar foydalanuvchilar topilmasa
-        if (allByBusinessId.isEmpty()) {
-            return new ApiResponse("BUSINESS NOT FOUND", false);
+        if (all.isEmpty()) {
+            return new ApiResponse("NOT FOUND", false);
         }
 
         // Foydalanuvchilarni DTO ga aylantirish
-        List<UserDTO> dtoList = new ArrayList<>();
-        for (User user : allByBusinessId) {
+        List<UserDTO> dtoList = all.getContent().stream().map(user -> {
             UserDTO userDto = userMapper.toDto(user);
 
-            // Agar foydalanuvchida foto mavjud bo'lsa, PhotoId ni qo'shish
-            if (user.getPhoto() != null) {
-                userDto.setPhotoId(user.getPhoto().getId());
-            }
+            // Role Category va Parent Role Category nomini qo'shish
+            Optional.ofNullable(user.getRole())
+                    .map(Role::getRoleCategory)
+                    .ifPresent(roleCategory -> {
+                        userDto.setRoleCategoryName(roleCategory.getName());
+                        Optional.ofNullable(roleCategory.getParentRoleCategory())
+                                .ifPresent(parentRoleCategory -> userDto.setRoleParentName(parentRoleCategory.getName()));
+                    });
 
-            dtoList.add(userDto);
-        }
+            // Branch nomlarini qo'shish
+            List<String> branchesName = user.getBranches().stream()
+                    .map(Branch::getName)
+                    .collect(Collectors.toList());
+            userDto.setBranchesName(branchesName);
 
-        return new ApiResponse("FOUND", true, dtoList);
+            // Foydalanuvchining rasmi mavjud bo'lsa photoId ni qo'shish
+            Optional.ofNullable(user.getPhoto())
+                    .ifPresent(photo -> userDto.setPhotoId(photo.getId()));
+
+            return userDto;
+        }).collect(Collectors.toList());
+
+        // Javobni tayyorlash
+        Map<String, Object> response = Map.of(
+                "users", dtoList,
+                "total", all.getTotalElements(),
+                "size", all.getSize(),
+                "page", all.getNumber(),
+                "totalPages", all.getTotalPages()
+        );
+
+        return new ApiResponse("FOUND", true, response);
     }
 
     public ApiResponse getAllByBranchId(UUID branch_id) {
