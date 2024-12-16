@@ -16,4 +16,6 @@ public class PayMethodDto {
 
     @NotNull(message = "required line")
     private UUID businessId;
+
+    private boolean isGlobal;
 }

@@ -38,16 +38,19 @@ public class AddressController {
         return helper.buildResponse(addressService.getAddress(id));
     }
 
-    @CheckPermission("VIEW_ADDRESS")
     @GetMapping("/get-parent-is-null")
     public HttpEntity<ApiResponse> get() {
         return helper.buildResponse(addressService.getAddresses());
     }
 
-    @CheckPermission("VIEW_ADDRESS")
     @GetMapping("/get-parent-id/{parentId}")
     public HttpEntity<ApiResponse> getParentId(@PathVariable UUID parentId) {
         return helper.buildResponse(addressService.getByParentId(parentId));
+    }
+
+    @GetMapping("/tree")
+    public HttpEntity<ApiResponse> getAddressTree() {
+        return helper.buildResponse(addressService.getAddressTreeByBusiness());
     }
 
 

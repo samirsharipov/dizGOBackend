@@ -33,7 +33,7 @@ public class RoleCategoryController {
         return helper.buildResponse(service.edit(id, roleCategoryDto));
     }
 
-    @CheckPermission("GET_ROLE")
+    @CheckPermission("VIEW_ROLE")
     @GetMapping("/get-by-business-id/{businessId}")
     public ResponseEntity<?> getByBusinessId(@PathVariable UUID businessId) {
         return helper.buildResponse(service.getRoleCategoriesByBusiness(businessId));

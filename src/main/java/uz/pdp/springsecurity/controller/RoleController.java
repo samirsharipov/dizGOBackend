@@ -35,21 +35,19 @@ public class RoleController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    @CheckPermission("VIEW_ROLE")
     @GetMapping("/{id}")
     public HttpEntity<?> get(@PathVariable UUID id) {
         ApiResponse apiResponse = roleService.get(id);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    @CheckPermission("VIEW_ROLE")
     @GetMapping("/get-by-business/{business_id}")
     public HttpEntity<?> getAllByBusiness(@PathVariable UUID business_id) {
         ApiResponse apiResponse = roleService.getAllByBusiness(business_id);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    @CheckPermission("VIEW_ORG")
+    @CheckPermission("VIEW_ROLE")
     @GetMapping("/get-by-business-role/{business_id}")
     public HttpEntity<?> getByBusinessRole(@PathVariable UUID business_id) {
         ApiResponse apiResponse = roleService.getByBusinessRole(business_id);

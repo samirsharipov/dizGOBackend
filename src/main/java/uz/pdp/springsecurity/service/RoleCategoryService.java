@@ -2,9 +2,11 @@ package uz.pdp.springsecurity.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import uz.pdp.springsecurity.entity.Business;
 import uz.pdp.springsecurity.entity.RoleCategory;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.RoleCategoryDto;
+import uz.pdp.springsecurity.repository.BusinessRepository;
 import uz.pdp.springsecurity.repository.RoleCategoryRepository;
 
 import java.util.*;
@@ -15,6 +17,7 @@ import java.util.stream.Collectors;
 public class RoleCategoryService {
 
     private final RoleCategoryRepository roleCategoryRepository;
+    private final BusinessRepository businessRepository;
 
     public ApiResponse create(RoleCategoryDto roleCategoryDto) {
 
@@ -104,6 +107,10 @@ public class RoleCategoryService {
         if (roleCategoryDto.getParentRoleCategoryId() != null) {
             Optional<RoleCategory> optionalRoleCategory = roleCategoryRepository.findById(roleCategoryDto.getParentRoleCategoryId());
             optionalRoleCategory.ifPresent(roleCategory::setParentRoleCategory);
+        }
+        if (roleCategoryDto.getBusinessId() != null) {
+            Optional<Business> optionalRoleCategory = businessRepository.findById(roleCategoryDto.getBusinessId());
+            optionalRoleCategory.ifPresent(roleCategory :: setBusiness);
         }
 
         roleCategory.setName(roleCategoryDto.getName());
