@@ -39,6 +39,7 @@ public class UserDTO {
     private String shiftType; // Smena turi
     private Date probation; // Sinov muddati
     private UUID roleId; // Role ID
+    private UUID roleParentId; // Role ID
     private UUID businessId; // Business ID
     private Set<UUID> branchIds; // Filial ID lar
     private String description; // Qo'shimcha ma'lumot
@@ -53,5 +54,10 @@ public class UserDTO {
     private Date dateStartContract;
 
     private Date dateEndContract;
+
+    private String roleName;
+    private List<String> branchesName;
+    private String roleCategoryName;
+    private String roleParentName;
 
 }

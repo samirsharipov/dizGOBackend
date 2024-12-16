@@ -36,6 +36,11 @@ public interface UserMapper {
     User toEntity(UserDTO userDto);
 
     // User entity dan UserDTO ga o'tkazish
+    @Mapping(target = "roleCategoryName", ignore = true)
+    @Mapping(target = "roleParentName", ignore = true)
+    @Mapping(target = "roleName", source = "role.name")
+    @Mapping(target = "branch", ignore = true)
+    @Mapping(target = "roleParentId", source = "role.parentRole.id")
     @Mapping(target = "branchIds", ignore = true)
     @Mapping(target = "contractFileId", ignore = true)
     @Mapping(target = "photoId", ignore = true)

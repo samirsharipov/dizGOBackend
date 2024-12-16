@@ -36,6 +36,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     List<User> findAllByBusiness_IdAndRoleIsNotAndActiveIsTrue(UUID business_id, Role role);
 
+    Page<User> findAllByBusinessId(UUID business_id, Pageable pageable);
+
     List<User> findAllByBranchesIdAndRoleIsNotAndActiveIsTrue(UUID branches_id, Role role);
 
     Optional<User> findByBusinessIdAndRoleName(UUID business_id, String role_name);
