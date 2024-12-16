@@ -9,6 +9,7 @@ import uz.pdp.springsecurity.payload.AddressGetDto;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.repository.AddressRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -75,5 +76,35 @@ public class AddressService {
                     .ifPresent(address::setParentAddress);
         }
         return address;
+    }
+
+    public ApiResponse getAddressTreeByBusiness() {
+        List<AddressGetDto> addressGetDtoList = buildAddressTreeByBusiness(null);
+        if (addressGetDtoList.isEmpty()) {
+            return new ApiResponse("No addresses found for this business", false);
+        }
+        return new ApiResponse("Address tree retrieved successfully", true, addressGetDtoList);
+    }
+
+    private List<AddressGetDto> buildAddressTreeByBusiness(UUID parentId) {
+        // Ota address bo'yicha bolalarni va biznesni filtrlaymiz
+        List<Address> childAddresses = addressRepository.findAllByParentAddress_Id(parentId);
+
+        // Har bir bola address uchun DTO yaratamiz
+        List<AddressGetDto> addressTree = new ArrayList<>();
+        for (Address address : childAddresses) {
+            // DTO yaratish
+            AddressGetDto dto = new AddressGetDto(
+                    address.getId(),
+                    address.getName(),
+                    address.getParentAddress() != null ? address.getParentAddress().getId() : null,
+                    address.getParentAddress() != null ? address.getParentAddress().getName() : null
+            );
+
+            // Rekursiv ravishda bolalarini qo'shamiz
+            dto.setChildren(buildAddressTreeByBusiness(address.getId()));
+            addressTree.add(dto);
+        }
+        return addressTree;
     }
 }

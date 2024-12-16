@@ -14,6 +14,5 @@ public interface PayMethodRepository extends JpaRepository<PaymentMethod, UUID> 
     PaymentMethod findByBusiness_IdAndTypeContainingIgnoreCaseOrderByCreatedAtDesc(UUID business_id, String type);
 
     Optional<PaymentMethod> findByTypeAndBusiness_id(String type, UUID business_id);
-    Optional<PaymentMethod> findByType(String type);
 
 }
