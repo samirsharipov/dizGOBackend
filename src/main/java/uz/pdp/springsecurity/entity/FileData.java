@@ -23,4 +23,9 @@ public class FileData extends AbsEntity {
 
     @ManyToOne
     private Task task;
+
+    @ManyToOne
+    private User user;
+
+    private String description;
 }

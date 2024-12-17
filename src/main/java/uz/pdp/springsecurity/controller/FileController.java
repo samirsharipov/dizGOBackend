@@ -10,6 +10,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import uz.pdp.springsecurity.entity.FileData;
+import uz.pdp.springsecurity.helpers.ResponseEntityHelper;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.repository.FileDateRepository;
 import uz.pdp.springsecurity.service.FileService;
@@ -29,15 +30,16 @@ public class FileController {
 
     private final FileService fileService;
     private final FileDateRepository fileDateRepository;
+    private final ResponseEntityHelper responseEntityHelper;
 
     @PostMapping("/files")
-    public HttpEntity<?> uploadFile(@RequestParam("file") MultipartFile file) {
+    public HttpEntity<?> uploadFile(@RequestParam("file") MultipartFile file, @RequestParam UUID userId, @RequestParam String description) {
         try {
             byte[] fileData = file.getBytes();
             String fileName = file.getOriginalFilename();
             String contentType = file.getContentType();
             long size = file.getSize();
-            ApiResponse apiResponse = fileService.saveFileToDatabase(fileName, fileData, size);
+            ApiResponse apiResponse = fileService.saveFileToDatabase(fileName, fileData, size, userId, description);
             return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.REQUEST_HEADER_FIELDS_TOO_LARGE).build();
@@ -63,16 +65,22 @@ public class FileController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-        @GetMapping("/files/download/{fileId}")
-        public ResponseEntity<byte[]> getFile(@PathVariable UUID fileId) {
-            FileData fileData = fileService.getFileFromDatabase(fileId);
-            if (fileData != null) {
-                return ResponseEntity.ok()
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileData.getFileName() + "\"")
-                        .body(fileData.getFileData());
-            } else {
-                return ResponseEntity.notFound().build();
-            }
+    @GetMapping("/files/download/{fileId}")
+    public ResponseEntity<byte[]> getFile(@PathVariable UUID fileId) {
+        FileData fileData = fileService.getFileFromDatabase(fileId);
+        if (fileData != null) {
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileData.getFileName() + "\"")
+                    .body(fileData.getFileData());
+        } else {
+            return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/get-by-userId/{userId}")
+    public HttpEntity<ApiResponse> getFileByUserId(@PathVariable UUID userId) {
+        return responseEntityHelper.buildResponse(fileService.getByUserId(userId));
+    }
+
 }
 

@@ -6,6 +6,8 @@ import uz.pdp.springsecurity.entity.template.AbsEntity;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,4 +21,7 @@ public class Address extends AbsEntity {
 
     @ManyToOne
     private Address parentAddress;
+
+    @OneToMany(mappedBy = "address")
+    private List<AddressTranslate> translates;
 }

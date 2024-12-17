@@ -1,6 +1,9 @@
 package uz.pdp.springsecurity.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uz.pdp.springsecurity.entity.Attendance;
 import uz.pdp.springsecurity.entity.Branch;
@@ -14,6 +17,8 @@ import uz.pdp.springsecurity.repository.UserRepository;
 import uz.pdp.springsecurity.service.functions.GeoCheck;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -112,5 +117,24 @@ public class AttendanceService {
                 return new ApiResponse("Siz hali bugun ishga kelmagansiz", false);
             }
         }
+    }
+
+    public ApiResponse getUserId(UUID userId, int size, int page) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Attendance> all = attendanceRepository.findAllByEmployeeId(userId, pageable);
+
+        if (all.isEmpty()) {
+            return new ApiResponse("not found", false);
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("all", all.toList());
+        response.put("total", all.getTotalElements());
+        response.put("data", all.getContent());
+        response.put("totalPages", all.getTotalPages());
+        response.put("currentPage", all.getNumber());
+
+        return new ApiResponse("found", true, response);
     }
 }

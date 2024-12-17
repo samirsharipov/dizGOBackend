@@ -2,15 +2,13 @@ package uz.pdp.springsecurity.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import uz.pdp.springsecurity.helpers.ResponseEntityHelper;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.service.StatisticsService;
+
+import java.sql.Timestamp;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -55,5 +53,10 @@ public class StatisticsController {
     public HttpEntity<ApiResponse> supplierStatistics(@RequestParam String type) {
         ApiResponse response = statisticsService.supplierStatistics(type);
         return responseEntityHelper.buildResponse(response);
+    }
+
+    @GetMapping("/attendance/{userId}")
+    public HttpEntity<ApiResponse> userStatisticsInfo(@PathVariable UUID userId, @RequestParam Timestamp startDate, @RequestParam Timestamp endDate) {
+        return responseEntityHelper.buildResponse(statisticsService.userStatisticsInfo(userId, startDate, endDate));
     }
 }
