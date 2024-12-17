@@ -89,11 +89,6 @@ public class UserService {
             return new ApiResponse("NOT FOUND ROLE", false);
         }
 
-        // Username mavjudligini tekshirish
-        if (userRepository.existsByUsernameIgnoreCase(userDto.getUsername())) {
-            return new ApiResponse("USER ALREADY EXISTS", false);
-        }
-
         return new ApiResponse("VALID", true);
     }
 
@@ -183,13 +178,13 @@ public class UserService {
         user.setShiftType(userDto.getShiftType());
         user.setProbation(userDto.getProbation());
         user.setBranches(branches);
-        user.setActive(userDto.isActive());
-        user.setEnabled(userDto.isEnabled());
         user.setDateOfEmployment(userDto.getDateOfEmployment() != null ? userDto.getDateOfEmployment() : user.getDateOfEmployment());
         user.setGrossPriceControlOneUser(userDto.isGrossPriceControlOneUser());
         user.setContractNumber(userDto.getContractNumber());
         user.setDateStartContract(userDto.getDateStartContract() != null ? userDto.getDateStartContract() : null);
         user.setDateEndContract(userDto.getDateEndContract() != null ? userDto.getDateEndContract() : null);
+        user.setActive(true);
+        user.setEnabled(true);
 
         // Jobni tekshirish va o'rnatish
         if (userDto.getJobId() != null) {
@@ -243,7 +238,7 @@ public class UserService {
         UserDTO userDTO = userMapper.toDto(user);
         userDTO.setPhotoId(user.getPhoto()!=null ? user.getPhoto().getId() : null);
 
-        // Branch nomlarini qo'shish
+        // Branch id larini qoshish
         Set<UUID> branchesIdList = user.getBranches().stream()
                 .map(Branch::getId)
                 .collect(Collectors.toSet());

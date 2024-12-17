@@ -24,4 +24,9 @@ public class AttendanceController {
         return responseEntityHelper.buildResponse(attendanceService.checkInWithQRCode(branchId, employeeId, qrCodeData,input));
     }
 
+    @GetMapping("/get-userId/{userId}")
+    public ResponseEntity<ApiResponse> getUserId(@PathVariable UUID userId, @RequestParam int size, @RequestParam int page) {
+        return responseEntityHelper.buildResponse(attendanceService.getUserId(userId,size,page));
+    }
+
 }

@@ -2,6 +2,7 @@ package uz.pdp.springsecurity.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import uz.pdp.springsecurity.entity.User;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.BusinessStat;
 import uz.pdp.springsecurity.payload.statistics.*;
@@ -10,6 +11,8 @@ import uz.pdp.springsecurity.repository.*;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +24,7 @@ public class StatisticsService {
     private final UserRepository userRepository;
     private final CustomerRepository customerRepository;
     private final SupplierRepository supplierRepository;
+    private final AttendanceRepository attendanceRepository;
 
     public ApiResponse businessStatistics(String type) {
         LocalDate now = LocalDate.now();
@@ -159,4 +163,25 @@ public class StatisticsService {
     }
 
 
+    public ApiResponse userStatisticsInfo(UUID userId, Timestamp startDate, Timestamp endDate) {
+
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
+            return new ApiResponse("not found", false);
+        }
+
+        User user = optionalUser.get();
+        String arrivalTime = user.getArrivalTime();
+        String leaveTime = user.getLeaveTime();
+
+        // Vaqtni Timestamp ga aylantirish
+        Timestamp expectedStartTime = Timestamp.valueOf(startDate.toLocalDateTime().withHour(Integer.parseInt(arrivalTime.split(":")[0]))
+                .withMinute(Integer.parseInt(arrivalTime.split(":")[1])));
+
+        Timestamp expectedEndTime = Timestamp.valueOf(startDate.toLocalDateTime().withHour(Integer.parseInt(leaveTime.split(":")[0]))
+                .withMinute(Integer.parseInt(leaveTime.split(":")[1])));
+
+        AttendanceStat attendanceStatistics = attendanceRepository.getAttendanceStatistics(userId, startDate, endDate, expectedStartTime, expectedEndTime);
+        return new ApiResponse("found", true, attendanceStatistics);
+    }
 }

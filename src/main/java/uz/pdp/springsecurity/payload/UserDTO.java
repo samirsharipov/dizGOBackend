@@ -13,6 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDTO {
+
     private UUID id;
     private String firstName; // Foydalanuvchining ismi
     private String lastName; // Foydalanuvchining familiyasi
