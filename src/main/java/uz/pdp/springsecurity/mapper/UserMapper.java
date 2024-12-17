@@ -36,6 +36,7 @@ public interface UserMapper {
     User toEntity(UserDTO userDto);
 
     // User entity dan UserDTO ga o'tkazish
+    @Mapping(target = "branchesName", ignore = true)
     @Mapping(target = "roleCategoryName", ignore = true)
     @Mapping(target = "roleParentName", ignore = true)
     @Mapping(target = "roleName", source = "role.name")

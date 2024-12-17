@@ -241,6 +241,13 @@ public class UserService {
 
         // User entity ni UserDTO ga aylantirish
         UserDTO userDTO = userMapper.toDto(user);
+        userDTO.setPhotoId(user.getPhoto()!=null ? user.getPhoto().getId() : null);
+
+        // Branch nomlarini qo'shish
+        Set<UUID> branchesIdList = user.getBranches().stream()
+                .map(Branch::getId)
+                .collect(Collectors.toSet());
+        userDTO.setBranchIds(branchesIdList);
 
         return new ApiResponse("SUCCESS", true, userDTO);
     }
