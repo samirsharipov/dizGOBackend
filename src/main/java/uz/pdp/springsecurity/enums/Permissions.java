@@ -176,8 +176,6 @@ public enum Permissions {
 
     GET_BUSINESS_ALL_AMOUNT,
 
-    GET_TO_CHOOSE_A_TARIFF,
-
     VIEW_REPORT,
 
     ADD_PROJECT_TYPE,
@@ -270,7 +268,6 @@ public enum Permissions {
     ADD_BALANCE,
 
     VIEW_DASHBOARD,
-    STOREKEEPER,
     VIEW_NAVIGATION,
     DELETE_NAVIGATION,
     ADD_NAVIGATION,
