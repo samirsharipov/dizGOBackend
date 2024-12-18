@@ -69,7 +69,7 @@ public class InfoService {
                 purchaseRepository.findAllByBranch_BusinessIdOrderByCreatedAtDesc(businessId),
                 tradeRepository.findAllByBranch_Business_IdOrderByCreatedAtDesc(businessId),
                 outlayRepository.findAllByBusinessId(businessId),
-                paymentRepository.findAllByPayMethod_BusinessId(businessId),
+                paymentRepository.findAll(),
                 outlayList,// doing nothing
                 customerRepository.findAllByBusiness_IdAndDebtIsNotOrderByPayDateAsc(businessId, 0d)
         );
@@ -260,7 +260,7 @@ public class InfoService {
         infoDto.setTodayProfit(todayProfit);
 
         HashMap<String, Double> byPayMethods = new HashMap<>();
-        List<PaymentMethod> paymentMethodList = payMethodRepository.findAllByBusiness_Id(businessId);
+        List<PaymentMethod> paymentMethodList = payMethodRepository.findAll();
         for (PaymentMethod paymentMethod : paymentMethodList) {
             byPayMethods.put(paymentMethod.getType(), 0d);
         }

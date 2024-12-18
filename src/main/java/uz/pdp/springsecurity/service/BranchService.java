@@ -108,7 +108,7 @@ public class BranchService {
     }
 
     public static void createBalance(Branch branch, BalanceRepository balanceRepository, PayMethodRepository payMethodRepository) {
-        List<PaymentMethod> allByBusinessId = payMethodRepository.findAllByBusiness_Id(branch.getBusiness().getId());
+        List<PaymentMethod> allByBusinessId = payMethodRepository.findAll();
 
         for (PaymentMethod paymentMethod : allByBusinessId) {
             Balance balanceSum = new Balance();

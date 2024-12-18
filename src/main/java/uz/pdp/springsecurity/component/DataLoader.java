@@ -140,9 +140,10 @@ public class DataLoader implements CommandLineRunner {
             ));
 
             List<PaymentMethod> paymentMethods = Arrays.asList(
-                    new PaymentMethod("Naqd", business),
-                    new PaymentMethod("PlastikKarta", business),
-                    new PaymentMethod("BankOrqali", business)
+                    new PaymentMethod("Naqd", false, true),
+                    new PaymentMethod("UzCard", true, false),
+                    new PaymentMethod("Humo", true, false),
+                    new PaymentMethod("BankOrqali", false, false)
             );
             payMethodRepository.saveAll(paymentMethods);
 

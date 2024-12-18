@@ -4,12 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uz.pdp.springsecurity.entity.Business;
 import uz.pdp.springsecurity.entity.LidField;
-import uz.pdp.springsecurity.entity.PaymentMethod;
 import uz.pdp.springsecurity.entity.Source;
 import uz.pdp.springsecurity.enums.ValueType;
 import uz.pdp.springsecurity.payload.BusinessDto;
 import uz.pdp.springsecurity.repository.LidFieldRepository;
-import uz.pdp.springsecurity.repository.PayMethodRepository;
 import uz.pdp.springsecurity.repository.SourceRepository;
 
 import java.util.Arrays;
@@ -33,15 +31,6 @@ public class BusinessHelper {
         return business;
     }
 
-    public void savePaymentMethods(Business business, PayMethodRepository payMethodRepository) {
-        List<PaymentMethod> paymentMethods = Arrays.asList(
-                new PaymentMethod("NAQD", business),
-                new PaymentMethod("PLASTIK KARTA", business),
-                new PaymentMethod("BANK ORQALI", business),
-                new PaymentMethod("MIJOZ BALANSI", business)
-        );
-        payMethodRepository.saveAll(paymentMethods);
-    }
 
     public void createStatusAndOther(Business business) {
         createLidField("FIO", ValueType.STRING, business, false);

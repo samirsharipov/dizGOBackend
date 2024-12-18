@@ -122,7 +122,7 @@ public class BalanceService {
 
     public ApiResponse getAllByBusinessId(UUID businessId) {
 
-        List<PaymentMethod> allPaymentMethod = payMethodRepository.findAllByBusiness_Id(businessId);
+        List<PaymentMethod> allPaymentMethod = payMethodRepository.findAll();
         List<BalanceGetDto> balanceGetDtoList = new ArrayList<>();
 
         for (PaymentMethod paymentMethod : allPaymentMethod) {

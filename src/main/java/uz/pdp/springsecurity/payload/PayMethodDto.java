@@ -14,8 +14,7 @@ public class PayMethodDto {
     @NotNull(message = "required line")
     private String type;
 
-    @NotNull(message = "required line")
-    private UUID businessId;
+    private boolean card;
 
-    private boolean isGlobal;
+    private boolean cash;
 }
