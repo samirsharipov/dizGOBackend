@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import uz.pdp.springsecurity.entity.Attendance;
 import uz.pdp.springsecurity.entity.Branch;
@@ -121,7 +122,7 @@ public class AttendanceService {
     }
 
     public ApiResponse getUserId(UUID userId, int size, int page) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size,  Sort.Direction.DESC, "createdAt");
 
         Page<Attendance> all = attendanceRepository.findAllByEmployeeId(userId, pageable);
 
