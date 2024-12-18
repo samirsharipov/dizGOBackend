@@ -1842,11 +1842,9 @@ public class ReportsService {
         Timestamp fromToday = Timestamp.valueOf(TODAY_END.minusDays(1));
         Timestamp toToday = Timestamp.valueOf(TODAY_END);
 
-        Optional<PaymentMethod> plastikKartaOptional = payMethodRepository.findByTypeAndBusiness_id("PlastikKarta", branch.getBusiness().getId());
-        Optional<PaymentMethod> bankOrqaliOptional = payMethodRepository.findByTypeAndBusiness_id("BankOrqali", branch.getBusiness().getId());
-        Optional<PaymentMethod> naqtOptional = payMethodRepository.findByTypeAndBusiness_id("Naqd", branch.getBusiness().getId());
+        Optional<PaymentMethod> bankOrqaliOptional = payMethodRepository.findByType("BankOrqali");
+        Optional<PaymentMethod> naqtOptional = payMethodRepository.findByType("Naqd");
         List<PaymentMethod> paymentMethodList = new ArrayList<>();
-        plastikKartaOptional.ifPresent(paymentMethodList::add);
         bankOrqaliOptional.ifPresent(paymentMethodList::add);
         if (naqtOptional.isEmpty()) {
             return new ApiResponse("tulov turidagi naqd belgisi topilmayapdi", false);
@@ -2306,7 +2304,7 @@ public class ReportsService {
         if (startDate == null || endDate == null) {
             List<OutlayInfoResult> results = new LinkedList<>();
             double total = 0;
-            for (PaymentMethod paymentMethod : payMethodRepository.findAllByBusiness_Id(user.getBusiness().getId())) {
+            for (PaymentMethod paymentMethod : payMethodRepository.findAll()) {
                 double s = 0;
                 for (Outlay outlay : checkIsDollar(branchId, paymentMethod, isDollar)) {
                     s = s + outlay.getTotalSum();
@@ -2322,7 +2320,7 @@ public class ReportsService {
         } else {
             List<OutlayInfoResult> results = new LinkedList<>();
             double total = 0;
-            for (PaymentMethod paymentMethod : payMethodRepository.findAllByBusiness_Id(user.getBusiness().getId())) {
+            for (PaymentMethod paymentMethod : payMethodRepository.findAll()) {
                 double s = 0;
                 for (Outlay outlay : checkIsDollarForSearch(branchId, paymentMethod, isDollar, startDate, endDate)) {
                     s = s + outlay.getTotalSum();
@@ -2353,7 +2351,7 @@ public class ReportsService {
     }
 
     public ApiResponse getCashManyInfo(User user, UUID branchId, Date startDate, Date endDate) {
-        PaymentMethod naqd = payMethodRepository.findByBusiness_IdAndTypeContainingIgnoreCaseOrderByCreatedAtDesc(user.getBusiness().getId(), "Naqd");
+        PaymentMethod naqd = payMethodRepository.findByTypeContainingIgnoreCaseOrderByCreatedAtDesc("Naqd");
         if (naqd == null) {
             return new ApiResponse("Naqd pul to'lovi topilmadi!");
         }

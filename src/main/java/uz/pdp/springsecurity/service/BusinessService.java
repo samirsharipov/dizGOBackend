@@ -53,7 +53,6 @@ public class BusinessService {
         Business business = businessRepository.save(businessHelper.createNewBusiness(businessDto));
 
         // To'lov usullarini saqlash
-        businessHelper.savePaymentMethods(business, payMethodRepository);
 
         // Obuna yaratish
         createEntityHelper.createSubscription(business, businessDto.getTariffId());

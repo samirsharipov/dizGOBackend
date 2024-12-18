@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 import uz.pdp.springsecurity.entity.Currency;
 import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.enums.HistoryName;
@@ -312,7 +311,7 @@ public class TradeService {
             debtCanculs.setDollarPrice(tradeDTO.getDollarPrice());
             debtCanculs.setDebtPrice(tradeDTO.getDebdSum());
             debtCanculsRepository.save(debtCanculs);
-            Optional<PaymentMethod> optional = payMethodRepository.findByTypeAndBusiness_id("Naqd", branch.getBusiness().getId());
+            Optional<PaymentMethod> optional = payMethodRepository.findByType("Naqd");
             optional.ifPresent(paymentMethod -> balanceService.edit(tradeDTO.getBranchId(), tradeDTO.getDollarPrice(), true, paymentMethod.getId(), true, "Savdo so'mda bo'ldi tulov dollarda!"));
 
             if (tradeDTO.getDebdSum() > 0)
@@ -895,7 +894,7 @@ public class TradeService {
                     totalDollar = totalDollar + debtCanculs.getDollarPrice();
                     totalSum = totalSum + debtCanculs.getDebtPrice();
                 }
-                Double plusDollarAmount = tradeRepository.findAllAmountDollarDifferentPayment(payMethodRepository.findByTypeAndBusiness_id("Naqd", businessId).orElseThrow().getId(), branchId);
+                Double plusDollarAmount = tradeRepository.findAllAmountDollarDifferentPayment(payMethodRepository.findByType("Naqd").orElseThrow().getId(), branchId);
                 results.add(new TradeInfoResult("Naqd", totalDollar + (plusDollarAmount == null ? 0 : plusDollarAmount)));
                 data.put("data", results);
                 data.put("totalAmount", totalSum);
@@ -906,7 +905,7 @@ public class TradeService {
                 List<TradeInfoResult> results2 = new LinkedList<>();
 
                 double total = 0;
-                for (PaymentMethod paymentMethod : payMethodRepository.findAllByBusiness_Id(businessId)) {
+                for (PaymentMethod paymentMethod : payMethodRepository.findAll()) {
                     double s = 0;
                     for (Trade trade : tradeRepository.findAllByBranch_IdAndPayMethodIdAndDollarTradeIsFalseAndDifferentPaymentIsFalse(branchId, paymentMethod.getId())) {
                         s = s + trade.getPaidSum();
@@ -916,7 +915,7 @@ public class TradeService {
 
                     results.add(new TradeInfoResult(paymentMethod.getType(), (s + (plusSumAmount == null ? 0 : plusSumAmount))));
                 }
-                for (PaymentMethod paymentMethod : payMethodRepository.findAllByBusiness_Id(businessId)) {
+                for (PaymentMethod paymentMethod : payMethodRepository.findAll()) {
                     Double amount = repaymentDebtRepository.findAllDebtAmountByPayMethodIdAndBranchId(paymentMethod.getId(), branchId);
                     results2.add(new TradeInfoResult(paymentMethod.getType(), amount == null ? 0 : amount));
                 }
@@ -940,7 +939,7 @@ public class TradeService {
                     totalDollar = totalDollar + debtCanculs.getDollarPrice();
                     totalSum = totalSum + debtCanculs.getDebtPrice();
                 }
-                Double plusDollarAmount = tradeRepository.findAllAmountDollarDifferentPaymentAndSearchDate(payMethodRepository.findByTypeAndBusiness_id("Naqd", businessId).orElseThrow().getId(), branchId, startDate, endDate);
+                Double plusDollarAmount = tradeRepository.findAllAmountDollarDifferentPaymentAndSearchDate(payMethodRepository.findByType("Naqd").orElseThrow().getId(), branchId, startDate, endDate);
                 results.add(new TradeInfoResult("Naqd", totalDollar + (plusDollarAmount == null ? 0 : plusDollarAmount)));
                 data.put("data", results);
                 data.put("totalAmount", totalSum);
@@ -950,7 +949,7 @@ public class TradeService {
                 List<TradeInfoResult> results = new LinkedList<>();
                 List<TradeInfoResult> results2 = new LinkedList<>();
                 double total = 0;
-                for (PaymentMethod paymentMethod : payMethodRepository.findAllByBusiness_Id(businessId)) {
+                for (PaymentMethod paymentMethod : payMethodRepository.findAll()) {
                     double s = 0;
                     for (Trade trade : tradeRepository.findAllByBranch_IdAndPayMethodIdAndDollarTradeIsFalseAndDifferentPaymentIsFalseAndCreatedAtBetween(branchId, paymentMethod.getId(), startDate, endDate)) {
                         s = s + trade.getPaidSum();
@@ -960,7 +959,7 @@ public class TradeService {
 
                     results.add(new TradeInfoResult(paymentMethod.getType(), (s + (plusSumAmount == null ? 0 : plusSumAmount))));
                 }
-                for (PaymentMethod paymentMethod : payMethodRepository.findAllByBusiness_Id(businessId)) {
+                for (PaymentMethod paymentMethod : payMethodRepository.findAll()) {
                     Double amount = repaymentDebtRepository.findAllDebtAmountByPayMethodIdAndBranchIdAndDate(paymentMethod.getId(), branchId, startDate, endDate);
                     results2.add(new TradeInfoResult(paymentMethod.getType(), amount == null ? 0 : amount));
                 }
