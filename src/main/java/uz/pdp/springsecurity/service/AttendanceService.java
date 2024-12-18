@@ -10,6 +10,7 @@ import uz.pdp.springsecurity.entity.Branch;
 import uz.pdp.springsecurity.entity.Location;
 import uz.pdp.springsecurity.entity.User;
 import uz.pdp.springsecurity.payload.ApiResponse;
+import uz.pdp.springsecurity.payload.AttendanceGetDto;
 import uz.pdp.springsecurity.repository.AttendanceRepository;
 import uz.pdp.springsecurity.repository.BranchRepository;
 import uz.pdp.springsecurity.repository.LocationRepository;
@@ -17,10 +18,7 @@ import uz.pdp.springsecurity.repository.UserRepository;
 import uz.pdp.springsecurity.service.functions.GeoCheck;
 
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -31,6 +29,7 @@ public class AttendanceService {
     private final LocationRepository locationRepository;
     private final GeoCheck geoCheck;
     private final BranchRepository branchRepository;
+    private final UserRepository userRepository;
 
     // QR kod orqali keldi-ketdi tasdiqlash
     public ApiResponse checkInWithQRCode(UUID branchId, UUID employeeId, String qrCodeData, boolean input) {
@@ -44,6 +43,7 @@ public class AttendanceService {
         if (optionalBranch.isEmpty()) {
             return new ApiResponse("Branch topilmadi", false);
         }
+
 
         UUID qrEmployeeId = UUID.fromString(qrParts[0]);
         long timestampLong = Long.parseLong(qrParts[1]);
@@ -95,6 +95,7 @@ public class AttendanceService {
                 attendance.setCheckInTime(new Timestamp(System.currentTimeMillis()));
                 attendance.setIsArrived(true);
                 attendance.setIncomeDistance(distance);
+                attendance.setBranchId(branchId);
                 attendanceRepository.save(attendance);
                 return new ApiResponse("Ishga kelish vaqti tasdiqlandi", true);
             } else {
@@ -128,12 +129,26 @@ public class AttendanceService {
             return new ApiResponse("not found", false);
         }
 
+        List<AttendanceGetDto> attendanceGetDtoList = new ArrayList<>();
+        for (Attendance attendance : all.stream().toList()) {
+            AttendanceGetDto attendanceGetDto = new AttendanceGetDto();
+            attendanceGetDto.setCheckInTime(attendance.getCheckInTime() != null ? attendance.getCheckInTime() : null);
+            attendanceGetDto.setCheckOutTime(attendance.getCheckOutTime() != null ? attendance.getCheckOutTime() : null);
+            attendanceGetDto.setArrived(attendance.getIsArrived());
+            if (attendance.getBranchId() != null) {
+                Optional<Branch> optionalBranch = branchRepository.findById(attendance.getBranchId());
+                optionalBranch.ifPresent(branch -> {
+                    attendanceGetDto.setBranchName(branch.getName());
+                });
+            }
+            attendanceGetDtoList.add(attendanceGetDto);
+        }
+
+
         Map<String, Object> response = new HashMap<>();
-        response.put("all", all.toList());
-        response.put("total", all.getTotalElements());
-        response.put("data", all.getContent());
+        response.put("data", attendanceGetDtoList);
+        response.put("totalElements", all.getTotalElements());
         response.put("totalPages", all.getTotalPages());
-        response.put("currentPage", all.getNumber());
 
         return new ApiResponse("found", true, response);
     }
