@@ -15,4 +15,5 @@ public class ProductResponseDTO {
     private double salePrice;
     private String barcode;
     private String MXIKCode;
+    private Double amount;
 }

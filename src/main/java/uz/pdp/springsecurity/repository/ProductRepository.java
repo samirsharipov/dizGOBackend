@@ -11,7 +11,6 @@ import uz.pdp.springsecurity.entity.Product;
 import uz.pdp.springsecurity.payload.ProductResponseDTO;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -106,7 +105,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     @Query("SELECT new uz.pdp.springsecurity.payload.ProductResponseDTO( " +
             "p.id, " +
             "COALESCE(pt.name, p.name), " +
-            "p.salePrice,p.barcode,p.MXIKCode " +
+            "p.salePrice,p.barcode,p.MXIKCode ,p.stockAmount" +
             ") " +
             "FROM Product p " +
             "LEFT JOIN p.translations pt ON pt.language.code = :languageCode " +

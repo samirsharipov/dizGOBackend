@@ -287,6 +287,8 @@ public class PurchaseService {
         product.setBuyPrice(purchaseProductDto.getBuyPrice());
         product.setBuyPriceDollar(Math.round(purchaseProductDto.getBuyPrice() / course * 100) / 100.);
         product.setSalePriceDollar(Math.round(purchaseProductDto.getSalePrice() / course * 100) / 100.);
+        product.setMargin(purchaseProductDto.getMargin());
+        product.setQqs(purchaseProductDto.isQqs());
         productRepository.save(product);
         purchaseProduct.setProduct(product);
         purchaseProduct.setPurchasedQuantity(purchaseProductDto.getPurchasedQuantity());

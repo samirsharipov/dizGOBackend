@@ -11,7 +11,8 @@ import java.util.UUID;
 @NoArgsConstructor
 public class FileDataDto {
     private UUID id;
-
     private String name;
     private long size;
+    private String type;
+    private String description;
 }

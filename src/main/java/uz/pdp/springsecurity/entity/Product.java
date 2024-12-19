@@ -147,12 +147,16 @@ public class Product extends AbsEntity {
     private double quantity;             // Mahsulot miqdori (temporarily used)
 
     private Boolean isGlobal;            // Global mavjudlik
+
     private boolean main;                // Asosiy mahsulot ko'rsatkichi
 
     private boolean clone;
 
-
     private String MXIKCode;             // Soliq uchun mxik kodi
+
+    private Double margin;
+
+    private Boolean qqs;
 
     @Override
     public final boolean equals(Object o) {
