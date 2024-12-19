@@ -215,6 +215,14 @@ public class BusinessService {
                 u.setEnabled(false);
                 userRepository.save(u);
             });
+
+            Optional<Subscription> optionalSubscription = subscriptionRepository.findByBusinessIdAndActiveTrue(businessId);
+            if (optionalSubscription.isPresent()) {
+                Subscription subscription = optionalSubscription.get();
+                subscription.setActive(false);
+                subscription.setDeleted(true);
+                subscriptionRepository.save(subscription);
+            }
         } else {
             business.setActive(true);
             business.setStatus(Constants.ACTIVE);
@@ -224,6 +232,13 @@ public class BusinessService {
                     userRepository.save(u);
                 }
             });
+            Optional<Subscription> optionalSubscription = subscriptionRepository.findByBusinessIdAndActiveFalse(businessId);
+            if (optionalSubscription.isPresent()) {
+                Subscription subscription = optionalSubscription.get();
+                subscription.setActive(true);
+                subscription.setDeleted(false);
+                subscriptionRepository.save(subscription);
+            }
         }
         businessRepository.save(business);
         return new ApiResponse("SUCCESS", true);
