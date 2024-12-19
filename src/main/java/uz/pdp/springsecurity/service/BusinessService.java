@@ -52,8 +52,6 @@ public class BusinessService {
         // Yangi biznes yaratish
         Business business = businessRepository.save(businessHelper.createNewBusiness(businessDto));
 
-        // To'lov usullarini saqlash
-
         // Obuna yaratish
         createEntityHelper.createSubscription(business, businessDto.getTariffId());
 

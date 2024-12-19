@@ -28,4 +28,11 @@ public class FileData extends AbsEntity {
     private User user;
 
     private String description;
+
+    public String getFileType() {
+        if (fileName != null && fileName.contains(".")) {
+            return fileName.substring(fileName.lastIndexOf(".") + 1);
+        }
+        return "unknown";
+    }
 }

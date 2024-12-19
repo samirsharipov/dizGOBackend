@@ -43,10 +43,18 @@ public class ProductService {
     @Transactional
     public ApiResponse editProduct(UUID productId, ProductEditDto productEditDto) {
         // Mahsulotni topish
-        Product product = findByIdOrThrow(productRepository, productId, "Product");
-        Category category = findByIdOrThrow(categoryRepository, productEditDto.getCategoryId(), "Category");
-        Brand brand = findByIdOrThrow(brandRepository, productEditDto.getBrandId(), "Brand");
         Measurement measurement = findByIdOrThrow(measurementRepository, productEditDto.getMeasurementId(), "Measurement");
+        Product product = findByIdOrThrow(productRepository, productId, "Product");
+
+        if (productEditDto != null) {
+            Brand brand = findByIdOrThrow(brandRepository, productEditDto.getBrandId(), "Brand");
+            product.setBrand(brand);
+
+        }
+        if (productEditDto.getCategoryId() != null) {
+            Category category = findByIdOrThrow(categoryRepository, productEditDto.getCategoryId(), "Category");
+            product.setCategory(category);
+        }
 
         // Mahsulotni yangilash
         product.setName(productEditDto.getName());
@@ -65,8 +73,6 @@ public class ProductService {
 
         //    product.setBarcode(productEditDto.getBarcode());
 
-        product.setBrand(brand);
-        product.setCategory(category);
         product.setMeasurement(measurement);
 
         // Foto ni yangilash
@@ -705,12 +711,20 @@ public class ProductService {
 
         Business business = findByIdOrThrow(businessRepository, productPostDto.getBusinessId(), "Business");
         Measurement measurement = findByIdOrThrow(measurementRepository, productPostDto.getMeasurementId(), "Measurement");
-        Brand brand = findByIdOrThrow(brandRepository, productPostDto.getBrandId(), "Brand");
-        Category category = findByIdOrThrow(categoryRepository, productPostDto.getCategoryId(), "Category");
+
+        Product product = buildProduct(productPostDto, business, measurement);
+
+        if (productPostDto.getBrandId() != null) {
+            Brand brand = findByIdOrThrow(brandRepository, productPostDto.getBrandId(), "Brand");
+            product.setBrand(brand);
+        }
+        if (productPostDto.getCategoryId() != null) {
+            Category category = findByIdOrThrow(categoryRepository, productPostDto.getCategoryId(), "Category");
+            product.setCategory(category);
+        }
 
         validateUniqueBarcode(productPostDto.getBarcode(), null, productPostDto.getBusinessId());
 
-        Product product = buildProduct(productPostDto, business, measurement, brand, category);
 
         // Branchlarni o'rnatish
         if (productPostDto.getIsGlobal()) {
@@ -727,7 +741,7 @@ public class ProductService {
         return new ApiResponse("success", true);
     }
 
-    private Product buildProduct(ProductPostDto productPostDto, Business business, Measurement measurement, Brand brand, Category category) {
+    private Product buildProduct(ProductPostDto productPostDto, Business business, Measurement measurement) {
         Product product = new Product();
         setProductFields(product,
                 productPostDto.getName(), productPostDto.getDescription(), productPostDto.getLongDescription(),
@@ -740,8 +754,7 @@ public class ProductService {
                 productPostDto.getShippingClass());
 
         product.setMeasurement(measurement);
-        product.setCategory(category);
-        product.setBrand(brand);
+
         product.setBusiness(business);
         product.setClone(productPostDto.isClone());
 
@@ -931,7 +944,13 @@ public class ProductService {
     public ApiResponse searchTrade(UUID branchId, String name, String language) {
         List<ProductResponseDTO> all = productRepository.findProductsByBranchIdAndKeyword(branchId, name, language);
         if (all.isEmpty()) {
-            return new ApiResponse("Product not found", false);
+            int barcode = Integer.parseInt(name.substring(1, 7));
+            double totalKg = Double.parseDouble(name.substring(7, name.length() - 1)) / 1000;
+            all = productRepository.findProductsByBranchIdAndKeyword(branchId, String.valueOf(barcode), language);
+            for (ProductResponseDTO productResponseDTO : all) {
+                productResponseDTO.setSalePrice(productResponseDTO.getSalePrice());
+                productResponseDTO.setAmount(totalKg);
+            }
         }
         return new ApiResponse("found", true, all);
     }

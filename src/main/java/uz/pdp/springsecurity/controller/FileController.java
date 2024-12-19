@@ -32,7 +32,7 @@ public class FileController {
     private final FileDateRepository fileDateRepository;
     private final ResponseEntityHelper responseEntityHelper;
 
-    @PostMapping("/files")
+    @PostMapping("/file")
     public HttpEntity<?> uploadFile(@RequestParam("file") MultipartFile file, @RequestParam UUID userId, @RequestParam String description) {
         try {
             byte[] fileData = file.getBytes();
@@ -78,8 +78,11 @@ public class FileController {
     }
 
     @GetMapping("/get-by-userId/{userId}")
-    public HttpEntity<ApiResponse> getFileByUserId(@PathVariable UUID userId) {
-        return responseEntityHelper.buildResponse(fileService.getByUserId(userId));
+    public HttpEntity<ApiResponse> getFileByUserId(@PathVariable UUID userId,
+                                                   @RequestParam(required = false) int page,
+                                                   @RequestParam(required = false) int size,
+                                                   @RequestParam(required = false) String name) {
+        return responseEntityHelper.buildResponse(fileService.getByUserId(userId, name, page, size));
     }
 
 }

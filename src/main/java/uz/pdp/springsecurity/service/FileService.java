@@ -1,18 +1,20 @@
 package uz.pdp.springsecurity.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import uz.pdp.springsecurity.entity.FileData;
 import uz.pdp.springsecurity.entity.User;
 import uz.pdp.springsecurity.payload.ApiResponse;
+import uz.pdp.springsecurity.payload.FileDataDto;
 import uz.pdp.springsecurity.repository.FileDateRepository;
 
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
 import uz.pdp.springsecurity.repository.UserRepository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -55,11 +57,36 @@ public class FileService {
         return new ApiResponse("Deleted", true);
     }
 
-    public ApiResponse getByUserId(UUID userId) {
-        List<FileData> all = fileDateRepository.findAllByUser_Id(userId);
-        if (all.isEmpty()) {
-            return new ApiResponse("Not found", false);
+    public ApiResponse getByUserId(UUID userId, String name, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
+
+        Page<FileData> all;
+        if (name != null && !name.isEmpty()) {
+            all = fileDateRepository.findAllByUser_IdAndFileNameContainingIgnoreCase(userId, name, pageable);
+        } else {
+            all = fileDateRepository.findAllByUser_Id(userId, pageable);  // faqat userId bo'yicha
         }
-        return new ApiResponse("Found", true, all);
+        if (all.isEmpty())
+            return new ApiResponse("Not found", false);
+
+
+        List<FileDataDto> allDto = new ArrayList<>();
+        for (FileData fileData : all.toList()) {
+            FileDataDto dto = new FileDataDto();
+            dto.setId(fileData.getId());
+            dto.setName(fileData.getFileName());
+            dto.setSize(fileData.getSize());
+            dto.setDescription(fileData.getDescription());
+            dto.setType(fileData.getFileType());
+            allDto.add(dto);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("files", allDto);
+        result.put("total", all.getTotalElements());
+        result.put("totalPages", all.getTotalPages());
+        result.put("currentPage", all.getNumber());
+
+        return new ApiResponse("Found", true, result);
     }
 }

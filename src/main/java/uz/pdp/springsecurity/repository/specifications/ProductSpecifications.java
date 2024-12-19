@@ -3,6 +3,8 @@ package uz.pdp.springsecurity.repository.specifications;
 import org.springframework.data.jpa.domain.Specification;
 import uz.pdp.springsecurity.entity.Product;
 
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import java.util.UUID;
 
 public class ProductSpecifications {
@@ -12,7 +14,10 @@ public class ProductSpecifications {
     }
 
     public static Specification<Product> belongsToBranch(UUID branchId) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("branch").get("id"), branchId);
+        return (root, query, criteriaBuilder) -> {
+            Join<Object, Object> branchJoin = root.join("branch", JoinType.LEFT);
+            return criteriaBuilder.equal(branchJoin.get("id"), branchId);
+        };
     }
 
     public static Specification<Product> belongsToBusiness(UUID businessId) {
