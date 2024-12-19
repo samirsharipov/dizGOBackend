@@ -13,6 +13,7 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, UUID
     boolean existsByBusinessIdAndActiveTrue(UUID BusinessId);
 
     Optional<Subscription> findByBusinessIdAndActiveTrue(UUID BusinessId);
+    Optional<Subscription> findByBusinessIdAndActiveFalse(UUID BusinessId);
 
     List<Subscription> findAllByDeleteIsFalse();
 
