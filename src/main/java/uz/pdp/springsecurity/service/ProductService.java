@@ -942,16 +942,51 @@ public class ProductService {
     }
 
     public ApiResponse searchTrade(UUID branchId, String name, String language) {
-        List<ProductResponseDTO> all = productRepository.findProductsByBranchIdAndKeyword(branchId, name, language);
+        // 1️⃣ Xabarlar uchun map
+        Map<String, String> messages = Map.of(
+                "uz_found", "Mahsulot topildi !",
+                "uz_not_found", "Mahsulot topilmadi !",
+                "en_found", "Product found !",
+                "en_not_found", "Product not found !",
+                "ru_found", "Товар найден",
+                "ru_not_found", "Продукт не найден !"
+        );
+
+        // 2️⃣ Parametrlarni tekshirish
+        if (name == null || name.isBlank()) {
+            return new ApiResponse(messages.get(language + "_not_found"), false);
+        }
+
+        // 3️⃣ Mahsulotni qidirish (nomi yoki barcode bo'yicha)
+        List<ProductResponseDTO> all = findProductByKeyword(branchId, name, language);
+
+        // 4️⃣ Mahsulot topilmasa, barcode'dan keyin 'totalKg'ni aniqlashga harakat qilamiz
         if (all.isEmpty()) {
-            int barcode = Integer.parseInt(name.substring(1, 7));
-            double totalKg = Double.parseDouble(name.substring(7, name.length() - 1)) / 1000;
-            all = productRepository.findProductsByBranchIdAndKeyword(branchId, String.valueOf(barcode), language);
-            for (ProductResponseDTO productResponseDTO : all) {
-                productResponseDTO.setSalePrice(productResponseDTO.getSalePrice());
-                productResponseDTO.setAmount(totalKg);
+            try {
+                int barcode = Integer.parseInt(name.substring(1, 7)); // barcode o'rni: 1-6
+                double totalKg = Double.parseDouble(name.substring(7, name.length() - 1)) / 1000; // 7-x dan oxirigacha
+                all = findProductByKeyword(branchId, String.valueOf(barcode), language);
+                for (ProductResponseDTO product : all) {
+                    product.setAmount(totalKg);
+                }
+            } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
+               return new ApiResponse(e.getMessage(), false);
             }
         }
-        return new ApiResponse("found", true, all);
+
+        // 5️⃣ Mahsulot topilmasa, xabarni qaytarish
+        if (all.isEmpty()) {
+            String notFoundMessage = messages.getOrDefault(language + "_not_found", messages.get("uz_not_found"));
+            return new ApiResponse(notFoundMessage, false);
+        }
+
+        // 6️⃣ Mahsulot topilsa, xabarni qaytarish
+        String foundMessage = messages.getOrDefault(language + "_found", messages.get("uz_found"));
+        return new ApiResponse(foundMessage, true, all);
+    }
+
+    private List<ProductResponseDTO> findProductByKeyword(UUID branchId, String keyword, String language) {
+        if (keyword == null || keyword.isBlank()) return new ArrayList<>();
+        return productRepository.findProductsByBranchIdAndKeyword(branchId, keyword, language);
     }
 }

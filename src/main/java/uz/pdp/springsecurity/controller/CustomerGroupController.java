@@ -1,5 +1,6 @@
 package uz.pdp.springsecurity.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +17,10 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/customerGroup")
+@RequiredArgsConstructor
 public class CustomerGroupController {
-    @Autowired
-    CustomerGroupService customerGroupService;
+
+    private final CustomerGroupService customerGroupService;
 
     @CheckPermission("ADD_CUSTOMER_GROUP")
     @PostMapping

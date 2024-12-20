@@ -128,6 +128,10 @@ public class CustomerService {
             }
             customer.setUser(user); // User bilan bog'lash
             customer.setActive(true); // Faol holatda
+
+            Optional<CustomerGroup> optionalCustomerGroup = customerGroupRepository.findByName("defaultCustomerGroup");
+            optionalCustomerGroup.ifPresent(customer::setCustomerGroup);
+
             customerRepository.save(customer);
 
             return new ApiResponse("Customer successfully created", true);
@@ -819,7 +823,7 @@ public class CustomerService {
     }
 
     public ApiResponse getForTrade(String query) {
-        Optional<CustomerResponseDto> optional = customerRepository.findByCustomerPhoneNumberOrUniqueCode(query,query);
+        Optional<CustomerResponseDto> optional = customerRepository.findByCustomerPhoneNumberOrUniqueCode(query, query);
         return optional
                 .map(customerResponseDto -> new ApiResponse("Customer exists", true, customerResponseDto))
                 .orElseGet(() -> new ApiResponse("Customer does not exist", false));

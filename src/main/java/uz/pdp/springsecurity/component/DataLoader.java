@@ -50,6 +50,7 @@ public class DataLoader implements CommandLineRunner {
     private final CreateEntityHelper createEntityHelper;
     private final BusinessHelper businessHelper;
     private final BranchCategoryRepository branchCategoryRepository;
+    private final CustomerGroupRepository customerGroupRepository;
 
     @Value("${spring.sql.init.mode}")
     private String initMode;
@@ -109,9 +110,6 @@ public class DataLoader implements CommandLineRunner {
 
             subscriptionRepository.save(new Subscription(business, tariffSuperAdmin, startDay, endDay,
                     StatusTariff.CONFIRMED, PayType.OFFLINE, true, true, false));
-
-//            Address address = addressRepository.save(new Address(
-//                    "Tashkent", "Shayxontuxur", "Gulobod", "1"));
 
             Role superAdmin = roleRepository.save(new Role(
                     Constants.SUPER_ADMIN,
@@ -222,6 +220,11 @@ public class DataLoader implements CommandLineRunner {
                     new ExchangeStatus(QABUL_QILINGAN.name())
             );
             exchangeStatusRepository.saveAll(exchangeStatuses);
+
+
+            CustomerGroup defaultCustomerGroup = new CustomerGroup("defaultCustomerGroup", 2, business);
+            defaultCustomerGroup.setActive(false);
+            customerGroupRepository.save(defaultCustomerGroup);
 
         } else if (initMode.equals("never")) {
 //            updatePermission(); // TODO: 5/29/2023 if you add new permission

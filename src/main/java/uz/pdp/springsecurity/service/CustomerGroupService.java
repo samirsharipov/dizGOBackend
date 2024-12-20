@@ -30,6 +30,10 @@ public class CustomerGroupService {
             return new ApiResponse("BUSINESS NOT FOUND", false);
         }
 
+        if (customerGroupDto.getName().equals("defaultCustomerGroup")) {
+            return new ApiResponse("CUSTOMER GROUP NAME ALREADY EXIST", false);
+        }
+
         CustomerGroup customerGroup = mapper.toEntity(customerGroupDto);
         customerGroupRepository.save(customerGroup);
         return new ApiResponse("ADDED", true);

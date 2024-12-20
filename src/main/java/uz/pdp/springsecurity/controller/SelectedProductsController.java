@@ -8,6 +8,7 @@ import uz.pdp.springsecurity.helpers.ResponseEntityHelper;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.service.SelectedProductsService;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -18,14 +19,9 @@ public class SelectedProductsController {
     private final ResponseEntityHelper responseHelper;
     private final SelectedProductsService service;
 
-    @PostMapping
-    public HttpEntity<ApiResponse> createSelectedProducts(@RequestBody SelectedProducts selectedProducts) {
-        return responseHelper.buildResponse(service.createSelectedProducts(selectedProducts));
-    }
-
-    @PutMapping("/{id}")
-    public HttpEntity<ApiResponse> updateSelectedProducts(@PathVariable UUID id, @RequestBody SelectedProducts selectedProducts) {
-        return responseHelper.buildResponse(service.updateSelectedProducts(id,selectedProducts));
+    @PostMapping("/create-list")
+    public HttpEntity<ApiResponse> createSelectedProductsList(@RequestBody List<SelectedProducts> selectedProductsList) {
+        return responseHelper.buildResponse(service.createSelectedProducts(selectedProductsList));
     }
 
     @GetMapping("/{id}")
@@ -36,5 +32,10 @@ public class SelectedProductsController {
     @GetMapping("/get-by-branch-id/{branchId}")
     public HttpEntity<ApiResponse> getSelectedProductsByBranchId(@PathVariable UUID branchId, @RequestParam String languageCode) {
         return responseHelper.buildResponse(service.getSelectedProductsByBranchId(branchId,languageCode));
+    }
+
+    @DeleteMapping("/{id}")
+    public HttpEntity<ApiResponse> deleteSelectedProducts(@PathVariable UUID id) {
+        return responseHelper.buildResponse(service.delete(id));
     }
 }
