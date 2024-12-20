@@ -7,6 +7,7 @@ public interface Constants {
     String SUPER_ADMIN = "Super Admin";
     String OPERATOR = "Operator";
     String CUSTOMER = "Customer";
+    String CASHIER = "cashier";
 
 
     String BOT_TOKEN = "6972170183:AAH_M_EYlVzQg9jWStSfR5_1NT91rX69Zrw";

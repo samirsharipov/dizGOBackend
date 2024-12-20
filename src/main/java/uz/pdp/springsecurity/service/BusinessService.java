@@ -9,7 +9,6 @@ import uz.pdp.springsecurity.enums.*;
 import uz.pdp.springsecurity.helpers.BusinessHelper;
 import uz.pdp.springsecurity.helpers.CreateEntityHelper;
 import uz.pdp.springsecurity.mapper.BusinessMapper;
-import uz.pdp.springsecurity.mapper.UserMapper;
 import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
 import uz.pdp.springsecurity.utils.Constants;
@@ -30,7 +29,6 @@ public class BusinessService {
     private final UserRepository userRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final BusinessMapper businessMapper;
-    private final PayMethodRepository payMethodRepository;
     private final NotificationRepository notificationRepository;
     private final ShablonRepository shablonRepository;
     private final BranchRepository branchRepository;
@@ -82,6 +80,7 @@ public class BusinessService {
 
         // User Role yaratish
         createEntityHelper.createAdminRoleAndUser(business, branch, businessDto);
+        createEntityHelper.saveRole(business, roleRepository);
 
         createEntityHelper.createShablon(business, shablonRepository);
 
@@ -94,6 +93,7 @@ public class BusinessService {
         // Filialga Task va Project Status qo'shish
         BranchService.createTaskStatus(branch, taskStatusRepository);
         createEntityHelper.createProjectStatus(branch, projectStatusRepository);
+
 
         return new ApiResponse("Successfully added", true);
     }

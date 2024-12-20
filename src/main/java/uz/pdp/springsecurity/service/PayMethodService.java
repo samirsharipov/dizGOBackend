@@ -2,7 +2,6 @@ package uz.pdp.springsecurity.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uz.pdp.springsecurity.entity.Business;
 import uz.pdp.springsecurity.entity.PaymentMethod;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.PayMethodDto;
@@ -21,7 +20,7 @@ public class PayMethodService {
     public ApiResponse add(PayMethodDto payMethodDto) {
         PaymentMethod paymentMethod = new PaymentMethod();
         paymentMethod.setType(payMethodDto.getType());
-        paymentMethod.setCard(paymentMethod.isCard());
+        paymentMethod.setCard(payMethodDto.isCard());
         paymentMethod.setCash(payMethodDto.isCash());
         payMethodRepository.save(paymentMethod);
         return new ApiResponse("ADDED", true);
@@ -33,7 +32,7 @@ public class PayMethodService {
 
         PaymentMethod paymentMethod = payMethodRepository.getById(id);
         paymentMethod.setType(payMethodDto.getType());
-        paymentMethod.setCard(paymentMethod.isCard());
+        paymentMethod.setCard(payMethodDto.isCard());
         paymentMethod.setCash(payMethodDto.isCash());
         payMethodRepository.save(paymentMethod);
 

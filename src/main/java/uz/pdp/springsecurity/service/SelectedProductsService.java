@@ -100,15 +100,15 @@ public class SelectedProductsService {
         dto.setBarcode(product.getBarcode());
         dto.setMXIKCode(product.getMXIKCode());
         dto.setName(language != null
-                ? getProductTranslatedName(product.getId(), language.getId())
+                ? getProductTranslatedName(product.getId(), language.getId(), product.getName())
                 : product.getName());
         return dto;
     }
 
-    private String getProductTranslatedName(UUID productId, UUID languageId) {
+    private String getProductTranslatedName(UUID productId, UUID languageId, String productName) {
         return productTranslateRepository.findByProductIdAndLanguage_Id(productId, languageId)
                 .map(ProductTranslate::getName)
-                .orElse(null);
+                .orElse(productName);
     }
 
     // 🔥 Delete product by ID

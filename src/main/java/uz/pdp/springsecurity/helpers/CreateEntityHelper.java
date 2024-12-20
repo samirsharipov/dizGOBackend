@@ -3,6 +3,7 @@ package uz.pdp.springsecurity.helpers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uz.pdp.springsecurity.entity.*;
+import uz.pdp.springsecurity.entity.template.RolePermissions;
 import uz.pdp.springsecurity.enums.StatusTariff;
 import uz.pdp.springsecurity.mapper.BranchMapper;
 import uz.pdp.springsecurity.payload.BranchDto;
@@ -104,5 +105,18 @@ public class CreateEntityHelper {
                 new LidStatus("Done", "rang", 4, "Done", true, true, business)
         );
         lidStatusRepository.saveAll(lidStatuses);
+    }
+
+    public  void saveRole(Business business, RoleRepository roleRepository) {
+
+        roleRepository.save(new Role(
+                Constants.MANAGER,
+                RolePermissions.MANAGER_PERMISSIONS_FOR_OTHERS,
+                business));
+
+        roleRepository.save(new Role(
+                Constants.CASHIER,
+                RolePermissions.CASHIER_PERMISSIONS,
+                business));
     }
 }
