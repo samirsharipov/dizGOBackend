@@ -83,7 +83,7 @@ public class SmsSendService {
     }
 
     public void sendVerificationCode(String phoneNumber, String code) {
-        String message = "Kod dlya vhoda v prilozheniyu Business Navigator: " + code + ". Ne soobshayte danniy kod nikomu!!!";
+        String message = "Kod dlya vhoda v prilozheniyu DizGO : " + code + ". Ne soobshayte danniy kod nikomu!!!";
         sendSms(phoneNumber, message);
     }
 }
