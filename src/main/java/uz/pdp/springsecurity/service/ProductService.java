@@ -970,7 +970,7 @@ public class ProductService {
                     product.setAmount(totalKg);
                 }
             } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
-               return new ApiResponse(e.getMessage(), false);
+               return new ApiResponse(messages.get(language + "_not_found"), false);
             }
         }
 
