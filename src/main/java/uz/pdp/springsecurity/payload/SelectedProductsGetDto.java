@@ -10,11 +10,13 @@ import java.util.UUID;
 @NoArgsConstructor
 @Data
 public class SelectedProductsGetDto {
-    private UUID id;
+    private UUID selectedProductId;
     // for product
-    private UUID productId;
-    private String productName;
-    private double productPrice;
+    private UUID id;
+    private String name;
+    private double salePrice;
+    private String barcode;
+    private String MXIKCode;
 
     private UUID branchId;
 }

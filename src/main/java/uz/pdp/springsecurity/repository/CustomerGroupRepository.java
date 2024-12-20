@@ -9,4 +9,6 @@ import java.util.UUID;
 
 public interface CustomerGroupRepository extends JpaRepository<CustomerGroup, UUID> {
     List<CustomerGroup> findAllByBusiness_Id(UUID business_id);
+
+    Optional<CustomerGroup> findByName(String name);
 }

@@ -25,112 +25,98 @@ public class SelectedProductsService {
     private final LanguageRepository languageRepository;
     private final ProductTranslateRepository productTranslateRepository;
 
-    public ApiResponse createSelectedProducts(SelectedProducts selectedProducts) {
-        ApiResponse Product_does_not_exist = getApiResponse(selectedProducts);
-        if (Product_does_not_exist != null) return Product_does_not_exist;
-        repository.save(selectedProducts);
-        return new ApiResponse("Successfully created selected products", true);
+    // 🔥 Universal createSelectedProducts (bitta yoki ro'yxatni bir xil metodda saqlash)
+    public ApiResponse createSelectedProducts(List<SelectedProducts> selectedProductsList) {
+        List<SelectedProducts> validProducts = new ArrayList<>();
+        for (SelectedProducts selectedProduct : selectedProductsList) {
+            if (validateSelectedProduct(selectedProduct)) {
+                validProducts.add(selectedProduct);
+            }
+        }
+        if (!validProducts.isEmpty()) {
+            repository.saveAll(validProducts);
+            return new ApiResponse("Successfully created selected products", true);
+        }
+        return new ApiResponse("No valid products found to save", false);
     }
 
-    public ApiResponse updateSelectedProducts(UUID id, SelectedProducts selectedProducts) {
-        Optional<SelectedProducts> optionalSelectedProducts = repository.findById(id);
-        if (optionalSelectedProducts.isEmpty())
-            return new ApiResponse("Product does not exist", false);
+    private boolean validateSelectedProduct(SelectedProducts selectedProduct) {
+        boolean productExists = productRepository.existsById(selectedProduct.getProductId());
+        if (!productExists) return false;
 
-        ApiResponse Product_does_not_exist = getApiResponse(selectedProducts);
-        if (Product_does_not_exist != null) return Product_does_not_exist;
+        boolean branchExists = branchRepository.existsById(selectedProduct.getBranchId());
+        if (!branchExists) return false;
 
-        SelectedProducts selected = optionalSelectedProducts.get();
-        selected.setBranchId(selectedProducts.getBranchId());
-        selected.setProductId(selectedProducts.getProductId());
-        repository.save(selected);
-        return new ApiResponse("Successfully updated selected products", true);
+        return true;
     }
 
-    @Nullable
-    private ApiResponse getApiResponse(SelectedProducts selectedProducts) {
-        boolean existsProduct = productRepository.existsById(selectedProducts.getProductId());
-        if (!existsProduct)
-            return new ApiResponse("Product does not exist", false);
-
-        boolean existsBranch = branchRepository.existsById(selectedProducts.getBranchId());
-        if (!existsBranch)
-            return new ApiResponse("Branch does not exist", false);
-
-        return null;
-    }
-
+    // 🔥 Get selected product by ID
     public ApiResponse getSelectedProducts(UUID id, String languageCode) {
-        Optional<SelectedProducts> optionalSelectedProducts = repository.findById(id);
-        if (optionalSelectedProducts.isEmpty())
-            return new ApiResponse("Product does not exist", false);
-
-        SelectedProducts selectedProducts = optionalSelectedProducts.get();
-        SelectedProductsGetDto selectedProductsGetDto = new SelectedProductsGetDto();
-
-        Optional<Product> optionalProduct = productRepository.findById(selectedProducts.getProductId());
-        if (optionalProduct.isEmpty()) {
-            return new ApiResponse("Product does not exist", false);
-        }
-        Product product = optionalProduct.get();
-
-        selectedProductsGetDto.setId(selectedProducts.getId());
-        selectedProductsGetDto.setProductId(product.getId());
-        selectedProductsGetDto.setProductPrice(product.getSalePrice());
-        selectedProductsGetDto.setBranchId(selectedProducts.getBranchId());
-
-        if (languageCode != null) {
-            Optional<Language> optionalLanguage = languageRepository.findByCode(languageCode);
-            if (optionalLanguage.isPresent()) {
-                Optional<ProductTranslate> optionalProductTranslate = productTranslateRepository.findByProductIdAndLanguage_Id(product.getId(), selectedProducts.getProductId());
-                if (optionalProductTranslate.isPresent()) {
-                    ProductTranslate productTranslate = optionalProductTranslate.get();
-                    selectedProductsGetDto.setProductName(productTranslate.getName());
-                }
-            }
-        } else {
-            selectedProductsGetDto.setProductName(product.getName());
-        }
-
-
-        return new ApiResponse("Successfully selected products", true, selectedProductsGetDto);
+        return repository.findById(id)
+                .map(selectedProduct -> {
+                    Product product = productRepository.findById(selectedProduct.getProductId())
+                            .orElseThrow(() -> new IllegalStateException("Product does not exist"));
+                    Language language = languageCode != null
+                            ? languageRepository.findByCode(languageCode).orElse(null)
+                            : null;
+                    SelectedProductsGetDto dto = convertToDto(selectedProduct, product, language);
+                    return new ApiResponse("Successfully selected products", true, dto);
+                })
+                .orElse(new ApiResponse("Product does not exist", false));
     }
 
+    // 🔥 Get products by branch ID
     public ApiResponse getSelectedProductsByBranchId(UUID branchId, String languageCode) {
-        List<SelectedProducts> all = repository.findAllByBranchId(branchId);
-        if (all.isEmpty()) {
-            return new ApiResponse("Branch does not exist", false);
-        }
-        Optional<Language> optionalLanguage = Optional.empty();
-        if (languageCode != null) {
-            optionalLanguage = languageRepository.findByCode(languageCode);
-        }
+        List<SelectedProducts> selectedProductsList = repository.findAllByBranchId(branchId);
+        if (selectedProductsList.isEmpty()) return new ApiResponse("No products found for the branch", false);
 
-        List<SelectedProductsGetDto> selectedProductsGetDtoList = new ArrayList<>();
-        for (SelectedProducts selectedProducts : all) {
-            SelectedProductsGetDto selectedProductsGetDto = new SelectedProductsGetDto();
-            Optional<Product> optionalProduct = productRepository.findById(selectedProducts.getProductId());
-            if (optionalProduct.isPresent()) {
-                Product product = optionalProduct.get();
-                selectedProductsGetDto.setId(selectedProducts.getId());
-                selectedProductsGetDto.setProductId(product.getId());
-                selectedProductsGetDto.setProductPrice(product.getSalePrice());
-                selectedProductsGetDto.setBranchId(selectedProducts.getBranchId());
-                if (optionalLanguage.isPresent()) {
-                    Language language = optionalLanguage.get();
-                    Optional<ProductTranslate> optionalProductTranslate = productTranslateRepository.findByProductIdAndLanguage_Id(product.getId(), language.getId());
-                    if (optionalProductTranslate.isPresent()) {
-                        ProductTranslate productTranslate = optionalProductTranslate.get();
-                        selectedProductsGetDto.setProductName(productTranslate.getName());
-                    }
-                } else {
-                    selectedProductsGetDto.setProductName(product.getName());
-                }
-            }
-            selectedProductsGetDtoList.add(selectedProductsGetDto);
+        List<UUID> productIds = selectedProductsList.stream()
+                .map(SelectedProducts::getProductId)
+                .toList();
+
+        List<Product> products = productRepository.findAllById(productIds);
+        Language language = languageCode != null
+                ? languageRepository.findByCode(languageCode).orElse(null)
+                : null;
+
+        List<SelectedProductsGetDto> dtoList = new ArrayList<>();
+        for (SelectedProducts selectedProduct : selectedProductsList) {
+            products.stream()
+                    .filter(product -> product.getId().equals(selectedProduct.getProductId()))
+                    .findFirst()
+                    .ifPresent(product -> dtoList.add(convertToDto(selectedProduct, product, language)));
         }
 
+        return new ApiResponse("Successfully selected products", true, dtoList);
+    }
 
-        return new ApiResponse("Successfully selected products", true, selectedProductsGetDtoList);
+    // 🔥 Yordamchi metod: SelectedProducts -> SelectedProductsGetDto
+    private SelectedProductsGetDto convertToDto(SelectedProducts selectedProduct, Product product, Language language) {
+        SelectedProductsGetDto dto = new SelectedProductsGetDto();
+        dto.setSelectedProductId(selectedProduct.getId());
+        dto.setId(product.getId());
+        dto.setSalePrice(product.getSalePrice());
+        dto.setBranchId(selectedProduct.getBranchId());
+        dto.setBarcode(product.getBarcode());
+        dto.setMXIKCode(product.getMXIKCode());
+        dto.setName(language != null
+                ? getProductTranslatedName(product.getId(), language.getId())
+                : product.getName());
+        return dto;
+    }
+
+    private String getProductTranslatedName(UUID productId, UUID languageId) {
+        return productTranslateRepository.findByProductIdAndLanguage_Id(productId, languageId)
+                .map(ProductTranslate::getName)
+                .orElse(null);
+    }
+
+    // 🔥 Delete product by ID
+    public ApiResponse delete(UUID id) {
+        boolean exists = repository.existsById(id);
+        if (!exists) return new ApiResponse("Product does not exist", false);
+
+        repository.deleteById(id);
+        return new ApiResponse("Successfully deleted selected product", true);
     }
 }
