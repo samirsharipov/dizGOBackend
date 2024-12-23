@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import uz.pdp.springsecurity.enums.Permissions;
 
 import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,6 +34,10 @@ public class BusinessDto {
     private UUID branchCategoryId;
 
     private UUID addressId;
+
+    private Timestamp contractStartDate;
+
+    private Timestamp contractEndDate;
 
     private List<Permissions> permissionsList;
 }

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
 import java.util.UUID;
 
 @Data
@@ -24,5 +25,9 @@ public class BusinessEditDto {
     private String businessNumber;
 
     private String status;
+
+    private Timestamp contractStartDate;
+    private Timestamp contractEndDate;
+
 
 }

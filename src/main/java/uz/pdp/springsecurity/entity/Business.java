@@ -7,6 +7,7 @@ import uz.pdp.springsecurity.entity.template.AbsEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import java.sql.Timestamp;
 
 @Entity
 @Getter
@@ -42,6 +43,10 @@ public class Business extends AbsEntity {
     private int editDays = 30;
 
     private Boolean main = Boolean.FALSE;
+
+    private Timestamp contractStartDate;
+
+    private Timestamp contractEndDate;
 
     public Business(String name, String description, boolean active, boolean delete, boolean main) {
         this.name = name;

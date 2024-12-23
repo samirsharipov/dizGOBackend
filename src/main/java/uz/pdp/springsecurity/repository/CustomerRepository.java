@@ -111,10 +111,15 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     Optional<Customer> findByUser_Id(UUID user_id);
 
-    @Query("SELECT new uz.pdp.springsecurity.payload.CustomerResponseDto(c.id, c.name) " +
-            "FROM Customer c WHERE c.phoneNumber = :phoneNumberQuery OR c.uniqueCode = :uniqueCodeQuery")
-    Optional<CustomerResponseDto> findByCustomerPhoneNumberOrUniqueCode(@Param("phoneNumberQuery") String phoneNumber,
-                                                                        @Param("uniqueCodeQuery") String uniqueCode);
+    @Query("SELECT new uz.pdp.springsecurity.payload.CustomerResponseDto(c.id, c.name, " +
+            "COALESCE(cg.percent, 0)) " +
+            "FROM Customer c " +
+            "LEFT JOIN c.customerGroup cg " +
+            "WHERE c.phoneNumber = :phoneNumberQuery OR c.uniqueCode = :uniqueCodeQuery")
+    Optional<CustomerResponseDto> findByCustomerPhoneNumberOrUniqueCode(
+            @Param("phoneNumberQuery") String phoneNumber,
+            @Param("uniqueCodeQuery") String uniqueCode
+    );
 
     boolean existsByUsername(String number);
 }
