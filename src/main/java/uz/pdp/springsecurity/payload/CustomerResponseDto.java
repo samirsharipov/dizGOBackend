@@ -13,4 +13,5 @@ public class CustomerResponseDto {
 
     private UUID id;
     private String name;
+    private double percent;
 }

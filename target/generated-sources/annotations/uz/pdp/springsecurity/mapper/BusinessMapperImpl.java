@@ -10,7 +10,7 @@ import uz.pdp.springsecurity.payload.BusinessGetDto;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-12-17T13:52:00+0500",
+    date = "2024-12-23T15:59:09+0500",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.13 (Amazon.com Inc.)"
 )
 @Component
@@ -31,6 +31,8 @@ public class BusinessMapperImpl implements BusinessMapper {
         businessEditDto.setDeleted( business.isDeleted() );
         businessEditDto.setBusinessNumber( business.getBusinessNumber() );
         businessEditDto.setStatus( business.getStatus() );
+        businessEditDto.setContractStartDate( business.getContractStartDate() );
+        businessEditDto.setContractEndDate( business.getContractEndDate() );
 
         return businessEditDto;
     }
@@ -64,6 +66,8 @@ public class BusinessMapperImpl implements BusinessMapper {
         businessGetDto.setDescription( business.getDescription() );
         businessGetDto.setActive( business.isActive() );
         businessGetDto.setDeleted( business.isDeleted() );
+        businessGetDto.setContractStartDate( business.getContractStartDate() );
+        businessGetDto.setContractEndDate( business.getContractEndDate() );
 
         return businessGetDto;
     }

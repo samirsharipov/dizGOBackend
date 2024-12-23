@@ -19,4 +19,7 @@ public class BusinessGetDto {
     private boolean active;
     private boolean deleted;
 
+    private Timestamp contractStartDate;
+    private Timestamp contractEndDate;
+
 }
