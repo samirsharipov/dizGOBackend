@@ -236,7 +236,7 @@ public class UserService {
 
         // User entity ni UserDTO ga aylantirish
         UserDTO userDTO = userMapper.toDto(user);
-        userDTO.setPhotoId(user.getPhoto()!=null ? user.getPhoto().getId() : null);
+        userDTO.setPhotoId(user.getPhoto() != null ? user.getPhoto().getId() : null);
 
         // Branch id larini qoshish
         Set<UUID> branchesIdList = user.getBranches().stream()
@@ -321,12 +321,14 @@ public class UserService {
         // Foydalanuvchilarni DTO ga aylantirish
         List<UserDTO> dtoList = all.getContent().stream().map(user -> {
             UserDTO userDto = userMapper.toDto(user);
+            userDto.setPhotoId(user.getPhoto() != null ? user.getPhoto().getId() : null);
 
             // Role Category va Parent Role Category nomini qo'shish
             Optional.ofNullable(user.getRole())
                     .map(Role::getRoleCategory)
                     .ifPresent(roleCategory -> {
                         userDto.setRoleCategoryName(roleCategory.getName());
+                        userDto.setRoleCategoryParentName(roleCategory.getParentRoleCategory() != null ? roleCategory.getParentRoleCategory().getName() : null);
                         Optional.ofNullable(roleCategory.getParentRoleCategory())
                                 .ifPresent(parentRoleCategory -> userDto.setRoleParentName(parentRoleCategory.getName()));
                     });

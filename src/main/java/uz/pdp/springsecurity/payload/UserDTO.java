@@ -57,8 +57,9 @@ public class UserDTO {
     private Date dateEndContract;
 
     private String roleName;
+    private String roleParentName;
     private List<String> branchesName;
     private String roleCategoryName;
-    private String roleParentName;
+    private String roleCategoryParentName;
 
 }
