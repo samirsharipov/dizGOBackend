@@ -11,7 +11,7 @@ import uz.pdp.springsecurity.payload.CarDto;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-12-23T15:59:08+0500",
+    date = "2024-12-27T16:17:53+0500",
     comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.13 (Amazon.com Inc.)"
 )
 @Component
