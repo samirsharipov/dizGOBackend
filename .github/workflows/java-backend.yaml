@@ -1,34 +1,27 @@
-name: Deploy Java Backend to Plesk
+name: Deploy to Server
 
 on:
   push:
     branches:
-      - main # yoki siz foydalanadigan branch nomi
+      - main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Repository klonlash
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Java o'rnatish
-        uses: actions/setup-java@v2
-        with:
-          java-version: '17' # loyihangizga mos Java versiyasini tanlang
-          distribution: 'temurin'
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Loyihani yig'ish (build)
-        run: |
-          chmod +x ./mvnw
-          ./mvnw clean package
-
-      - name: JAR faylni Plesk'ga yuklash
-        uses: appleboy/scp-action@v0.1.0
-        with:
-          host: ${{ secrets.PLESK_HOST }}
-          username: ${{ secrets.PLESK_USERNAME }}
-          password: ${{ secrets.PLESK_PASSWORD }}
-          source: "target/spring-security.jar" # Yig'ilgan JAR fayl manzili
-          target: "/var/www/vhosts/dizgoBackend" # Maqsadli katalog
+    - name: Deploy to Server
+      run: |
+        ssh -o StrictHostKeyChecking=no username@target_server_ip << 'EOF'
+          cd /path/to/your/project
+          git pull origin main
+          # other deployment commands like restart service or build
+        EOF
