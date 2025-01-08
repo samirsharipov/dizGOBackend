@@ -31,4 +31,4 @@ jobs:
           username: ${{ secrets.PLESK_USERNAME }}
           password: ${{ secrets.PLESK_PASSWORD }}
           source: "target/spring-security.jar" # Yig'ilgan JAR fayl manzili
-          target: "/var/www/vhosts/bnav.uz/back.bnav.uz" # Maqsadli katalog
+          target: "/var/www/vhosts/dizgoBackend" # Maqsadli katalog
