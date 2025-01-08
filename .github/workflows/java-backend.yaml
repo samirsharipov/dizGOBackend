@@ -1,32 +1,38 @@
-name: Serverga joylashtirish (Deploy)
+name: Deploy to Plesk
 
 on:
   push:
     branches:
-      - main
+      - main  # Asosiy branchda push bo'lsa deploy qilish
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-    # 1-qadam: Repositoryni tekshirib chiqish (checkout)
-    - name: Kodni tekshirib chiqish
-      uses: actions/checkout@v2
+      # Kodni checkout qilish
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    # 2-qadam: SSH kalitini sozlash
-    - name: SSH sozlash
-      uses: webfactory/ssh-agent@v0.5.3
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      # Plesk serveriga SSH ulanishni sozlash
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.PLESK_HOST }} >> ~/.ssh/known_hosts
 
-    # 3-qadam: Serverni known_hosts fayliga qo'shish (SSH'ning xavfsizligini tekshirishdan qochish)
-    - name: Serverni known_hosts ga qo'shish
-      run: |
-        mkdir -p ~/.ssh
-        ssh-keyscan -H 162.55.182.148 >> ~/.ssh/known_hosts
+      # SSH agentini ishga tushirish va kalitni qo'shish
+      - name: Start SSH agent
+        run: |
+          eval $(ssh-agent -s)
+          ssh-add ~/.ssh/id_rsa
 
-    # 4-qadam: Kodingizni serverga joylashtirish
-    - name: Kodni joylashtirish
-      run: |
-        ssh -o StrictHostKeyChecking=no root@162.55.182.148 "cd /path/to/your/project && git pull && ./deploy.sh"
+      # Plesk serveriga deploy qilish
+      - name: Deploy to Plesk
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.PLESK_USERNAME }}@${{ secrets.PLESK_HOST }} << EOF
+            # Plesk orqali deploy qilish uchun kerakli buyruqlar
+            # Masalan, fayllarni nusxalash yoki tizimni yangilash
+            cd /var/www/vhosts/your-domain.com/httpdocs
+            git pull origin main  # Yoki kerakli boshqa komandalar
+          EOF
