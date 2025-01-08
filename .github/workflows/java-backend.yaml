@@ -1,4 +1,4 @@
-name: Deploy to Server
+name: Serverga joylashtirish (Deploy)
 
 on:
   push:
@@ -10,18 +10,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    # 1-qadam: Repositoryni tekshirib chiqish (checkout)
+    - name: Kodni tekshirib chiqish
+      uses: actions/checkout@v2
 
-    - name: Set up SSH
+    # 2-qadam: SSH kalitini sozlash
+    - name: SSH sozlash
       uses: webfactory/ssh-agent@v0.5.3
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Deploy to Server
+    # 3-qadam: Serverni known_hosts fayliga qo'shish (SSH'ning xavfsizligini tekshirishdan qochish)
+    - name: Serverni known_hosts ga qo'shish
       run: |
-        ssh -o StrictHostKeyChecking=no username@target_server_ip << 'EOF'
-          cd /path/to/your/project
-          git pull origin main
-          # other deployment commands like restart service or build
-        EOF
+        mkdir -p ~/.ssh
+        ssh-keyscan -H 162.55.182.148 >> ~/.ssh/known_hosts
+
+    # 4-qadam: Kodingizni serverga joylashtirish
+    - name: Kodni joylashtirish
+      run: |
+        ssh -o StrictHostKeyChecking=no root@162.55.182.148 "cd /path/to/your/project && git pull && ./deploy.sh"
