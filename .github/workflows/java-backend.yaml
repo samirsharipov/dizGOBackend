@@ -25,4 +25,3 @@ jobs:
           git pull origin main
           # other deployment commands like restart service or build
         EOF
-        
