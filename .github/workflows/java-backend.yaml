@@ -34,7 +34,7 @@ jobs:
 
     - name: Maven build qilish
       run: |
-        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'cd /home/root/deploy/optimitBackend && mvn clean package -DskipTests'
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'cd /home/root/deploy/optimitBackend && mvn clean install -DskipTests'
 
     - name: Deploy qilish
       run: |
