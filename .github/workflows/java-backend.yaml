@@ -38,18 +38,25 @@ jobs:
 
     - name: Deploy qilish
       run: |
-       ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 '
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 '
         JAR_PATH="/home/root/deploy/optimitBackend/target/spring-security.jar"
         SCREEN_NAME="spring_app"
-
-        # Agar screen sesiyasi mavjud bo‘lsa, uni to‘xtatish
-       if screen -list | grep -q "$SCREEN_NAME"; then
-        echo "Stopping existing jar process..."
-        screen -S $SCREEN_NAME -X quit
+        LOG_DIR="/home/root/deploy/optimitBackend/logs"
+        LOG_FILE="$LOG_DIR/spring_app.log"
+  
+        # Loglar uchun papka mavjudligini tekshirish, yo‘q bo‘lsa yaratish
+        if [ ! -d "$LOG_DIR" ]; then
+          mkdir -p "$LOG_DIR"
         fi
 
-        # Yangi jar faylni screen orqali ishga tushirish
+        # Agar screen sessiyasi mavjud bo‘lsa, uni to‘xtatish
+        if screen -list | grep -q "$SCREEN_NAME"; then
+          echo "Stopping existing jar process..."
+          screen -S $SCREEN_NAME -X quit
+        fi
+
+        # Yangi jar faylni screen orqali ishga tushirish va loglarni yozish
         echo "Starting new jar process..."
-        screen -dmS $SCREEN_NAME java -jar $JAR_PATH
+        screen -dmS $SCREEN_NAME bash -c "java -jar $JAR_PATH > $LOG_FILE 2>&1"
         echo "Application deployed successfully."
         '
