@@ -13,6 +13,12 @@ jobs:
     - name: Kodingizni tekshirish
       uses: actions/checkout@v2
 
+    - name: JDKni o'rnatish
+      uses: actions/setup-java@v2
+      with:
+        java-version: '17'  # Java versiyasini 17 qilib o'zgartiring
+        distribution: 'openjdk'
+
     - name: Maven Buildni bajarish
       run: mvn clean install
 
