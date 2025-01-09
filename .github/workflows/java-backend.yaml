@@ -36,4 +36,4 @@ jobs:
             cd /var/www/vhosts/your-domain.com/httpdocs
             git pull origin main  # Yoki kerakli boshqa komandalar
           EOF
-          
+        
