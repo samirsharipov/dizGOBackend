@@ -13,6 +13,9 @@ jobs:
     - name: Kodingizni tekshirish
       uses: actions/checkout@v2
 
+    - name: Maven Buildni bajarish
+      run: mvn clean install
+
     - name: SSH Private Keyni yaratish
       run: |
         mkdir -p ~/.ssh
