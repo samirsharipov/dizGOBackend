@@ -28,18 +28,15 @@ jobs:
         mkdir -p ~/.ssh
         echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
 
-    - name: Serverda papka yaratish
-      run: ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'mkdir -p /home/root/deploy'
-
-    - name: Serverga kodingizni pull qilish
+    - name: Serverda git pull qilish (Agar loyihangiz mavjud bo'lsa)
       run: |
-        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'mkdir -p /home/root/deploy && cd /home/root/deploy && git init && git remote add origin git@github.com:samirsharipov/optimitBackend.git'
-        
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'cd /home/root/deploy/optimitBackend && git pull origin main'
+
     - name: Maven build qilish
       run: |
-        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'cd /home/root/deploy && mvn clean package -DskipTests'
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'cd /home/root/deploy/optimitBackend && mvn clean package -DskipTests'
 
     - name: Deploy qilish
       run: |
-        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no target/spring-security.jar root@162.55.182.148:/home/root/deploy
+        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no /home/root/deploy/optimitBackend/target/spring-security.jar root@162.55.182.148:/home/root/deploy
         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'bash -s' < ./deploy-script.sh
