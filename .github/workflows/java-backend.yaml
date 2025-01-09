@@ -23,10 +23,15 @@ jobs:
     - name: SSH ruxsatlarini o‘rnatish
       run: chmod 600 ~/.ssh/id_rsa
 
+    - name: Host key verificationni o‘tkazib yuborish
+      run: |
+        mkdir -p ~/.ssh
+        echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+
     - name: Serverda papka yaratish
-      run: ssh -i ~/.ssh/id_rsa root@162.55.182.148 'mkdir -p /home/root/deploy'
+      run: ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'mkdir -p /home/root/deploy'
 
     - name: Deploy qilish
       run: |
-        scp -i ~/.ssh/id_rsa target/spring-security.jar root@162.55.182.148:/home/root/deploy
-        ssh -i ~/.ssh/id_rsa root@162.55.182.148 'bash -s' < ./deploy-script.sh
+        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no target/spring-security.jar root@162.55.182.148:/home/root/deploy
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'bash -s' < ./deploy-script.sh
