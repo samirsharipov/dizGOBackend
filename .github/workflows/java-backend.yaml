@@ -38,5 +38,18 @@ jobs:
 
     - name: Deploy qilish
       run: |
-        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no /home/root/deploy/optimitBackend/target/spring-security.jar root@162.55.182.148:/home/root/deploy/optimitBackend/target/
-        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'bash -s' < ./deploy-script.sh
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 '
+          JAR_PATH="/home/root/deploy/optimitBackend/target/spring-security.jar"
+          PID=$(pgrep -f $JAR_PATH)
+          
+          # Agar jar fayl ishlayotgan bo‘lsa, uni to‘xtatish
+          if [ -n "$PID" ]; then
+            echo "Stopping existing jar process..."
+            kill -9 $PID
+          fi
+
+          # Yangi jar faylni ishga tushirish
+          echo "Starting new jar process..."
+          nohup java -jar $JAR_PATH > /dev/null 2>&1 &
+          echo "Application deployed successfully."
+        '
