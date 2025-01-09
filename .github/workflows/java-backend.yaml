@@ -17,17 +17,18 @@ jobs:
       uses: actions/setup-java@v2
       with:
         java-version: '17'
+        distribution: 'adoptopenjdk'  # JDK distributivini tanlang
 
     - name: Maven bilan qurish
       run: mvn clean install -DskipTests
 
     - name: Serverda deploy papkasini yaratish
       run: |
-        ssh -i ${{ secrets.SSH_PRIVATE_KEY }} root@162.55.182.148 'mkdir -p /home/root/deploy'  # Kerakli manzilni to'liq ko'rsating
+        ssh -i ${{ secrets.SSH_PRIVATE_KEY }} root@162.55.182.148 'mkdir -p /home/root/deploy'
 
     - name: Serverga deploy qilish
       run: |
-        scp -i ${{ secrets.SSH_PRIVATE_KEY }} target/spring-security.jar root@162.55.182.148:/home/root/deploy  # Kerakli manzilni to'liq ko'rsating
+        scp -i ${{ secrets.SSH_PRIVATE_KEY }} target/spring-security.jar root@162.55.182.148:/home/root/deploy
         ssh -i ${{ secrets.SSH_PRIVATE_KEY }} root@162.55.182.148 'bash -s' < ./deploy-script.sh
       env:
         PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
