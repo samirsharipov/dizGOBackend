@@ -13,9 +13,6 @@ jobs:
     - name: Kodingizni tekshirish
       uses: actions/checkout@v2
 
-    - name: Navigate to project directory
-      run: cd /var/www/vhosts/backend/optimitBackend  # Loyiha papkasiga o'tish
-
     - name: Install dependencies
       run: mvn install -DskipTests
 
@@ -42,5 +39,5 @@ jobs:
 
     - name: Deploy qilish
       run: |
-        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no /var/www/vhosts/backend/optimitBackend/target/spring-security.jar root@162.55.182.148:/home/root/deploy
+        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no target/spring-security.jar root@162.55.182.148:/home/root/deploy
         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'bash -s' < ./deploy-script.sh
