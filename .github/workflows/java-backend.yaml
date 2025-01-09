@@ -14,7 +14,9 @@ jobs:
       uses: actions/checkout@v2
 
     - name: SSH Private Keyni yaratish
-      run: echo "$PRIVATE_KEY" > ~/.ssh/id_rsa
+      run: |
+        mkdir -p ~/.ssh
+        echo "$PRIVATE_KEY" > ~/.ssh/id_rsa
       env:
         PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
