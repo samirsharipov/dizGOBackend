@@ -13,15 +13,6 @@ jobs:
     - name: Kodingizni tekshirish
       uses: actions/checkout@v2
 
-    - name: JDK 17 ni sozlash
-      uses: actions/setup-java@v2
-      with:
-        java-version: '17'
-        distribution: 'adoptium'  # 'adoptopenjdk' o'rniga 'adoptium'
-        java-package: jdk
-        architecture: x64
-        check-latest: false
-
     - name: Maven bilan qurish
       run: mvn clean install -DskipTests
 
