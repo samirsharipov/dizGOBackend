@@ -1,4 +1,4 @@
-name: Spring Boot Loyihasini Serverga Deploy Qilish
+name: Deploy Spring Boot Project
 
 on:
   push:
@@ -13,13 +13,18 @@ jobs:
     - name: Kodingizni tekshirish
       uses: actions/checkout@v2
 
-    - name: Serverda deploy papkasini yaratish
-      run: |
-        ssh -i ${{ secrets.SSH_PRIVATE_KEY }} root@162.55.182.148 'mkdir -p /home/root/deploy'
-
-    - name: Serverga deploy qilish
-      run: |
-        scp -i ${{ secrets.SSH_PRIVATE_KEY }} target/spring-security.jar root@162.55.182.148:/home/root/deploy
-        ssh -i ${{ secrets.SSH_PRIVATE_KEY }} root@162.55.182.148 'bash -s' < ./deploy-script.sh
+    - name: SSH Private Keyni yaratish
+      run: echo "$PRIVATE_KEY" > ~/.ssh/id_rsa
       env:
         PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: SSH ruxsatlarini o‘rnatish
+      run: chmod 600 ~/.ssh/id_rsa
+
+    - name: Serverda papka yaratish
+      run: ssh -i ~/.ssh/id_rsa root@162.55.182.148 'mkdir -p /home/root/deploy'
+
+    - name: Deploy qilish
+      run: |
+        scp -i ~/.ssh/id_rsa target/spring-security.jar root@162.55.182.148:/home/root/deploy
+        ssh -i ~/.ssh/id_rsa root@162.55.182.148 'bash -s' < ./deploy-script.sh
