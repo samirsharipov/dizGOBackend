@@ -13,12 +13,6 @@ jobs:
     - name: Kodingizni tekshirish
       uses: actions/checkout@v2
 
-    - name: Install dependencies
-      run: mvn install -DskipTests
-
-    - name: Build the project
-      run: mvn clean package 
-
     - name: SSH Private Keyni yaratish
       run: |
         mkdir -p ~/.ssh
@@ -36,6 +30,14 @@ jobs:
 
     - name: Serverda papka yaratish
       run: ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'mkdir -p /home/root/deploy'
+
+    - name: Serverga kodingizni pull qilish
+      run: |
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'cd /home/root/deploy && git pull origin main'
+
+    - name: Maven build qilish
+      run: |
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'cd /home/root/deploy && mvn clean package -DskipTests'
 
     - name: Deploy qilish
       run: |
