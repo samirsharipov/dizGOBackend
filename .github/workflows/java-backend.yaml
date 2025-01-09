@@ -38,4 +38,3 @@ jobs:
       run: |
         scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no target/spring-security.jar root@162.55.182.148:/home/root/deploy
         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'bash -s' < ./deploy-script.sh
- 
