@@ -13,9 +13,6 @@ jobs:
     - name: Kodingizni tekshirish
       uses: actions/checkout@v2
 
-    - name: Maven bilan qurish
-      run: mvn clean install -DskipTests
-
     - name: Serverda deploy papkasini yaratish
       run: |
         ssh -i ${{ secrets.SSH_PRIVATE_KEY }} root@162.55.182.148 'mkdir -p /home/root/deploy'
