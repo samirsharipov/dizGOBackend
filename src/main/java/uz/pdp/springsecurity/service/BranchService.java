@@ -10,6 +10,7 @@ import uz.pdp.springsecurity.payload.BranchDto;
 import uz.pdp.springsecurity.payload.BranchGetDto;
 import uz.pdp.springsecurity.repository.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -190,20 +191,35 @@ public class BranchService {
         return new ApiResponse("DELETED", true);
     }
 
-    public ApiResponse getByBusinessId(UUID business_id) {
-        List<Branch> allByBusiness_id = branchRepository.findAllByBusiness_Id(business_id);
-        if (allByBusiness_id.isEmpty()) return new ApiResponse("BUSINESS NOT FOUND", false);
-        return new ApiResponse("FOUND", true, allByBusiness_id.stream().map(this::toDto).collect(Collectors.toList()));
+    public ApiResponse getByBusinessId(UUID businessId) {
+        List<Branch> branches = branchRepository.findAllByBusiness_Id(businessId);
+
+        if (branches.isEmpty()) {
+            return new ApiResponse("BUSINESS NOT FOUND", false);
+        }
+
+        List<BranchGetDto> branchGetDtoList = branches.stream()
+                .map(branch -> {
+                    Location location = locationRepository.findByBranchId(branch.getId()).orElse(null);
+                    return toDto(branch, location);
+                })
+                .collect(Collectors.toList());
+
+        return new ApiResponse("FOUND", true, branchGetDtoList);
     }
 
-    public BranchGetDto toDto(Branch branch) {
+    public BranchGetDto toDto(Branch branch, Location branchLocation) {
         return new BranchGetDto(
                 branch.getId(),
                 branch.getName(),
                 branch.getAddress() != null ? branch.getAddress().getId() : null,
                 branch.getBranchCategory() != null ? branch.getBranchCategory().getId() : null,
-                branch.getBranchCategory() != null ? branch.getBranchCategory().getName() : null
+                branch.getBranchCategory() != null ? branch.getBranchCategory().getName() : null,
+                branch.getAddressName() != null ? branch.getAddressName() : null,
+                branchLocation != null ? branchLocation.getLatitude() : 0,
+                branchLocation != null ? branchLocation.getLongitude() : 0
         );
     }
+
 
 }

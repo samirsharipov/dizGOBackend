@@ -15,4 +15,7 @@ public class BranchGetDto {
     private UUID addressId;
     private UUID branchCategoryId;
     private String branchCategoryName;
+    private String addressName;
+    private double latitude;
+    private double longitude;
 }
