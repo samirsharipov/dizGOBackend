@@ -13,4 +13,6 @@ public interface BranchRepository extends JpaRepository<Branch, UUID> {
     int countAllByBusiness_Id(UUID business_id);
 
     Optional<Branch> findByBranchCategory_Id(UUID branchCategoryId);
+
+    boolean existsByBranchCategory_Id(UUID branchCategoryId);
 }

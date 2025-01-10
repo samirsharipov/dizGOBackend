@@ -16,8 +16,6 @@ import java.util.*;
 public interface UserRepository extends JpaRepository<User, UUID> {
     boolean existsById(UUID id);
 
-    User findByChatId(Long chatId);
-
     boolean existsByUsernameIgnoreCase(String username);
 
     Optional<User> findByUsername(String username);
@@ -34,15 +32,18 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     List<User> findAllByBranches_Id(UUID branches_id);
 
-    List<User> findAllByBusiness_IdAndRoleIsNotAndActiveIsTrue(UUID business_id, Role role);
-
     Page<User> findAllByBusinessId(UUID business_id, Pageable pageable);
+    @Query("SELECT u FROM users u WHERE u.business.id = :businessId " +
+            "AND (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
+            "OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
+            "OR LOWER(u.phoneNumber) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
+    Page<User> findByBusinessIdAndSearchTerm(@Param("businessId") UUID businessId,
+                                             @Param("searchTerm") String searchTerm,
+                                             Pageable pageable);
 
     List<User> findAllByBranchesIdAndRoleIsNotAndActiveIsTrue(UUID branches_id, Role role);
 
     Optional<User> findByBusinessIdAndRoleName(UUID business_id, String role_name);
-
-    Page<User> findAllByFirstNameContainingIgnoreCaseAndBranchesIdAndUsernameNot(String firstName, UUID branches_id, String username, Pageable pageable);
 
     List<User> findAllByBusiness_IdAndRoleName(UUID business_id, String role_name);
 
