@@ -31,6 +31,7 @@ public class BranchService {
     private final SubscriptionRepository subscriptionRepository;
     private final BranchCategoryRepository branchCategoryRepository;
     private final CreateEntityHelper createEntityHelper;
+    private final LocationRepository locationRepository;
 
     public ApiResponse addBranch(BranchDto branchDto) {
         Branch branch = new Branch();
@@ -68,7 +69,7 @@ public class BranchService {
             }
         }
 
-        branchRepository.save(branch);
+        Branch save = branchRepository.save(branch);
         user.getBranches().add(branch);
         userRepository.save(user);
         invoiceService.create(branch);
@@ -78,6 +79,12 @@ public class BranchService {
         createBalance(branch, balanceRepository, payMethodRepository);
 
         createProjectStatus(branch);
+        Location location = new Location();
+        location.setBranchId(save.getId());
+        location.setLatitude(branchDto.getLatitude());
+        location.setLongitude(branchDto.getLongitude());
+        location.setRadius(50);
+        locationRepository.save(location);
 
 
         return new ApiResponse("Added", true);
