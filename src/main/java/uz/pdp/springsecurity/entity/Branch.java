@@ -24,6 +24,8 @@ public class Branch extends AbsEntity {
     @OneToOne
     private Address address;
 
+    private String addressName;
+
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Business business;
