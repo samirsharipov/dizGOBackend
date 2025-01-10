@@ -13,7 +13,8 @@ import javax.persistence.Entity;
 @NoArgsConstructor
 @Entity
 @Where(clause = "deleted = false AND active = true")
-public class BranchCategory extends AbsEntity {
+public class
+BranchCategory extends AbsEntity {
 
     private String name;
 

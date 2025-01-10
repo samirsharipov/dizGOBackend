@@ -13,8 +13,8 @@ public class BranchDto {
     private String name;
     private UUID addressId;
     private String addressName;
-    private long latitude;
-    private long longitude;
+    private double latitude;
+    private double longitude;
     private UUID businessId;
     private UUID mainBranchId;
     private UUID categoryId;
