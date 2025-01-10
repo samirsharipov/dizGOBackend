@@ -62,6 +62,7 @@ public class BranchService {
         branch.setBusiness(optionalBusiness.get());
 
         branch.setMainBranchId(branchDto.getMainBranchId());
+        branch.setAddressName(branchDto.getAddressName());
 
         if (user.getBusiness().getMain()) {
             if (branchDto.getCategoryId() != null) {
@@ -150,6 +151,14 @@ public class BranchService {
 
         branch.setMainBranchId(branchDto.getMainBranchId());
 
+        Optional<Location> optionalLocation = locationRepository.findByBranchId(branch.getId());
+
+        optionalLocation.ifPresent(location -> {
+            location.setLatitude(branchDto.getLatitude());
+            location.setLongitude(branchDto.getLongitude());
+        });
+
+        branch.setAddressName(branchDto.getAddressName());
         if (business.getMain()) {
             if (branchDto.getCategoryId() != null) {
                 branchCategoryRepository.findById(branchDto.getCategoryId()).ifPresent(branch::setBranchCategory);

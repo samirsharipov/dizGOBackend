@@ -12,6 +12,7 @@ import java.util.UUID;
 public class BranchDto {
     private String name;
     private UUID addressId;
+    private String addressName;
     private long latitude;
     private long longitude;
     private UUID businessId;
