@@ -66,7 +66,12 @@ public class BranchService {
 
         if (user.getBusiness().getMain()) {
             if (branchDto.getCategoryId() != null) {
-                branchCategoryRepository.findById(branchDto.getCategoryId()).ifPresent(branch::setBranchCategory);
+                boolean existed = branchRepository.existsByBranchCategory_Id(branchDto.getCategoryId());
+                if (existed) {
+                    return new ApiResponse("Bunday categoriya oldin boshqa fillialga boglangan", false);
+                } else {
+                    branchCategoryRepository.findById(branchDto.getCategoryId()).ifPresent(branch::setBranchCategory);
+                }
             }
         }
 
@@ -161,6 +166,10 @@ public class BranchService {
         branch.setAddressName(branchDto.getAddressName());
         if (business.getMain()) {
             if (branchDto.getCategoryId() != null) {
+                boolean exists = branchRepository.existsByBranchCategory_Id(branchDto.getCategoryId());
+                if (exists && !branch.getBranchCategory().getId().equals(branchDto.getCategoryId())) {
+                    return new ApiResponse("Bunday categoriya oldin boshqa fillialga boglangan", false);
+                }
                 branchCategoryRepository.findById(branchDto.getCategoryId()).ifPresent(branch::setBranchCategory);
             }
         }

@@ -310,9 +310,15 @@ public class UserService {
     }
 
 
-    public ApiResponse getAllByBusinessId(UUID businessId, int size, int page) {
+    public ApiResponse getAllByBusinessId(UUID businessId, String nameOrPhoneNumber, int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<User> all = userRepository.findAllByBusinessId(businessId, pageable);
+        Page<User> all = null;
+
+        if (nameOrPhoneNumber != null && !nameOrPhoneNumber.isEmpty()) {
+            all = userRepository.findByBusinessIdAndSearchTerm(businessId, nameOrPhoneNumber, pageable);
+        } else {
+            all = userRepository.findAllByBusinessId(businessId, pageable);
+        }
 
         if (all.isEmpty()) {
             return new ApiResponse("NOT FOUND", false);
