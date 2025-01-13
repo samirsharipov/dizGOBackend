@@ -8,9 +8,11 @@ import org.springframework.web.bind.annotation.*;
 import uz.pdp.springsecurity.annotations.CheckPermission;
 import uz.pdp.springsecurity.annotations.CurrentUser;
 import uz.pdp.springsecurity.entity.User;
+import uz.pdp.springsecurity.helpers.ResponseEntityHelper;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.ProfileDto;
 import uz.pdp.springsecurity.payload.UserDTO;
+import uz.pdp.springsecurity.service.CustomerService;
 import uz.pdp.springsecurity.service.UserService;
 
 import javax.validation.Valid;
@@ -22,6 +24,7 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+    private final ResponseEntityHelper responseEntityHelper;
 
     @CheckPermission("ADD_USER")
     @PostMapping()
@@ -137,5 +140,10 @@ public class UserController {
     public HttpEntity<?> forgotPassword(@PathVariable String phoneNumber, @RequestParam String password) {
         ApiResponse apiResponse = userService.forgotPassword(phoneNumber, password);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
+
+    @GetMapping("/get-by-phone-number/{phoneNumber}")
+    public HttpEntity<?> getByPhoneNumber(@PathVariable String phoneNumber) {
+        return responseEntityHelper.buildResponse(userService.getByPhoneNumber(phoneNumber));
     }
 }
