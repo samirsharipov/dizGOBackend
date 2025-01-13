@@ -82,25 +82,14 @@ public class UserService {
         User saveUser = userRepository.save(user);
 
 
-        Optional<Customer> optionalCustomer =
-                customerRepository.
-                        findByPhoneNumberAndActiveIsTrueOrPhoneNumberAndActiveIsNull(userDto.getPhoneNumber(), userDto.getPhoneNumber());
-
-        if (optionalCustomer.isEmpty()) {
-            CustomerRegisterDto customerRegisterDto = new CustomerRegisterDto();
-            customerRegisterDto.setUserId(saveUser.getId());
-            customerRegisterDto.setFirstName(userDto.getFirstName());
-            customerRegisterDto.setLastName(userDto.getLastName());
-            customerRegisterDto.setPassword(userDto.getPassword());
-            customerRegisterDto.setPhoneNumber(userDto.getPhoneNumber());
-            customerService.createCustomer(customerRegisterDto);
-        }else {
-            Customer customer = optionalCustomer.get();
-            customer.setUser(saveUser);
-            customerRepository.save(customer);
-        }
-
         //Mijoz sifatida royxatdan otqazish
+        CustomerRegisterDto customerRegisterDto = new CustomerRegisterDto();
+        customerRegisterDto.setUserId(saveUser.getId());
+        customerRegisterDto.setFirstName(userDto.getFirstName());
+        customerRegisterDto.setLastName(userDto.getLastName());
+        customerRegisterDto.setPassword(userDto.getPassword());
+        customerRegisterDto.setPhoneNumber(userDto.getPhoneNumber());
+        customerService.createCustomer(customerRegisterDto);
 
 
         // Agreement qo'shish (foydalanuvchi uchun)
@@ -125,9 +114,17 @@ public class UserService {
 
     private ApiResponse checkUsernameAndPhoneNumber(String username, String phoneNumber) {
         if (userRepository.existsByUsernameIgnoreCase(username)) {
+            Optional<Customer> optionalCustomer = customerRepository.findByPhoneNumberAndActiveIsTrueOrPhoneNumberAndActiveIsNull(username, username);
+            if (optionalCustomer.isPresent()) {
+                return new ApiResponse("CUSTOMER EXISTS USERNAME", false);
+            }
             return new ApiResponse("USERNAME ALREADY EXISTS", false);
         }
         if (userRepository.existsByPhoneNumber(phoneNumber)) {
+            Optional<Customer> optionalCustomer = customerRepository.findByPhoneNumberAndActiveIsTrueOrPhoneNumberAndActiveIsNull(phoneNumber, phoneNumber);
+            if (optionalCustomer.isPresent()) {
+                return new ApiResponse("CUSTOMER EXISTS PHONE NUMBER", false);
+            }
             return new ApiResponse("PHONE NUMBER ALREADY EXISTS", false);
         }
         return new ApiResponse("VALID", true);

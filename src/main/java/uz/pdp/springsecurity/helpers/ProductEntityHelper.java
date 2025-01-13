@@ -25,20 +25,29 @@ public class ProductEntityHelper {
 
         Business business = branch.getBusiness();
 
-        Category category = findOrCreateEntity(
-                () -> categoryRepository.findByBusiness_IdAndName(business.getId(), originalProduct.getCategory().getName()),
-                () -> createCategory(originalProduct.getCategory(), business),
-                categoryRepository::save);
+        Category category = null;
+        if (originalProduct.getCategory() != null) {
+            category = findOrCreateEntity(
+                    () -> categoryRepository.findByBusiness_IdAndName(business.getId(), originalProduct.getCategory().getName()),
+                    () -> createCategory(originalProduct.getCategory(), business),
+                    categoryRepository::save);
+        }
 
-        Brand brand = findOrCreateEntity(
-                () -> brandRepository.findByBusiness_IdAndName(business.getId(), originalProduct.getBrand().getName()),
-                () -> createBrand(originalProduct.getBrand(), business),
-                brandRepository::save);
+        Brand brand = null;
+        if (originalProduct.getBrand() != null) {
+            brand = findOrCreateEntity(
+                    () -> brandRepository.findByBusiness_IdAndName(business.getId(), originalProduct.getBrand().getName()),
+                    () -> createBrand(originalProduct.getBrand(), business),
+                    brandRepository::save);
+        }
 
-        Measurement measurement = findOrCreateEntity(
-                () -> measurementRepository.findByBusinessIdAndName(business.getId(), originalProduct.getMeasurement().getName()),
-                () -> createMeasurement(originalProduct.getMeasurement(), business),
-                measurementRepository::save);
+        Measurement measurement = null;
+        if (originalProduct.getMeasurement() != null) {
+            measurement = findOrCreateEntity(
+                    () -> measurementRepository.findByBusinessIdAndName(business.getId(), originalProduct.getMeasurement().getName()),
+                    () -> createMeasurement(originalProduct.getMeasurement(), business),
+                    measurementRepository::save);
+        }
 
         Product clonedProduct = new Product();
         cloneProductFields(originalProduct, clonedProduct, branch, business, category, brand, measurement);

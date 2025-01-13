@@ -3,13 +3,11 @@ package uz.pdp.springsecurity.service;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uz.pdp.springsecurity.entity.Business;
 import uz.pdp.springsecurity.entity.Measurement;
 import uz.pdp.springsecurity.entity.MeasurementTranslate;
-import uz.pdp.springsecurity.payload.ApiResponse;
-import uz.pdp.springsecurity.payload.MeasurementDto;
-import uz.pdp.springsecurity.payload.MeasurementGetDto;
-import uz.pdp.springsecurity.payload.MeasurementTranslateDto;
+import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.BusinessRepository;
 import uz.pdp.springsecurity.repository.LanguageRepository;
 import uz.pdp.springsecurity.repository.MeasurementRepository;
@@ -56,6 +54,7 @@ public class MeasurementService {
         return new ApiResponse("ADDED", true);
     }
 
+    @Transactional
     public ApiResponse edit(UUID id, MeasurementDto measurementDto) {
         if (!measurementRepository.existsById(id)) {
             return new ApiResponse("NOT FOUND", false);
@@ -166,7 +165,8 @@ public class MeasurementService {
         }
     }
 
-    private void updateTranslations(List<MeasurementTranslateDto> translations, Measurement measurement) {
+    @Transactional
+    public void updateTranslations(List<MeasurementTranslateDto> translations, Measurement measurement) {
         // Eski tarjimalarni o'chirish
         measurementTranslateRepository.deleteByMeasurement_id(measurement.getId());
 
@@ -181,7 +181,16 @@ public class MeasurementService {
         if (all.isEmpty()) {
             return new ApiResponse("NOT FOUND", false);
         }
-
-        return new ApiResponse("FOUND", true, all);
+        List<MeasurementTranslateGetDto> getDtoList = new ArrayList<>();
+        for (MeasurementTranslate measurementTranslate : all) {
+            MeasurementTranslateGetDto getDto = new MeasurementTranslateGetDto();
+            getDto.setId(measurementTranslate.getId());
+            getDto.setName(measurementTranslate.getName());
+            getDto.setDescription(measurementTranslate.getDescription());
+            getDto.setLanguageId(measurementTranslate.getLanguage().getId());
+            getDto.setCode(measurementTranslate.getLanguage().getCode());
+            getDtoList.add(getDto);
+        }
+        return new ApiResponse("FOUND", true, getDtoList);
     }
 }
