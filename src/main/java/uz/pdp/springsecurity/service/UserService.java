@@ -38,6 +38,7 @@ public class UserService {
     private final JobRepository jobRepository;
     private final VerificationCodeService verificationService;
     private final CustomerService customerService;
+    private final CustomerRepository customerRepository;
 
 
     public ApiResponse add(UserDTO userDto, boolean isNewUser) {
@@ -80,15 +81,26 @@ public class UserService {
         User user = createUserFromDto(userDto, business, role, branches);
         User saveUser = userRepository.save(user);
 
-        CustomerRegisterDto customerRegisterDto = new CustomerRegisterDto();
-        customerRegisterDto.setUserId(saveUser.getId());
-        customerRegisterDto.setFirstName(userDto.getFirstName());
-        customerRegisterDto.setLastName(userDto.getLastName());
-        customerRegisterDto.setPassword(userDto.getPassword());
-        customerRegisterDto.setPhoneNumber(userDto.getPhoneNumber());
+
+        Optional<Customer> optionalCustomer =
+                customerRepository.
+                        findByPhoneNumberAndActiveIsTrueOrPhoneNumberAndActiveIsNull(userDto.getPhoneNumber(), userDto.getPhoneNumber());
+
+        if (optionalCustomer.isEmpty()) {
+            CustomerRegisterDto customerRegisterDto = new CustomerRegisterDto();
+            customerRegisterDto.setUserId(saveUser.getId());
+            customerRegisterDto.setFirstName(userDto.getFirstName());
+            customerRegisterDto.setLastName(userDto.getLastName());
+            customerRegisterDto.setPassword(userDto.getPassword());
+            customerRegisterDto.setPhoneNumber(userDto.getPhoneNumber());
+            customerService.createCustomer(customerRegisterDto);
+        }else {
+            Customer customer = optionalCustomer.get();
+            customer.setUser(saveUser);
+            customerRepository.save(customer);
+        }
 
         //Mijoz sifatida royxatdan otqazish
-        customerService.createCustomer(customerRegisterDto);
 
 
         // Agreement qo'shish (foydalanuvchi uchun)
