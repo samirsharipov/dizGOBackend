@@ -39,6 +39,12 @@ public class UserService {
 
 
     public ApiResponse add(UserDTO userDto, boolean isNewUser) {
+
+        ApiResponse checkUsernameAndPhoneNumber = checkUsernameAndPhoneNumber(userDto.getUsername(), userDto.getPhoneNumber());
+        if (!checkUsernameAndPhoneNumber.isSuccess()) {
+            return checkUsernameAndPhoneNumber;
+        }
+
         // Umumiy validatsiya: Business, Role va Username tekshiriladi
         ApiResponse validationResponse = validateUser(userDto);
         if (!validationResponse.isSuccess()) {
@@ -90,6 +96,15 @@ public class UserService {
         }
 
         return new ApiResponse("VALID", true);
+    }
+
+    private ApiResponse checkUsernameAndPhoneNumber(String username, String phoneNumber) {
+        if (userRepository.existsByUsernameIgnoreCase(username)) {
+            return new ApiResponse("USERNAME ALREADY EXISTS", false);
+        }
+        if (userRepository.existsByPhoneNumber(phoneNumber)) {
+            return new ApiResponse("PHONE NUMBER ALREADY EXISTS", false);
+        }
     }
 
     private Set<Branch> collectBranches(Set<UUID> branchIds) {
