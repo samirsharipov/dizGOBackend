@@ -68,6 +68,7 @@ public class CreateEntityHelper {
         userDto.setPassword(userCreateDto.getPassword());
         userDto.setFirstName(userCreateDto.getFirstName());
         userDto.setLastName(userCreateDto.getLastName());
+        userDto.setPhoneNumber(businessDto.getBusinessNumber());
         userDto.setEnabled(false);
 
         userDto.setBranchIds(Set.of(branch.getId()));

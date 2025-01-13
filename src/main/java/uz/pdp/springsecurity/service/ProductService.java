@@ -792,10 +792,12 @@ public class ProductService {
         // Eski tarjimalarni o'chirish
         productTranslateRepository.deleteAllByProductId(product.getId());
 
-        productTranslateDTOList.forEach(translation -> {
-            ProductTranslate productTranslate = fromTranslateDto(translation, product);
-            productTranslateRepository.save(productTranslate);
-        });
+        if (productTranslateDTOList != null) {
+            productTranslateDTOList.forEach(translation -> {
+                ProductTranslate productTranslate = fromTranslateDto(translation, product);
+                productTranslateRepository.save(productTranslate);
+            });
+        }
     }
 
     public static <T> T findByIdOrThrow(JpaRepository<T, UUID> repository, UUID id, String entityName) {
@@ -970,7 +972,7 @@ public class ProductService {
                     product.setAmount(totalKg);
                 }
             } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
-               return new ApiResponse(messages.get(language + "_not_found"), false);
+                return new ApiResponse(messages.get(language + "_not_found"), false);
             }
         }
 

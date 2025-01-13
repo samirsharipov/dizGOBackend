@@ -26,7 +26,7 @@ public class ProductExcelController {
             try {
                 CompletableFuture<Void> voidCompletableFuture =
                         productExcelService.importFromExcelAsync(file, branchId, emitter);
-                voidCompletableFuture.thenRun(emitter::complete); // Jarayonni yakunlang
+                voidCompletableFuture.thenRun(emitter::complete);
             } catch (Exception e) {
                 emitterService.sendError(emitter, "Xatolik yuz berdi: " + e.getMessage());
                 emitter.completeWithError(e);
