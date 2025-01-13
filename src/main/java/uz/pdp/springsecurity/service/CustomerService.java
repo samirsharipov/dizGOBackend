@@ -103,17 +103,27 @@ public class CustomerService {
             Role customerRole = roleRepository.findByName("Customer")
                     .orElseThrow(() -> new RuntimeException("Customer role not found"));
 
-            // 3. Yangi User yaratish
             User user = new User();
-            user.setFirstName(customerDto.getFirstName());
-            user.setLastName(customerDto.getLastName());
-            user.setUsername(customerDto.getPhoneNumber());
-            user.setPassword(passwordEncoder.encode(customerDto.getPassword()));
-            user.setPhoneNumber(customerDto.getPhoneNumber());
-            user.setRole(customerRole);
-            user.setEnabled(true); // Akkaunt aktiv
-            user.setActive(true); // Akkaunt faol
-            userRepository.save(user);
+
+
+            if (customerDto.getUserId() != null) {
+                Optional<User> optionalUser = userRepository.findById(customerDto.getUserId());
+                if (optionalUser.isEmpty()) {
+                    return new ApiResponse("User does not exist", false);
+                }
+                user = optionalUser.get();
+            } else {
+                // 3. Yangi User yaratish
+                user.setFirstName(customerDto.getFirstName());
+                user.setLastName(customerDto.getLastName());
+                user.setUsername(customerDto.getPhoneNumber());
+                user.setPassword(passwordEncoder.encode(customerDto.getPassword()));
+                user.setPhoneNumber(customerDto.getPhoneNumber());
+                user.setRole(customerRole);
+                user.setEnabled(true); // Akkaunt aktiv
+                user.setActive(true); // Akkaunt faol
+                userRepository.save(user);
+            }
 
             // 4. Customer yaratish va User bilan bog'lash
             Customer customer = new Customer();

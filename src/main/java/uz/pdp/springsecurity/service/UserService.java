@@ -1,6 +1,7 @@
 package uz.pdp.springsecurity.service;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -36,6 +37,7 @@ public class UserService {
     private final TradeRepository tradeRepository;
     private final JobRepository jobRepository;
     private final VerificationCodeService verificationService;
+    private final CustomerService customerService;
 
 
     public ApiResponse add(UserDTO userDto, boolean isNewUser) {
@@ -76,7 +78,18 @@ public class UserService {
 
         // Userni yaratish va mapping qilish (DTO dan Entity ga)
         User user = createUserFromDto(userDto, business, role, branches);
-        userRepository.save(user);
+        User saveUser = userRepository.save(user);
+
+        CustomerRegisterDto customerRegisterDto = new CustomerRegisterDto();
+        customerRegisterDto.setUserId(saveUser.getId());
+        customerRegisterDto.setFirstName(userDto.getFirstName());
+        customerRegisterDto.setLastName(userDto.getLastName());
+        customerRegisterDto.setPassword(userDto.getPassword());
+        customerRegisterDto.setPhoneNumber(userDto.getPhoneNumber());
+
+        //Mijoz sifatida royxatdan otqazish
+        customerService.createCustomer(customerRegisterDto);
+
 
         // Agreement qo'shish (foydalanuvchi uchun)
         agreementService.add(user);
@@ -273,14 +286,7 @@ public class UserService {
         User user = optionalUser.get();
 
         // User entity ni UserDTO ga aylantirish
-        UserDTO userDTO = userMapper.toDto(user);
-        userDTO.setPhotoId(user.getPhoto() != null ? user.getPhoto().getId() : null);
-
-        // Branch id larini qoshish
-        Set<UUID> branchesIdList = user.getBranches().stream()
-                .map(Branch::getId)
-                .collect(Collectors.toSet());
-        userDTO.setBranchIds(branchesIdList);
+        UserDTO userDTO = getUserDTO(user);
 
         return new ApiResponse("SUCCESS", true, userDTO);
     }
@@ -580,5 +586,32 @@ public class UserService {
         userRepository.save(user);
         verificationService.deleteVerificationCode(phoneNumber);
         return new ApiResponse("OK", true);
+    }
+
+    public ApiResponse getByPhoneNumber(String phoneNumber) {
+
+        Optional<User> optionalUser = userRepository.findByPhoneNumber(phoneNumber);
+        if (optionalUser.isEmpty()) {
+            return new ApiResponse("NOT FOUND", false);
+        }
+        User user = optionalUser.get();
+
+        // User entity ni UserDTO ga aylantirish
+        UserDTO userDTO = getUserDTO(user);
+
+        return new ApiResponse("OK", true, userDTO);
+    }
+
+    @NotNull
+    private UserDTO getUserDTO(User user) {
+        UserDTO userDTO = userMapper.toDto(user);
+        userDTO.setPhotoId(user.getPhoto() != null ? user.getPhoto().getId() : null);
+
+        // Branch id larini qoshish
+        Set<UUID> branchesIdList = user.getBranches().stream()
+                .map(Branch::getId)
+                .collect(Collectors.toSet());
+        userDTO.setBranchIds(branchesIdList);
+        return userDTO;
     }
 }
