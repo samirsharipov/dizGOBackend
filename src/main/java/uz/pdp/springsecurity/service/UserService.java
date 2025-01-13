@@ -105,6 +105,23 @@ public class UserService {
         if (userRepository.existsByPhoneNumber(phoneNumber)) {
             return new ApiResponse("PHONE NUMBER ALREADY EXISTS", false);
         }
+        return new ApiResponse("VALID", true);
+    }
+
+    private ApiResponse checkUsernameAndPhoneNumberForEdit(String username, String phoneNumber, User user) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isPresent()) {
+            if (!optionalUser.get().getUsername().equals(user.getUsername())) {
+                return new ApiResponse("USERNAME ALREADY EXISTS", false);
+            }
+        }
+        Optional<User> byPhoneNumber = userRepository.findByPhoneNumber(phoneNumber);
+        if (byPhoneNumber.isPresent()) {
+            if (!byPhoneNumber.get().getPhoneNumber().equals(user.getPhoneNumber())) {
+                return new ApiResponse("PHONE NUMBER ALREADY EXISTS", false);
+            }
+        }
+        return new ApiResponse("VALID", true);
     }
 
     private Set<Branch> collectBranches(Set<UUID> branchIds) {
@@ -146,6 +163,12 @@ public class UserService {
             return new ApiResponse("USER NOT FOUND", false);
         }
         User user = optionalUser.get();
+
+        ApiResponse checkUsernameAndPhoneNumberForEdit =
+                checkUsernameAndPhoneNumberForEdit(userDto.getUsername(), userDto.getPhoneNumber(), user);
+        if (!checkUsernameAndPhoneNumberForEdit.isSuccess()) {
+            return checkUsernameAndPhoneNumberForEdit;
+        }
 
         // Umumiy validatsiya: Business, Role va Username tekshiriladi
         ApiResponse validationResponse = validateUser(userDto);
