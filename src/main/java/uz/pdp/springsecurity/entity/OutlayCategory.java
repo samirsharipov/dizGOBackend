@@ -13,7 +13,6 @@ import javax.persistence.ManyToOne;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class OutlayCategory extends AbsEntity {
 
     private String title;
@@ -21,4 +20,12 @@ public class OutlayCategory extends AbsEntity {
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Branch branch;
+
+    @ManyToOne
+    private Business business;
+
+    public OutlayCategory(String title, Business business) {
+        this.title = title;
+        this.business = business;
+    }
 }

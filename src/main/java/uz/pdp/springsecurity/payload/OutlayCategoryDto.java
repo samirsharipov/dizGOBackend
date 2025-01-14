@@ -11,8 +11,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OutlayCategoryDto {
+
     @NotNull(message = "required line")
     private String title;
-    private UUID branchId;
 
+    private UUID businessId;
 }
