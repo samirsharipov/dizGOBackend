@@ -185,9 +185,15 @@ public class BranchService {
     }
 
     public ApiResponse deleteBranch(UUID id) {
-        if (!branchRepository.existsById(id)) return new ApiResponse("NOT FOUND", false);
+        Optional<Branch> optionalBranch = branchRepository.findById(id);
+        if (optionalBranch.isEmpty()) {
+            return new ApiResponse("BRANCH NOT FOUND", false);
+        }
 
-        branchRepository.deleteById(id);
+        Branch branch = optionalBranch.get();
+        branch.setDeleted(true);
+        branch.setActive(false);
+        branchRepository.save(optionalBranch.get());
         return new ApiResponse("DELETED", true);
     }
 

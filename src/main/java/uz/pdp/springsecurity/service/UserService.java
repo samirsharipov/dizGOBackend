@@ -43,6 +43,13 @@ public class UserService {
 
     public ApiResponse add(UserDTO userDto, boolean isNewUser) {
 
+        ApiResponse validateUsername
+                = validateUsername(userDto.getUsername());
+
+        if (!validateUsername.isSuccess()){
+            return validateUsername;
+        }
+
         ApiResponse checkUsernameAndPhoneNumber = checkUsernameAndPhoneNumber(userDto.getUsername(), userDto.getPhoneNumber());
         if (!checkUsernameAndPhoneNumber.isSuccess()) {
             return checkUsernameAndPhoneNumber;
@@ -107,6 +114,24 @@ public class UserService {
         // Role mavjudligini tekshirish
         if (roleRepository.findById(userDto.getRoleId()).isEmpty()) {
             return new ApiResponse("NOT FOUND ROLE", false);
+        }
+
+        return new ApiResponse("VALID", true);
+    }
+
+    private ApiResponse validateUsername(String username) {
+
+        if (username.equals("admin")) {
+            return new ApiResponse("ADMIN USERNAME FAILED", false);
+        }
+        if (username.equals("superadmin")) {
+            return new ApiResponse("SUPERADMIN USERNAME FAILED", false);
+        }
+        if (username.equals("manager")) {
+            return new ApiResponse("MANAGER USERNAME FAILED", false);
+        }
+        if (username.equals("user")) {
+            return new ApiResponse("USER USERNAME FAILED", false);
         }
 
         return new ApiResponse("VALID", true);

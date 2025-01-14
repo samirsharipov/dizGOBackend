@@ -47,12 +47,6 @@ public class OutlayCategoryController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    @CheckPermission("VIEW_OUTLAY")
-    @GetMapping("/get-by-branchId/{branch_id}")
-    public HttpEntity<?> getAllByBranchId(@PathVariable UUID branch_id) {
-        ApiResponse apiResponse = outlayCategoryService.getAllByBranchId(branch_id);
-        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
-    }
 
     @CheckPermission("VIEW_OUTLAY_ADMIN")
     @GetMapping("/get-by-businessId/{businessId}")

@@ -18,6 +18,8 @@ public class RoleService {
     private final BusinessRepository businessRepository;
     private final UserRepository userRepository;
     private final TariffRepository tariffRepository;
+    private final CategoryRepository categoryRepository;
+    private final RoleCategoryRepository roleCategoryRepository;
 
     public ApiResponse add(RoleDto roleDto) {
         Optional<Business> optionalBusiness = businessRepository.findById(roleDto.getBusinessId());
@@ -164,6 +166,11 @@ public class RoleService {
         role.setPermissions(roleDto.getPermissions());
         role.setDescription(roleDto.getDescription());
         role.setBusiness(business);
+
+        if (roleDto.getRoleCategoryId() != null) {
+            Optional<RoleCategory> categoryOptional = roleCategoryRepository.findById(roleDto.getRoleCategoryId());
+            categoryOptional.ifPresent(role::setRoleCategory);
+        }
 
         if (roleDto.getIsOffice() != null) {
             role.setOffice(roleDto.getIsOffice());

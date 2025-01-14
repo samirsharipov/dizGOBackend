@@ -11,4 +11,5 @@ public interface OutlayCategoryRepository extends JpaRepository<OutlayCategory, 
     List<OutlayCategory> findAllByBranch_Id(UUID branch_id);
 
     List<OutlayCategory> findAllByBranchBusinessId(UUID branch_business_id);
+    List<OutlayCategory> findAllByBusinessId(UUID branch_business_id);
 }
