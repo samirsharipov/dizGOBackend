@@ -73,13 +73,14 @@ public interface OutlayRepository extends JpaRepository<Outlay, UUID> {
     );
 
 
-    List<Outlay> findAllByDateBetweenAndBranchId(Date firstDate, Date secondDate, UUID uuid);
-
     @Query(value = "SELECT SUM(total_sum) FROM outlay WHERE created_at BETWEEN ?1 AND  ?2 AND branch_id = ?3", nativeQuery = true)
     Double outlayByCreatedAtBetweenAndBranchId(Timestamp from, Timestamp to, UUID branchId);
 
     @Query(value = "SELECT SUM(o.totalSum) FROM Outlay o WHERE o.branch.business.id = :businessId AND o.createdAt >= :startDate AND o.createdAt <= :endDate")
-    Double outlayByCreatedAtBetweenAndBusinessId(@Param("businessId") UUID branchId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+    Double outlayByCreatedAtBetweenAndBusinessId(@Param("businessId") UUID businessId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+
+    @Query(value = "SELECT SUM(o.totalSum) FROM Outlay o WHERE o.branch.id = :branchId AND o.createdAt >= :startDate AND o.createdAt <= :endDate")
+    Double outlayByBranchIdAndCreatedAtBetween(@Param("branchId") UUID branchId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
 
     @Query(value = "SELECT SUM(o.totalSum) FROM Outlay o WHERE o.branch.business.id = :businessId AND o.paymentMethod.id = :paymethodId AND o.createdAt >= :startDate AND o.createdAt <= :endDate")
     Double outlayByCreatedAtBetweenAndBusinessIdAndPaymentMethod(@Param("businessId") UUID businessId, @Param("paymethodId") UUID paymethodId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);

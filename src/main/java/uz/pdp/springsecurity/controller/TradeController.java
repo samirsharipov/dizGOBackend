@@ -45,7 +45,6 @@ public class TradeController {
     }
 
     //Bitta savdoni ko'rish
-
     @CheckPermission("VIEW_TRADE")
     @GetMapping("/{id}")
     public HttpEntity<?> getOne(@PathVariable UUID id) {

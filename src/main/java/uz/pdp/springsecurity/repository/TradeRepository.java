@@ -7,14 +7,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import uz.pdp.springsecurity.entity.Outlay;
 import uz.pdp.springsecurity.entity.Trade;
 import uz.pdp.springsecurity.payload.projections.DataProjection;
 import uz.pdp.springsecurity.payload.projections.MonthProjection;
 import uz.pdp.springsecurity.payload.projections.ReportForProduct;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -169,13 +167,40 @@ public interface TradeRepository extends JpaRepository<Trade, UUID>, JpaSpecific
 
     List<Trade> findAllByBranch_Business_IdOrderByCreatedAtDesc(UUID businessId);
 
-    double countAllByBranch_BusinessIdAndCreatedAtBetween(UUID branch_business_id, Timestamp startDate, Timestamp endDate);
+
 
     double countAllByBranchIdAndCreatedAtBetween(UUID branch_id, Timestamp startDate, Timestamp endDate);
 
+    double countAllByBranch_BusinessIdAndCreatedAtBetween(UUID branch_business_id, Timestamp startDate, Timestamp endDate);
 
+    // trade total sum by branch id
     @Query(value = "select sum (t.totalSum) from Trade t where t.branch.id = :branchId AND t.createdAt >= :startDate AND t.createdAt <= :endDate")
     Double totalSum(@Param("branchId") UUID branchId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+
+    // trade total sum by business id
+    @Query(value = "select sum (t.totalSum) from Trade t where t.branch.business.id = :businessId AND t.createdAt >= :startDate AND t.createdAt <= :endDate")
+    Double totalSumByBusiness(@Param("businessId") UUID businessId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+
+    // trade total profit sum by branch id
+    @Query(value = "select sum (t.totalProfit) from Trade t where t.branch.id = :branchId AND t.createdAt >= :startDate AND t.createdAt <= :endDate")
+    Double totalProfit(@Param("branchId") UUID branchId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+
+    // trade total profit sum by business id
+    @Query(value = "select sum (t.totalProfit) from Trade t where t.branch.business.id = :businessId AND t.createdAt >= :startDate AND t.createdAt <= :endDate")
+    Double totalProfitByBusinessId(@Param("businessId") UUID businessId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+
+    @Query("select count(t) from Trade t where t.branch.id = :branchId and t.createdAt between :startDate and :endDate")
+    Long countAllByBranchId(@Param("branchId") UUID branchId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+
+    @Query("select count(t) from Trade t where t.branch.business.id = :businessId and t.createdAt between :startDate and :endDate")
+    Long countAllByBusinessId(@Param("businessId") UUID businessId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+
+    @Query("select count(distinct t.customer.id) from Trade t where t.branch.business.id = :businessId and t.createdAt between :startDate and :endDate")
+    Long countDistinctCustomersByBusinessId(@Param("businessId") UUID businessId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+
+    @Query("select count(distinct t.customer.id) from Trade t where t.branch.id = :branchId and t.createdAt between :startDate and :endDate")
+    Long countDistinctCustomersByBranchId(@Param("branchId") UUID branchId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+
 
     @Query(value = "select sum (t.totalSum) from Trade t where t.payMethod.id = :payMethodId and t.branch.id = :branchId AND t.createdAt >= :startDate AND t.createdAt <= :endDate")
     Double totalPayment(@Param("payMethodId") UUID payMethodId, @Param("branchId") UUID branchId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
@@ -183,14 +208,6 @@ public interface TradeRepository extends JpaRepository<Trade, UUID>, JpaSpecific
     @Query(value = "select sum (t.totalSum) from Trade t where t.payMethod.id = :payMethodId and t.branch.business.id = :businessId AND t.createdAt >= :startDate AND t.createdAt <= :endDate")
     Double totalPaymentByBusiness(@Param("payMethodId") UUID payMethodId, @Param("businessId") UUID businessId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
 
-    @Query(value = "select sum (t.totalSum) from Trade t where t.branch.business.id = :businessId AND t.createdAt >= :startDate AND t.createdAt <= :endDate")
-    Double totalSumByBusiness(@Param("businessId") UUID businessId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
-
-    @Query(value = "select sum (t.totalProfit) from Trade t where t.branch.id = :branchId AND t.createdAt >= :startDate AND t.createdAt <= :endDate")
-    Double totalProfit(@Param("branchId") UUID branchId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
-
-    @Query(value = "select sum (t.totalProfit) from Trade t where t.branch.business.id = :businessId AND t.createdAt >= :startDate AND t.createdAt <= :endDate")
-    Double totalProfitByBusinessId(@Param("businessId") UUID businessId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
 
     @Query(value = "SELECT SUM(t.debtSum) FROM Trade t WHERE t.branch.id = :branchId AND t.createdAt >= :startDate AND t.createdAt <= :endDate")
     Double totalDebtSum(@Param("branchId") UUID branchId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);

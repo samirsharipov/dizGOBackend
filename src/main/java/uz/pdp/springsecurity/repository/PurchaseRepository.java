@@ -15,7 +15,9 @@ import java.util.*;
 
 public interface PurchaseRepository extends JpaRepository<Purchase, UUID> {
     Optional<Purchase> findFirstByBranchIdOrderByCreatedAtDesc(UUID branchId);
-Purchase findByBranchIdAndInvoiceContainingIgnoreCase(UUID branch_id, String invoice);
+
+    Purchase findByBranchIdAndInvoiceContainingIgnoreCase(UUID branch_id, String invoice);
+
     List<Purchase> findAllByBranch_IdOrderByCreatedAtDesc(UUID branch_id);
 
     @Query("SELECT s.name, s.phoneNumber, SUM(p.totalSum) FROM Purchase p JOIN p.supplier s WHERE p.branch.id = :branchId GROUP BY s.name, s.phoneNumber ORDER BY SUM(p.totalSum) DESC")
@@ -39,26 +41,40 @@ Purchase findByBranchIdAndInvoiceContainingIgnoreCase(UUID branch_id, String inv
     Double totalMyDebt(@Param("branchId") UUID branchId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
 
     Page<Purchase> findAllByBranchIdAndSellerIdAndSupplierIdAndDate(UUID branchId, UUID userId, UUID supplierId, Date paymentStatus, Pageable pageable);
+
     Page<Purchase> findAllByBranch_BusinessIdAndSellerIdAndSupplierIdAndDate(UUID businessID, UUID userId, UUID supplierId, Date paymentStatus, Pageable pageable);
 
     Page<Purchase> findAllByBranchIdAndSellerIdAndSupplierId(UUID branchId, UUID userId, UUID supplierId, Pageable pageable);
+
     Page<Purchase> findAllByBranch_BusinessIdAndSellerIdAndSupplierId(UUID businessID, UUID userId, UUID supplierId, Pageable pageable);
 
     Page<Purchase> findAllByBranchIdAndSellerIdAndDate(UUID branchId, UUID userId, Date paymentStatus, Pageable pageable);
+
     Page<Purchase> findAllByBranch_BusinessIdAndSellerIdAndDate(UUID businessID, UUID userId, Date paymentStatus, Pageable pageable);
 
     Page<Purchase> findAllByBranchIdAndSupplierIdAndDate(UUID branchId, UUID supplierId, Date paymentStatus, Pageable pageable);
+
     Page<Purchase> findAllByBranch_BusinessIdAndSupplierIdAndDate(UUID businessID, UUID supplierId, Date paymentStatus, Pageable pageable);
 
     Page<Purchase> findAllByBranchIdAndSellerId(UUID branchId, UUID userId, Pageable pageable);
+
     Page<Purchase> findAllByBranch_BusinessIdAndSellerId(UUID businessID, UUID userId, Pageable pageable);
 
     Page<Purchase> findAllByBranchIdAndSupplierId(UUID branchId, UUID supplierId, Pageable pageable);
+
     Page<Purchase> findAllByBranch_BusinessIdAndSupplierId(UUID businessID, UUID supplierId, Pageable pageable);
 
     Page<Purchase> findAllByBranchIdAndDate(UUID branchId, Date paymentStatus, Pageable pageable);
+
     Page<Purchase> findAllByBranch_BusinessIdAndDate(UUID businessID, Date paymentStatus, Pageable pageable);
 
     Page<Purchase> findAllByBranchId(UUID branchId, Pageable pageable);
+
     Page<Purchase> findAllByBranch_BusinessId(UUID businessID, Pageable pageable);
+
+    @Query(value = "SELECT COUNT(p) FROM Purchase p WHERE p.branch.id = :branchId AND p.date >= :startDate AND p.date <= :endDate")
+    Long countPurchasesByBranchIdAndDateBetween(@Param("branchId") UUID branchId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+
+    @Query(value = "SELECT COUNT(p) FROM Purchase p WHERE p.branch.business.id = :businessId AND p.date >= :startDate AND p.date <= :endDate")
+    Long countPurchasesByBusinessIdAndDateBetween(@Param("businessId") UUID businessId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
 }

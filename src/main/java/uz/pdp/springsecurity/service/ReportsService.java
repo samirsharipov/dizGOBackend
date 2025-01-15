@@ -54,7 +54,6 @@ public class ReportsService {
     private final TradeLidMapper tradeLidMapper;
     private final RepaymentDebtRepository repaymentDebtRepository;
     private final FifoCalculationRepository fifoCalculationRepository;
-
     private final static Date date = new Date();
     private final static Timestamp currentDay = new Timestamp(System.currentTimeMillis());
     private final static Timestamp enDate = new Timestamp(date.getTime());
@@ -2217,7 +2216,7 @@ public class ReportsService {
 
             if (branchId != null) {
                 SellerForChartDto sellerForChartDto = new SellerForChartDto();
-                double tradeAmountByBranchId = tradeRepository.countAllByBranchIdAndCreatedAtBetween(branchId, from, to);
+                double tradeAmountByBranchId = tradeRepository.countAllByBranchId(branchId, from, to);
                 sellerForChartDto.setCreateAt(from);
                 sellerForChartDto.setTradeAmount(tradeAmountByBranchId);
                 dtoList.add(sellerForChartDto);

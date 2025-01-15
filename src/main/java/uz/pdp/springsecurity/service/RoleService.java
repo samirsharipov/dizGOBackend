@@ -18,7 +18,6 @@ public class RoleService {
     private final BusinessRepository businessRepository;
     private final UserRepository userRepository;
     private final TariffRepository tariffRepository;
-    private final CategoryRepository categoryRepository;
     private final RoleCategoryRepository roleCategoryRepository;
 
     public ApiResponse add(RoleDto roleDto) {

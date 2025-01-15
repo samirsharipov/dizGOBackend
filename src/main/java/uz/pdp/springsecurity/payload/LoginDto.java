@@ -10,9 +10,10 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoginDto {
-    @NotNull(message = "required line")
+
     private String username;
+    private String phoneNumber;
+
     @NotNull(message = "required line")
     private String password;
-
 }

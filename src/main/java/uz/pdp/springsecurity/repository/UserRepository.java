@@ -82,9 +82,16 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Query("select count(u) from users u where u.createdAt between :startDate and :endDate")
     long countTotalBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
 
-    boolean existsByUsername(String username);
-
     boolean existsByPhoneNumber(String phoneNumber);
 
     Page<User> findAllByFirstNameRegexAndBranchesIdAndUsernameNot(String queryName, UUID branchId, String superadmin, Pageable pageable);
+
+    @Query("select count(u.id) from users u " +
+            "join u.branches b " +
+            "where b.id = :branchId and u.active = true and u.deleted = false")
+    Long countActiveUsersByBranch(@Param("branchId") UUID branchId);
+
+    @Query("select count(u.id) from users u " +
+            "where u.business.id = :businessId and u.active = true and u.deleted = false")
+    Long countActiveUsersByBusiness(@Param("businessId") UUID businessId);
 }
