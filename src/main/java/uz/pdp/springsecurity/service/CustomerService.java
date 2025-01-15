@@ -91,20 +91,11 @@ public class CustomerService {
     @Transactional
     public ApiResponse createCustomer(CustomerRegisterDto customerDto) {
         try {
-            // 1. Tekshiruv: username va phoneNumber unikal bo'lishi kerak
-            if (userRepository.existsByUsername(customerDto.getPhoneNumber())) {
-                return new ApiResponse("Username already exists", false);
-            }
-            if (userRepository.existsByPhoneNumber(customerDto.getPhoneNumber())) {
-                return new ApiResponse("Phone number already exists", false);
-            }
 
-            // 2. Role o'rnatish (Customer uchun maxsus rol topiladi)
             Role customerRole = roleRepository.findByName("Customer")
                     .orElseThrow(() -> new RuntimeException("Customer role not found"));
 
             User user = new User();
-
 
             if (customerDto.getUserId() != null) {
                 Optional<User> optionalUser = userRepository.findById(customerDto.getUserId());

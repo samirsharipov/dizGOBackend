@@ -51,4 +51,34 @@ public interface WarehouseRepository extends JpaRepository<Warehouse, UUID> {
 
     @Query(value = "SELECT SUM(w.amount * w.product.salePrice) FROM Warehouse w WHERE w.product.id = ?1 AND w.branch.id = ?2")
     Double salePriceByProductSingleAndBranchId(UUID productId, UUID branchId);
+
+    @Query("select count(w.id) from Warehouse w " +
+            "where w.branch.id = :branchId " +
+            "and w.amount > 0")
+    Long countProductsWithAmountGreaterThanZeroByBranch(@Param("branchId") UUID branchId);
+
+    @Query("select count(w.id) from Warehouse w " +
+            "where w.product.business.id = :businessId " +
+            "and w.amount > 0")
+    Long countProductsWithAmountGreaterThanZeroByBusiness(@Param("businessId") UUID businessId);
+
+    @Query("select count(w.id) from Warehouse w " +
+            "where w.branch.id = :branchId " +
+            "and w.amount <= 0")
+    Long countProductsWithAmountLessThanOrEqualToZeroByBranch(@Param("branchId") UUID branchId);
+
+    @Query("select count(w.id) from Warehouse w " +
+            "where w.product.business.id = :businessId " +
+            "and w.amount <= 0")
+    Long countProductsWithAmountLessThanOrEqualToZeroByBusiness(@Param("businessId") UUID businessId);
+
+    @Query("select count(w.id) from Warehouse w " +
+            "where w.branch.id = :branchId " +
+            "and w.amount <= w.product.minQuantity")
+    Long countProductsWithAmountLessThanOrEqualToMinQuantityByBranch(@Param("branchId") UUID branchId);
+
+    @Query("select count(w.id) from Warehouse w " +
+            "where w.product.business.id = :businessId " +
+            "and w.amount <= w.product.minQuantity")
+    Long countProductsWithAmountLessThanOrEqualToMinQuantityByBusiness(@Param("businessId") UUID businessId);
 }
