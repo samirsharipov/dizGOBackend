@@ -25,8 +25,8 @@ public class MainReportService {
         report.setTotalTradeSum(totalTradeSum(businessId, branchId, startDate, endDate));
         report.setTotalTradeProfitSum(totalTradeProfitSum(businessId, branchId, startDate, endDate));
         report.setTotalTradeCount(totalTradeCount(businessId, branchId, startDate, endDate));
-        report.setTotalTradeCustomerCount(totalCustomerCount(businessId, branchId, startDate, endDate));
-        report.setTotalProductCount(countProduct(businessId, branchId, startDate, endDate));
+        report.setTotalTradeCustomerCount(totalCustomerCount(businessId, branchId));
+        report.setTotalProductCount(countProduct(businessId, branchId));
         report.setTotalProductCountGreaterThanZero(countProductGreaterThanZero(businessId, branchId));
         report.setTotalProductCountLessThanZero(countProductLessThanZero(businessId, branchId));
         report.setTotalProductMinQuantity(minQuantity(businessId, branchId));
@@ -75,26 +75,26 @@ public class MainReportService {
     }
 
     // count customer district in trade
-    private long totalCustomerCount(UUID businessId, UUID branchId, Timestamp startDate, Timestamp endDate) {
+    private long totalCustomerCount(UUID businessId, UUID branchId) {
         long totalCustomers = 0L;
         if (branchId != null) {
-            Long distinctCustomersByBranchId = tradeRepository.countDistinctCustomersByBranchId(branchId, startDate, endDate);
+            Long distinctCustomersByBranchId = tradeRepository.countDistinctCustomersByBranchId(branchId);
             totalCustomers += distinctCustomersByBranchId != null ? distinctCustomersByBranchId : 0L;
         } else {
-            Long customersByBusinessId = tradeRepository.countDistinctCustomersByBusinessId(businessId, startDate, endDate);
+            Long customersByBusinessId = tradeRepository.countDistinctCustomersByBusinessId(businessId);
             totalCustomers += customersByBusinessId != null ? customersByBusinessId : 0L;
         }
         return totalCustomers;
     }
 
 
-    private long countProduct(UUID businessId, UUID branchId, Timestamp startDate, Timestamp endDate) {
+    private long countProduct(UUID businessId, UUID branchId) {
         long productCount = 0L;
         if (branchId != null) {
-            Long countProductsByBranch = productRepository.countProductsByBranch(branchId, startDate, endDate);
+            Long countProductsByBranch = productRepository.countProductsByBranch(branchId);
             productCount += countProductsByBranch != null ? countProductsByBranch : 0L;
         } else {
-            Long productsByBusiness = productRepository.countProductsByBusiness(businessId, startDate, endDate);
+            Long productsByBusiness = productRepository.countProductsByBusiness(businessId);
             productCount += productsByBusiness != null ? productsByBusiness : 0L;
         }
         return productCount;

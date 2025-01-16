@@ -195,11 +195,11 @@ public interface TradeRepository extends JpaRepository<Trade, UUID>, JpaSpecific
     @Query("select count(t) from Trade t where t.branch.business.id = :businessId and t.createdAt between :startDate and :endDate")
     Long countAllByBusinessId(@Param("businessId") UUID businessId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
 
-    @Query("select count(distinct t.customer.id) from Trade t where t.branch.business.id = :businessId and t.createdAt between :startDate and :endDate")
-    Long countDistinctCustomersByBusinessId(@Param("businessId") UUID businessId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+    @Query("select count(distinct t.customer.id) from Trade t where t.branch.business.id = :businessId")
+    Long countDistinctCustomersByBusinessId(@Param("businessId") UUID businessId);
 
-    @Query("select count(distinct t.customer.id) from Trade t where t.branch.id = :branchId and t.createdAt between :startDate and :endDate")
-    Long countDistinctCustomersByBranchId(@Param("branchId") UUID branchId, @Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
+    @Query("select count(distinct t.customer.id) from Trade t where t.branch.id = :branchId")
+    Long countDistinctCustomersByBranchId(@Param("branchId") UUID branchId);
 
 
     @Query(value = "select sum (t.totalSum) from Trade t where t.payMethod.id = :payMethodId and t.branch.id = :branchId AND t.createdAt >= :startDate AND t.createdAt <= :endDate")
