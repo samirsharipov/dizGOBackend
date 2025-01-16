@@ -46,7 +46,7 @@ public class ProductService {
         Measurement measurement = findByIdOrThrow(measurementRepository, productEditDto.getMeasurementId(), "Measurement");
         Product product = findByIdOrThrow(productRepository, productId, "Product");
 
-        if (productEditDto != null) {
+        if (productEditDto.getBrandId() != null) {
             Brand brand = findByIdOrThrow(brandRepository, productEditDto.getBrandId(), "Brand");
             product.setBrand(brand);
 
