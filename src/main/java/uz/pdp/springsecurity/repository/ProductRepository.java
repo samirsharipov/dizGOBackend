@@ -118,22 +118,16 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             "join p.branch b " +
             "where b.id = :branchId " +
             "and p.active = true " +
-            "and p.deleted = false " +
-            "and p.createdAt between :startDate and :endDate")
+            "and p.deleted = false ")
     Long countProductsByBranch(
-            @Param("branchId") UUID branchId,
-            @Param("startDate") Timestamp startDate,
-            @Param("endDate") Timestamp endDate);
+            @Param("branchId") UUID branchId);
 
     @Query("select count(p.id) from Product p " +
             "where p.business.id = :businessId " +
             "and p.active = true " +
-            "and p.deleted = false " +
-            "and p.createdAt between :startDate and :endDate")
+            "and p.deleted = false " )
     Long countProductsByBusiness(
-            @Param("businessId") UUID businessId,
-            @Param("startDate") Timestamp startDate,
-            @Param("endDate") Timestamp endDate);
+            @Param("businessId") UUID businessId);
 }
 
 
