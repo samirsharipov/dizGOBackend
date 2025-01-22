@@ -18,6 +18,7 @@ import static uz.pdp.springsecurity.enums.SalaryStatus.*;
 @RequiredArgsConstructor
 public class AgreementService {
     private final AgreementRepository agreementRepository;
+
     public void add(User user) {
         List<Agreement> agreementList =
                 Arrays.asList(
@@ -32,7 +33,8 @@ public class AgreementService {
     public ApiResponse edit(UUID userId, AgreementGetDto agreementGetDto) {
         Integer countAllByUserId = agreementRepository.countAllByUserId(userId);
         if (countAllByUserId != SalaryStatus.values().length) return new ApiResponse("ERROR", false);
-        if (countAllByUserId != agreementGetDto.getAgreementDtoList().size()) return new ApiResponse("LIST SIZE ERROR", false);
+        if (countAllByUserId != agreementGetDto.getAgreementDtoList().size())
+            return new ApiResponse("LIST SIZE ERROR", false);
         List<Agreement> agreementList = new ArrayList<>();
         for (AgreementDto agreementDto : agreementGetDto.getAgreementDtoList()) {
             Optional<Agreement> optionalAgreement = agreementRepository.findByUserIdAndSalaryStatus(userId, SalaryStatus.valueOf(agreementDto.getSalaryStatus()));
@@ -71,6 +73,6 @@ public class AgreementService {
                 agreementList.get(0).getEndDate(),
                 agreementDtoList
         );
-        return new ApiResponse( true, agreementGetDto);
+        return new ApiResponse("success", true, agreementGetDto);
     }
 }

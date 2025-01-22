@@ -33,14 +33,13 @@ public class ApiResponse implements Serializable {
         this.success = success;
     }
 
-    // Constructor with success and object
-    public ApiResponse(boolean success, Object object) {
-        this.success = success;
+    // Constructor with object
+    public ApiResponse(Object object) {
         this.object = object;
     }
 
-    // Constructor with object
-    public ApiResponse(Object object) {
+    public ApiResponse(boolean success, Object object) {
+        this.success = success;
         this.object = object;
     }
 

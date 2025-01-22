@@ -59,6 +59,6 @@ public class InvoiceService {
         invoiceDto.setDescription(invoice.getDescription());
         invoiceDto.setFooter(invoice.getFooter());
         if (invoice.getPhoto() != null) invoiceDto.setPhotoId(invoice.getPhoto().getId());
-        return new ApiResponse(true, invoiceDto);
+        return new ApiResponse("success",true, invoiceDto);
     }
 }
