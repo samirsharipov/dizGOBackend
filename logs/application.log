@@ -491,3 +491,38 @@ java.lang.StringIndexOutOfBoundsException: begin 0, end 6, length 5
 2025-01-22 13:00:26 [RMI TCP Connection(3)-192.168.1.50] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
 2025-01-22 13:00:51 [ForkJoinPool.commonPool-worker-1] INFO  u.p.s.s.VerificationCodeService - Verification code sent to 998977677793
 2025-01-22 13:00:51 [ForkJoinPool.commonPool-worker-2] INFO  u.p.s.s.VerificationCodeService - Verification code sent to 998909470342
+2025-01-22 15:29:57 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-01-22 15:29:57 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-01-22 15:32:47 [main] INFO  u.p.s.SpringSecurityApplication - Starting SpringSecurityApplication using Java 17.0.13 on Samirs-Air.home with PID 31725 (/Users/samirsharipov/biznesNavigator/optimitBackend/target/classes started by samirsharipov in /Users/samirsharipov/biznesNavigator/optimitBackend)
+2025-01-22 15:32:47 [main] INFO  u.p.s.SpringSecurityApplication - The following profiles are active: dev
+2025-01-22 15:32:49 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8081"]
+2025-01-22 15:32:49 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-01-22 15:32:49 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.54]
+2025-01-22 15:32:49 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-01-22 15:32:49 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-01-22 15:32:49 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 5.4.32.Final
+2025-01-22 15:32:49 [main] INFO  o.h.annotations.common.Version - HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2025-01-22 15:32:49 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-01-22 15:32:49 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-01-22 15:32:49 [main] INFO  org.hibernate.dialect.Dialect - HHH000400: Using dialect: org.hibernate.dialect.PostgreSQL10Dialect
+2025-01-22 15:32:51 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2025-01-22 15:32:56 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8081"]
+2025-01-22 15:32:58 [main] INFO  u.p.s.SpringSecurityApplication - Started SpringSecurityApplication in 11.514 seconds (JVM running for 13.111)
+2025-01-22 15:32:58 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-01-22 15:32:58 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-01-22 15:33:01 [main] INFO  u.p.s.SpringSecurityApplication - Starting SpringSecurityApplication using Java 17.0.13 on Samirs-Air.home with PID 31756 (/Users/samirsharipov/biznesNavigator/optimitBackend/target/classes started by samirsharipov in /Users/samirsharipov/biznesNavigator/optimitBackend)
+2025-01-22 15:33:01 [main] INFO  u.p.s.SpringSecurityApplication - The following profiles are active: dev
+2025-01-22 15:33:02 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8081"]
+2025-01-22 15:33:02 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-01-22 15:33:02 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.54]
+2025-01-22 15:33:02 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-01-22 15:33:02 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-01-22 15:33:02 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 5.4.32.Final
+2025-01-22 15:33:02 [main] INFO  o.h.annotations.common.Version - HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2025-01-22 15:33:02 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-01-22 15:33:02 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-01-22 15:33:02 [main] INFO  org.hibernate.dialect.Dialect - HHH000400: Using dialect: org.hibernate.dialect.PostgreSQL10Dialect
+2025-01-22 15:33:05 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2025-01-22 15:33:09 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8081"]
+2025-01-22 15:33:11 [main] INFO  u.p.s.SpringSecurityApplication - Started SpringSecurityApplication in 10.316 seconds (JVM running for 10.804)
+2025-01-22 15:33:11 [RMI TCP Connection(4)-192.168.1.50] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
