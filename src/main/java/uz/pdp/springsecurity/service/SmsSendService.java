@@ -88,7 +88,7 @@ public class SmsSendService {
     }
 
     public void sendInfoSuperAdminMessage(String phoneNumber) {
-        String message = "Super-Admin dasturga kirdi! DizGO";
+        String message = "Super Admin profiliga kirish amalga oshirildi! DizGO";
         sendSms(phoneNumber, message);
     }
 }
