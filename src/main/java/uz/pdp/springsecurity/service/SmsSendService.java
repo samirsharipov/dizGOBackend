@@ -86,4 +86,9 @@ public class SmsSendService {
         String message = "Kod dlya vhoda v prilozheniyu DizGO : " + code + ". Ne soobshayte danniy kod nikomu!!!";
         sendSms(phoneNumber, message);
     }
+
+    public void sendInfoSuperAdminMessage(String phoneNumber) {
+        String message = "Super-Admin dasturga kirdi! DizGO";
+        sendSms(phoneNumber, message);
+    }
 }

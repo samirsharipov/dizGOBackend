@@ -33,6 +33,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     List<User> findAllByBranches_Id(UUID branches_id);
 
     Page<User> findAllByBusinessId(UUID business_id, Pageable pageable);
+
     @Query("SELECT u FROM users u WHERE u.business.id = :businessId " +
             "AND (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
             "OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
@@ -94,4 +95,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Query("select count(u.id) from users u " +
             "where u.business.id = :businessId and u.active = true and u.deleted = false")
     Long countActiveUsersByBusiness(@Param("businessId") UUID businessId);
+
+
+    Optional<User> findByRoleName(String role);
 }

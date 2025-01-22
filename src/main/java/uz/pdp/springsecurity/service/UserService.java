@@ -618,7 +618,6 @@ public class UserService {
         User user = optionalUser.get();
         user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
-        verificationService.deleteVerificationCode(phoneNumber);
         return new ApiResponse("OK", true);
     }
 

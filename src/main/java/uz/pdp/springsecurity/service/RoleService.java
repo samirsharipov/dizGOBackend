@@ -1,7 +1,9 @@
 package uz.pdp.springsecurity.service;
 
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.exeptions.RescuersNotFoundEx;
 import uz.pdp.springsecurity.payload.*;
@@ -197,5 +199,13 @@ public class RoleService {
         return roles.stream()
                 .map(this::toDto)
                 .toList();
+    }
+
+    @Transactional
+    public Role getUserRole(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Hibernate.initialize(user.getRole()); // Role obyekti lazy bo‘lgani uchun yuklanadi
+        return user.getRole();
     }
 }

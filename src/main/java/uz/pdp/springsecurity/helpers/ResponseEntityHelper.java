@@ -15,4 +15,10 @@ public class ResponseEntityHelper {
                 .status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT)
                 .body(apiResponse);
     }
+
+    public ResponseEntity<ApiResponse> buildResponse(ApiResponse apiResponse, int isSuccess, int isError) {
+        return ResponseEntity
+                .status(apiResponse.isSuccess() ? isSuccess : isError)
+                .body(apiResponse);
+    }
 }

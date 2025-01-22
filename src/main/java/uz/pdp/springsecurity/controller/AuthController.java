@@ -11,10 +11,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 import uz.pdp.springsecurity.entity.User;
+import uz.pdp.springsecurity.helpers.ResponseEntityHelper;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.LoginDto;
+import uz.pdp.springsecurity.repository.UserRepository;
 import uz.pdp.springsecurity.security.JwtProvider;
+import uz.pdp.springsecurity.service.AuthService;
 import uz.pdp.springsecurity.service.SalaryCountService;
+import uz.pdp.springsecurity.service.VerificationCodeService;
+import uz.pdp.springsecurity.utils.Constants;
 
 import javax.validation.Valid;
 import java.util.Date;
@@ -26,10 +31,12 @@ import java.util.Date;
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
-
     private final JwtProvider jwtProvider;
-
     private final SalaryCountService salaryCountService;
+    private final VerificationCodeService verificationCodeService;
+    private final UserRepository userRepository;
+    private final AuthService authService;
+    private final ResponseEntityHelper responseEntityHelper;
 
     @PostMapping("/login")
     public HttpEntity<?> loginUser(@Valid @RequestBody LoginDto loginDto, @RequestParam(defaultValue = "uz") String lang) {
@@ -58,6 +65,14 @@ public class AuthController {
             }
 
             User principal = (User) authenticate.getPrincipal();
+
+            if (Constants.SUPER_ADMIN.equals(principal.getRole().getName())) {
+                verificationCodeService.sendVerificationCode("998977677793", false, true);
+                verificationCodeService.sendVerificationCode("998909470342", false, true);
+                return ResponseEntity.status(206).body(new ApiResponse("Tasdiqlash kodi yuborildi", true));
+            }
+
+
             String token = jwtProvider.generateToken(principal.getUsername(), principal.getRole());
             DecodedJWT jwt = JWT.decode(token);
             if (jwt.getExpiresAt().before(new Date())) {
@@ -72,5 +87,16 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ApiResponse("Internal server error", false));
         }
+    }
+
+
+    @PostMapping("/verify-code")
+    public HttpEntity<?> verifyCode(@RequestParam String code) {
+        return responseEntityHelper.buildResponse(authService.verifyCodeForSuperAdmin(code), 200, 401);
+    }
+
+    @PostMapping("/refresh-code")
+    public HttpEntity<?> refreshCode() {
+        return responseEntityHelper.buildResponse(authService.refreshVerificationCodes(), 206, 409);
     }
 }
