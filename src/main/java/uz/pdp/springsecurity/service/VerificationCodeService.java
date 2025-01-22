@@ -1,6 +1,8 @@
 package uz.pdp.springsecurity.service;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uz.pdp.springsecurity.entity.VerificationCode;
 import uz.pdp.springsecurity.payload.ApiResponse;
@@ -10,46 +12,48 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
 public class VerificationCodeService {
 
     private final VerificationCodeRepository verificationCodeRepository;
+    private static final Logger log = LoggerFactory.getLogger(VerificationCodeService.class);
     private final SmsSendService smsService;
 
+
     @Transactional
-    public ApiResponse sendVerificationCode(String phoneNumber, boolean refresh) {
+    public ApiResponse sendVerificationCode(String phoneNumber, boolean refresh, boolean isSuperAdmin) {
+        // Yangi tasdiqlash kodi yaratish
+        VerificationCode existingCode = verificationCodeRepository.findByPhoneNumber(phoneNumber).orElse(null);
 
-        if (refresh) {
-            deleteVerificationCode(phoneNumber);
-        }
+        String code = generateCode();
+        if (existingCode != null) {
+            // Agar telefon raqami mavjud bo'lsa, uni yangilash
 
-        Optional<VerificationCode> existingCode = verificationCodeRepository
-                .findByPhoneNumberAndVerifiedFalse(phoneNumber);
-
-        if (existingCode.isPresent()) {
-            if (existingCode.get().getExpiresAt().isAfter(LocalDateTime.now())) {
-                return new ApiResponse("A verification code has already been sent. Please wait for it to expire.", false);
+            if (!isSuperAdmin && existingCode.getExpiresAt().isAfter(LocalDateTime.now())) {
+                return new ApiResponse("Verification code already exists and is still valid", false);
             }
 
-            verificationCodeRepository.delete(existingCode.get());
+            existingCode.setCode(code);
+            existingCode.setExpiresAt(LocalDateTime.now().plusMinutes(3));
+            existingCode.setSuperAdmin(isSuperAdmin);
+        } else {
+            // Agar telefon raqami mavjud bo'lmasa, yangi yozuv qo'shish
+            existingCode = new VerificationCode(phoneNumber, code, LocalDateTime.now().plusMinutes(3), isSuperAdmin);
         }
+        verificationCodeRepository.save(existingCode);
 
-        // Yangi tasdiqlash kodini yaratish
-        String code = generateCode();
-        VerificationCode verificationCode = new VerificationCode();
-        verificationCode.setPhoneNumber(phoneNumber);
-        verificationCode.setCode(code);
-        verificationCode.setExpiresAt(LocalDateTime.now().plusMinutes(5)); // 5 daqiqa amal qiladi
-        verificationCodeRepository.save(verificationCode);
-
-        // SMS xizmatidan kodni yuborish
-        try {
-            smsService.sendVerificationCode(phoneNumber, code);
-        }catch (Exception e){
-            return new ApiResponse(e.getMessage(), false);
-        }
+        // SMS xizmatidan kodni yuborish (asinxron)
+        CompletableFuture.runAsync(() -> {
+            try {
+                smsService.sendVerificationCode(phoneNumber, code);
+                log.info("Verification code sent to {}", phoneNumber);
+            } catch (Exception e) {
+                log.error("SMS sending failed: {}", e.getMessage());
+            }
+        });
 
         return new ApiResponse("Verification code sent", true);
     }
@@ -58,6 +62,20 @@ public class VerificationCodeService {
 
         Optional<VerificationCode> optionalCode = verificationCodeRepository
                 .findByPhoneNumberAndCodeAndVerifiedFalse(phoneNumber, code);
+
+        if (optionalCode.isPresent() && optionalCode.get().getExpiresAt().isAfter(LocalDateTime.now())) {
+            VerificationCode verificationCode = optionalCode.get();
+            verificationCode.setVerified(true);
+            verificationCodeRepository.save(verificationCode);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean verifyCodeForSuperAdmin(String code) {
+
+        Optional<VerificationCode> optionalCode = verificationCodeRepository
+                .findByCodeAndSuperAdminTrue(code);
 
         if (optionalCode.isPresent() && optionalCode.get().getExpiresAt().isAfter(LocalDateTime.now())) {
             VerificationCode verificationCode = optionalCode.get();
@@ -80,11 +98,7 @@ public class VerificationCodeService {
         return verificationCode.isVerified();
     }
 
-    public void deleteVerificationCode(String phoneNumber) {
-        verificationCodeRepository.deleteByPhoneNumber(phoneNumber);
-    }
-
     private String generateCode() {
-        return String.valueOf(new Random().nextInt(999999)).substring(0, 6);
+        return String.format("%06d", new Random().nextInt(1000000));
     }
 }
