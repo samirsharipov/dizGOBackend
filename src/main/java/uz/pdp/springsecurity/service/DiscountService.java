@@ -129,7 +129,20 @@ public class DiscountService {
                     discount.setActive(false);
                     discount.setDeleted(true);
                     discountRepository.save(discount);
+                    updateProductDiscountStatus(discount.getProducts(), false);
                     return new ApiResponse("Chegirma tizimdan o‘chirildi (Soft delete)", true);
+                })
+                .orElseGet(() -> new ApiResponse("Chegirma topilmadi", false));
+    }
+
+    public ApiResponse active(UUID id) {
+        return discountRepository.findById(id)
+                .map(discount -> {
+                    discount.setActive(true);
+                    discount.setStartDate(new Timestamp(System.currentTimeMillis()));
+                    discountRepository.save(discount);
+                    updateProductDiscountStatus(discount.getProducts(), true);
+                    return new ApiResponse("Chegirma muvaffaqiyatli faolsiz qilindi", true);
                 })
                 .orElseGet(() -> new ApiResponse("Chegirma topilmadi", false));
     }
@@ -181,17 +194,6 @@ public class DiscountService {
             }
         });
         return new ApiResponse("all", true, productInfoList);
-    }
-
-    public DiscountGetDto.ProductInfo checkProduct(UUID productId) {
-        Optional<Product> optionalProduct = productRepository.findById(productId);
-        if (optionalProduct.isPresent()) {
-            Product product = optionalProduct.get();
-            if (product.getDiscount() != null && product.getDiscount()) {
-                return new DiscountGetDto.ProductInfo(product.getId(), product.getName(), product.getSalePrice());
-            }
-        }
-        return new DiscountGetDto.ProductInfo();
     }
 
     public ApiResponse search(UUID branchId, String name, String code) {
@@ -274,18 +276,6 @@ public class DiscountService {
         spec = spec.and(DiscountSpecifications.isNotDeleted());
 
         return discountRepository.findAll(spec);
-    }
-
-    public ApiResponse active(UUID id) {
-        return discountRepository.findById(id)
-                .map(discount -> {
-                    discount.setActive(true);
-                    discount.setStartDate(new Timestamp(System.currentTimeMillis()));
-                    discountRepository.save(discount);
-                    updateProductDiscountStatus(discount.getProducts(), true);
-                    return new ApiResponse("Chegirma muvaffaqiyatli faolsiz qilindi", true);
-                })
-                .orElseGet(() -> new ApiResponse("Chegirma topilmadi", false));
     }
 
 }
