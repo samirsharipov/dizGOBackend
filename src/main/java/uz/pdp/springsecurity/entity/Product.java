@@ -158,6 +158,8 @@ public class Product extends AbsEntity {
 
     private Boolean qqs;
 
+    private Boolean discount;
+
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

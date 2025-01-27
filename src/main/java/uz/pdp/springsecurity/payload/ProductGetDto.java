@@ -90,5 +90,7 @@ public class ProductGetDto {
 
     private String mxikCode;
 
+    private Boolean discount;
+
     List<ProductTranslateDTO> translates;
 }

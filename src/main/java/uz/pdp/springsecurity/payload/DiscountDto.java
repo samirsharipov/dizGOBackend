@@ -2,20 +2,24 @@ package uz.pdp.springsecurity.payload;
 
 import lombok.Data;
 
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
 public class DiscountDto {
-    private String name; // Chegirma nomi
-    private String description; // Ixtiyoriy tavsif
-    private String type; // Chegirma turi (foiz yoki summa)
-    private double value; // Chegirma miqdori
+    private String name;
+    private String description;
+    private String type; // Enum sifatida qabul qilinadi
+    private double value;
+    private Timestamp startDate;
+    private Timestamp endDate;
+    private Time startHour;
+    private Time endHour;
+    private Set<Integer> weekDays; // Hafta kunlari
 
-    private Timestamp startDate; // Boshlanish sanasi
-    private Timestamp endDate; // Tugash sanasi
-
-    private List<UUID> productIds; // Bog'langan mahsulotlar
-    private List<UUID> branchIds; // Bog'langan filliallar
+    private List<UUID> productIds;
+    private List<UUID> branchIds;
 }
