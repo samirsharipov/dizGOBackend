@@ -1,6 +1,7 @@
 package uz.pdp.springsecurity.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uz.pdp.springsecurity.enums.DiscountType;
@@ -11,6 +12,7 @@ import uz.pdp.springsecurity.payload.DiscountEditDto;
 import uz.pdp.springsecurity.service.DiscountService;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -52,9 +54,27 @@ public class DiscountController {
         return responseEntityHelper.buildResponse(discountService.deactivateDiscount(id));
     }
 
+    @PutMapping("/active/{id}")
+    public ResponseEntity<ApiResponse> active(@PathVariable UUID id) {
+        return responseEntityHelper.buildResponse(discountService.active(id));
+    }
+
     // Chegirmani o‘chirish
     @DeleteMapping("/soft-delete/{id}")
     public ResponseEntity<ApiResponse> forceDeleteDiscount(@PathVariable UUID id) {
         return responseEntityHelper.buildResponse(discountService.deleteDiscount(id));
     }
+
+    @GetMapping("/search/{branch_id}")
+    public HttpEntity<?> search(@PathVariable UUID branch_id,
+                                @RequestParam String name,
+                                @RequestParam String language) {
+        return responseEntityHelper.buildResponse(discountService.search(branch_id, name, language));
+    }
+
+    @GetMapping("check-products")
+    public HttpEntity<?> checkProducts(@RequestParam List<UUID> productIds) {
+        return responseEntityHelper.buildResponse(discountService.checkProductList(productIds));
+    }
+
 }
