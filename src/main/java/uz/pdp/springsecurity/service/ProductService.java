@@ -176,51 +176,49 @@ public class ProductService {
         }).orElseGet(() -> new ApiResponse("not found", false));
     }
 
-    public ApiResponse getByCategory(UUID category_id, User user) {
-        Set<Branch> branches = user.getBranches();
-        List<Product> productList = new ArrayList<>();
-        for (Branch branch : branches) {
-            List<Product> all = productRepository.findAllByCategoryIdAndBranchIdAndActiveTrue(category_id, branch.getId());
-            if (!all.isEmpty()) {
-                productList.addAll(all);
-            }
-        }
+    public ApiResponse getByCategory(UUID category_id, String code) {
 
-        List<ProductViewDto> viewDtos = new ArrayList<>();
-        for (Product product : productList) {
-            ProductViewDto productViewDto = new ProductViewDto();
-            productViewDto.setProductId(product.getId());
-            productViewDto.setProductName(product.getName());
-            if (product.getBrand() != null)
-                productViewDto.setBrandName(product.getBrand().getName());
-            productViewDto.setBuyPrice(product.getBuyPrice());
-            productViewDto.setSalePrice(product.getSalePrice());
-            productViewDto.setMinQuantity(product.getMinQuantity());
-            productViewDto.setBranch(product.getBranch());
-            productViewDto.setExpiredDate(product.getExpireDate());
-            Optional<Warehouse> optionalWarehouse = warehouseRepository.findByProduct_Id(product.getId());
-            if (optionalWarehouse.isPresent()) {
-                Warehouse warehouse = optionalWarehouse.get();
-                if (warehouse.getProduct().getId().equals(product.getId())) {
-                    productViewDto.setAmount(warehouse.getAmount());
-                }
-            }
-            viewDtos.add(productViewDto);
-        }
+        List<ProductShortDto> productShortDto =
+                productRepository.findAllByCategoryIdAndActiveOrderByNameAsc(category_id, code);
 
-
-        if (viewDtos.isEmpty()) {
+        if (productShortDto.isEmpty()) {
             return new ApiResponse("NOT FOUND", false);
         }
-        return new ApiResponse("FOUND", true, viewDtos);
+
+        return new ApiResponse("FOUND", true, productShortDto);
     }
 
-    public ApiResponse getByBrand(UUID brand_id) {
-        List<ProductViewDto> productViewDtos = new ArrayList<>();
-        List<Product> allProductByBrand = productRepository.findAllByBrandIdAndActiveIsTrue(brand_id);
-        getProductMethod(productViewDtos, allProductByBrand, null);
+    public ApiResponse getByBrand(UUID brand_id, String code) {
+        List<ProductShortDto> productShortDtoList = productRepository.findAllByBrandIdAndActiveOrderByNameAsc(brand_id, code);
+        if (productShortDtoList.isEmpty())
+            return new ApiResponse("NOT FOUND", false);
 
-        return new ApiResponse("FOUND", true, productViewDtos);
+        return new ApiResponse("FOUND", true, productShortDtoList);
+    }
+
+    @NotNull
+    public List<ProductGetDto> getProductGetDtoList(List<Product> products, String code) {
+
+        Language language = languageRepository.findByCode(code)
+                .orElseThrow(() -> new RuntimeException("LANGUAGE NOT FOUND"));
+
+        return products.stream()
+                .map(product -> {
+                    ProductGetDto productGetDto = productConvert.convertToDto(product);
+
+                    product.getTranslations().stream()
+                            .filter(translate -> translate.getLanguage().getId().equals(language.getId()))
+                            .findFirst()
+                            .ifPresent(translate -> {
+                                productGetDto.setName(translate.getName());
+                                productGetDto.setDescription(translate.getDescription());
+                                productGetDto.setLongDescription(translate.getLongDescription());
+                                productGetDto.setAttributes(translate.getAttributes());
+                            });
+
+                    return productGetDto;
+                })
+                .toList();
     }
 
     public ApiResponse getByBranchAndBarcode(UUID branch_id, User user, ProductBarcodeDto barcodeDto) {
@@ -668,8 +666,7 @@ public class ProductService {
     }
 
     public ApiResponse search(UUID branchId, String name, String code) {
-        Language language = languageRepository.findByCode(code)
-                .orElseThrow(() -> new RuntimeException("LANGUAGE NOT FOUND"));
+
 
         Branch branch = findByIdOrThrow(branchRepository, branchId, "branch");
         UUID mainBranchBusinessId = branch.getMainBranchId() != null
@@ -684,24 +681,7 @@ public class ProductService {
         if (products.isEmpty()) {
             return new ApiResponse("not found", false);
         }
-
-        List<ProductGetDto> productGetDtoList = products.stream()
-                .map(product -> {
-                    ProductGetDto productGetDto = productConvert.convertToDto(product);
-
-                    product.getTranslations().stream()
-                            .filter(translate -> translate.getLanguage().getId().equals(language.getId()))
-                            .findFirst()
-                            .ifPresent(translate -> {
-                                productGetDto.setName(translate.getName());
-                                productGetDto.setDescription(translate.getDescription());
-                                productGetDto.setLongDescription(translate.getLongDescription());
-                                productGetDto.setAttributes(translate.getAttributes());
-                            });
-
-                    return productGetDto;
-                })
-                .toList();
+        List<ProductGetDto> productGetDtoList = getProductGetDtoList(products, code);
 
         return new ApiResponse("all", true, productGetDtoList);
     }

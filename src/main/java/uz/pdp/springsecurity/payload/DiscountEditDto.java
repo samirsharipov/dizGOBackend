@@ -10,7 +10,9 @@ import java.util.UUID;
 
 @Data
 public class DiscountEditDto {
-    private List<UUID> productIds;
+    private List<UUID> currentProductIds;
+    private List<UUID> newProductIds;
+    private List<UUID> oldProductIds;
     private double value;
     private Timestamp startTime;
     private Timestamp endTime;
