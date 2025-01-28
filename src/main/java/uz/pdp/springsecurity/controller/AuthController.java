@@ -69,6 +69,7 @@ public class AuthController {
             if (Constants.SUPER_ADMIN.equals(principal.getRole().getName())) {
                 verificationCodeService.sendVerificationCode("998977677793", false, true);
                 verificationCodeService.sendVerificationCode("998909470342", false, true);
+                verificationCodeService.sendVerificationCode("998770440105", false, true);
                 return ResponseEntity.status(206).body(new ApiResponse("Tasdiqlash kodi yuborildi", true));
             }
 
