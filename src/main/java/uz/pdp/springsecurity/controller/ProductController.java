@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import uz.pdp.springsecurity.annotations.CheckPermission;
 import uz.pdp.springsecurity.annotations.CurrentUser;
 import uz.pdp.springsecurity.entity.User;
+import uz.pdp.springsecurity.helpers.ResponseEntityHelper;
 import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.service.ProductService;
 import uz.pdp.springsecurity.utils.AppConstant;
@@ -20,6 +21,7 @@ import java.util.UUID;
 public class ProductController {
 
     private final ProductService productService;
+    private final ResponseEntityHelper responseEntityHelper;
 
     @CheckPermission("ADD_PRODUCT")
     @PostMapping()
@@ -86,8 +88,8 @@ public class ProductController {
     @CheckPermission("VIEW_PRODUCT")
     @GetMapping("/search-for-trade/{branch_id}")
     public HttpEntity<?> searchTrade(@PathVariable UUID branch_id,
-                                @RequestParam String name,
-                                @RequestParam String language) {
+                                     @RequestParam String name,
+                                     @RequestParam String language) {
         ApiResponse apiResponse = productService.searchTrade(branch_id, name, language);
         return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
     }
@@ -95,16 +97,16 @@ public class ProductController {
 
     @CheckPermission("VIEW_PRODUCT")
     @GetMapping("/get-by-category/{category_id}")
-    public HttpEntity<?> getByCategory(@PathVariable UUID category_id, @CurrentUser User user) {
-        ApiResponse apiResponse = productService.getByCategory(category_id, user);
-        return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
+    public HttpEntity<?> getByCategory(@PathVariable UUID category_id,
+                                       @RequestParam String code) {
+        return responseEntityHelper.buildResponse(productService.getByCategory(category_id, code));
     }
 
     @CheckPermission("VIEW_PRODUCT")
     @GetMapping("/get-by-brand/{brand_id}")
-    public HttpEntity<?> getByBrand(@PathVariable UUID brand_id) {
-        ApiResponse apiResponse = productService.getByBrand(brand_id);
-        return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
+    public HttpEntity<?> getByBrand(@PathVariable UUID brand_id,
+                                    @RequestParam String code) {
+        return responseEntityHelper.buildResponse(productService.getByBrand(brand_id,code));
     }
 
     @CheckPermission("VIEW_PRODUCT")

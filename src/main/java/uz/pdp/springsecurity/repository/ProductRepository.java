@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import uz.pdp.springsecurity.entity.Product;
 import uz.pdp.springsecurity.payload.ProductResponseDTO;
+import uz.pdp.springsecurity.payload.ProductShortDto;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -32,6 +33,31 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     boolean existsByPluCodeAndBusiness_Id(String pluCode, UUID business_id);
 
     List<Product> findAllByCategoryIdAndBranchIdAndActiveTrue(UUID category_id, UUID branch_id);
+
+    @Query("SELECT new uz.pdp.springsecurity.payload.ProductShortDto(p.id, " +
+            "COALESCE(pt.name, p.name), p.brand.id, p.category.id, p.salePrice) " +
+            "FROM Product p " +
+            "LEFT JOIN ProductTranslate pt ON pt.product = p " +
+            "LEFT JOIN Language l ON pt.language = l " +
+            "WHERE p.category.id = :categoryId AND p.active = true " +
+            "AND (l.code = :languageCode OR l.code IS NULL) " +
+            "ORDER BY COALESCE(pt.name, p.name) ASC")
+    List<ProductShortDto> findAllByCategoryIdAndActiveOrderByNameAsc(
+            @Param("categoryId") UUID categoryId,
+            @Param("languageCode") String languageCode);
+
+    @Query("SELECT new uz.pdp.springsecurity.payload.ProductShortDto(p.id, " +
+            "COALESCE(pt.name, p.name), p.brand.id, p.category.id, p.salePrice) " +
+            "FROM Product p " +
+            "LEFT JOIN ProductTranslate pt ON pt.product = p " +
+            "LEFT JOIN Language l ON pt.language = l " +
+            "WHERE p.brand.id = :brandId AND p.active = true " +
+            "AND (l.code = :languageCode OR l.code IS NULL) " +
+            "ORDER BY COALESCE(pt.name, p.name) ASC")
+    List<ProductShortDto> findAllByBrandIdAndActiveOrderByNameAsc(
+            @Param("brandId") UUID brandId,
+            @Param("languageCode") String languageCode);
+
 
     Page<Product> findAllByCategory_IdAndBranch_IdAndActiveTrue(UUID category_id, UUID branch_id, Pageable pageable);
 
@@ -125,7 +151,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     @Query("select count(p.id) from Product p " +
             "where p.business.id = :businessId " +
             "and p.active = true " +
-            "and p.deleted = false " )
+            "and p.deleted = false ")
     Long countProductsByBusiness(
             @Param("businessId") UUID businessId);
 }

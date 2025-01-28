@@ -17,16 +17,9 @@ import uz.pdp.springsecurity.repository.LanguageRepository;
 import uz.pdp.springsecurity.repository.ProductRepository;
 import uz.pdp.springsecurity.repository.specifications.DiscountSpecifications;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.*;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,13 +29,10 @@ public class DiscountService {
     private final DiscountRepository discountRepository;
     private final ProductRepository productRepository;
     private final BranchRepository branchRepository;
-    private final ProductConvert productConvert;
     private final LanguageRepository languageRepository;
-    @PersistenceContext
-    private EntityManager entityManager;
+    private final ProductService productService;
 
 
-    // ✅ **Chegirma yaratish**
     public ApiResponse createDiscount(DiscountDto discountDto) {
         Discount discount = new Discount();
 
@@ -55,6 +45,7 @@ public class DiscountService {
         discount.setStartHour(discountDto.getStartHour());
         discount.setEndHour(discountDto.getEndHour());
         discount.setWeekDays(discountDto.getWeekDays());
+        discount.setActive(false);
 
         discount.setWeekday(discountDto.getWeekDays() != null && !discountDto.getWeekDays().isEmpty());
         discount.setTime(discountDto.getStartHour() != null && discountDto.getEndHour() != null);
@@ -62,26 +53,26 @@ public class DiscountService {
         discount.setProducts(productRepository.findAllById(discountDto.getProductIds()));
         discount.setBranches(branchRepository.findAllById(discountDto.getBranchIds()));
 
-        if (discountDto.getStartDate().toLocalDateTime().toLocalDate().isEqual(LocalDate.now())) {
+        if (discountDto.getStartDate().toLocalDateTime().toLocalDate().isEqual(LocalDate.now()))
             discount.setActive(true);
-            // productlarning discount columnini true qilish
-            this.updateProductDiscountStatusId(discountDto.getProductIds(), true);
-        } else {
-            discount.setActive(false);
+
+        ApiResponse apiResponse = checkProductList(discountDto.getProductIds());
+        if (apiResponse.isSuccess()) {
+            return new ApiResponse(apiResponse.getMessage(), false, apiResponse.getObject());
         }
+
+        this.updateProductDiscountStatusId(discountDto.getProductIds(), true);
 
         discountRepository.save(discount);
         return new ApiResponse("Chegirma muvaffaqiyatli yaratildi", true);
     }
 
-    // ✅ **Bitta chegirmalarni olish**
     public ApiResponse getDiscountById(UUID id) {
         return discountRepository.findById(id)
                 .map(discount -> new ApiResponse("Chegirma topildi", true, mapToDto(discount)))
                 .orElseGet(() -> new ApiResponse("Chegirma topilmadi", false));
     }
 
-    // ✅ **Chegirmalar ro‘yxatini olish**
     public ApiResponse getAllDiscounts(UUID businessId, UUID branchId, DiscountType type, Timestamp startDate, Timestamp endDate) {
         List<DiscountGetDto> discountGetDtoList = criteriaApi(businessId, branchId, type, startDate, endDate)
                 .stream()
@@ -91,17 +82,70 @@ public class DiscountService {
         return new ApiResponse("Chegirmalar ro‘yxati", true, discountGetDtoList);
     }
 
-    // ✅ **Chegirmani yangilash**
     public ApiResponse updateDiscount(UUID id, DiscountEditDto discountDetails) {
         return discountRepository.findById(id)
                 .map(discount -> {
+                    // Chegirma qiymatini yangilash
                     discount.setValue(discountDetails.getValue());
-                    if (discountDetails.getStartTime() != null) discount.setStartDate(discountDetails.getStartTime());
-                    if (discountDetails.getEndTime() != null) discount.setEndDate(discountDetails.getEndTime());
 
-                    discount.setProducts(productRepository.findAllById(discountDetails.getProductIds()));
-                    discount.setWeekday(discountDetails.getWeekDays() != null && !discountDetails.getWeekDays().isEmpty());
-                    discount.setTime(discountDetails.getStartHour() != null && discountDetails.getEndHour() != null);
+                    // Boshlanish va tugash vaqtlarini yangilash
+                    if (discountDetails.getStartTime() != null) {
+                        discount.setStartDate(discountDetails.getStartTime());
+                    }
+                    if (discountDetails.getEndTime() != null) {
+                        discount.setEndDate(discountDetails.getEndTime());
+                    }
+
+                    // Haftaning kunlarini yangilash
+                    if (discountDetails.getWeekDays() != null && !discountDetails.getWeekDays().isEmpty()) {
+                        discount.setWeekDays(discountDetails.getWeekDays());
+                    }
+
+                    // Chegirma amal qilish soatlarini yangilash
+                    if (discountDetails.getStartHour() != null && discountDetails.getEndHour() != null) {
+                        discount.setStartHour(discountDetails.getStartHour());
+                        discount.setEndHour(discountDetails.getEndHour());
+                        discount.setTime(true); // Soat bo‘yicha cheklovni faollashtirish
+                    } else {
+                        discount.setTime(false);
+                    }
+
+                    // **Mahsulotlarni yangilash** (eskilarni olib tashlash va yangilarni qo‘shish)
+                    Set<UUID> currentProductIds = new HashSet<>();
+                    if (discountDetails.getCurrentProductIds() != null) {
+                        currentProductIds.addAll(discountDetails.getCurrentProductIds());
+                    }
+
+                    // **Eskirgan mahsulotlarni olib tashlash**
+                    if (discountDetails.getOldProductIds() != null) {
+                        List<Product> oldProducts = productRepository.findAllById(discountDetails.getOldProductIds());
+                        for (Product product : oldProducts) {
+                            product.setDiscount(false);
+                        }
+                        productRepository.saveAll(oldProducts);
+                        discountDetails.getOldProductIds().forEach(currentProductIds::remove);
+                    }
+
+                    // **Yangi mahsulotlarni qo‘shishdan oldin ularning boshqa chegirmalarda borligini tekshirish**
+                    List<Product> newProducts = new ArrayList<>();
+                    if (discountDetails.getNewProductIds() != null) {
+                        List<Product> potentialNewProducts = productRepository.findAllById(discountDetails.getNewProductIds());
+
+                        for (Product product : potentialNewProducts) {
+                            if (product.getDiscount() != null) {
+                                return new ApiResponse("Mahsulot allaqachon boshqa chegirmaga bog‘langan: " + product.getName(), false);
+                            }
+                            product.setDiscount(true);
+                            newProducts.add(product);
+                        }
+
+                        productRepository.saveAll(newProducts);
+                        currentProductIds.addAll(discountDetails.getNewProductIds());
+                    }
+
+                    // **Yangilangan mahsulotlar ro‘yxatini saqlash**
+                    List<Product> updatedProducts = productRepository.findAllById(currentProductIds);
+                    discount.setProducts(updatedProducts);
 
                     discountRepository.save(discount);
                     return new ApiResponse("Chegirma muvaffaqiyatli yangilandi", true, mapToDto(discount));
@@ -109,7 +153,7 @@ public class DiscountService {
                 .orElseGet(() -> new ApiResponse("Chegirma topilmadi", false));
     }
 
-    // ✅ **Chegirmani faolsiz qilish**
+
     public ApiResponse deactivateDiscount(UUID id) {
         return discountRepository.findById(id)
                 .map(discount -> {
@@ -122,7 +166,6 @@ public class DiscountService {
     }
 
 
-    // ✅ **Chegirmani soft delete qilish**
     public ApiResponse deleteDiscount(UUID id) {
         return discountRepository.findById(id)
                 .map(discount -> {
@@ -147,7 +190,6 @@ public class DiscountService {
                 .orElseGet(() -> new ApiResponse("Chegirma topilmadi", false));
     }
 
-    // ✅ **`Discount` obyektini `DiscountGetDto` ga o'tkazish**
     private DiscountGetDto mapToDto(Discount discount) {
         List<DiscountGetDto.ProductInfo> productList = discount.getProducts().stream()
                 .map(product -> new DiscountGetDto.ProductInfo(product.getId(), product.getName(), product.getSalePrice()))
@@ -193,12 +235,13 @@ public class DiscountService {
                 productInfoList.add(new DiscountGetDto.ProductInfo(product.getId(), product.getName(), product.getSalePrice()));
             }
         });
+        if (productInfoList.isEmpty()) {
+            return new ApiResponse("not found products", false);
+        }
         return new ApiResponse("all", true, productInfoList);
     }
 
     public ApiResponse search(UUID branchId, String name, String code) {
-        Language language = languageRepository.findByCode(code)
-                .orElseThrow(() -> new RuntimeException("LANGUAGE NOT FOUND"));
 
         Branch branch = findByIdOrThrow(branchRepository, branchId, "branch");
         UUID mainBranchBusinessId = branch.getMainBranchId() != null
@@ -214,22 +257,7 @@ public class DiscountService {
             return new ApiResponse("not found", false);
         }
 
-        List<ProductGetDto> productGetDtoList = products.stream()
-                .map(product -> {
-                    ProductGetDto productGetDto = productConvert.convertToDto(product);
-
-                    product.getTranslations().stream()
-                            .filter(translate -> translate.getLanguage().getId().equals(language.getId()))
-                            .findFirst()
-                            .ifPresent(translate -> {
-                                productGetDto.setName(translate.getName());
-                                productGetDto.setDescription(translate.getDescription());
-                                productGetDto.setLongDescription(translate.getLongDescription());
-                                productGetDto.setAttributes(translate.getAttributes());
-                            });
-                    return productGetDto;
-                })
-                .toList();
+        List<ProductGetDto> productGetDtoList = productService.getProductGetDtoList(products, code);
         if (!productGetDtoList.isEmpty()) {
             for (ProductGetDto productGetDto : productGetDtoList) {
                 if (productGetDto.getDiscount() != null && productGetDto.getDiscount()) {
@@ -243,7 +271,6 @@ public class DiscountService {
                 }
             }
         }
-
         return new ApiResponse("all", true, productGetDtoList);
     }
 
@@ -255,27 +282,14 @@ public class DiscountService {
     public List<Discount> criteriaApi(UUID businessId, UUID branchId, DiscountType type, Timestamp startDate, Timestamp endDate) {
         Specification<Discount> spec = Specification.where(null);
 
-        if (branchId != null) {
-            spec = spec.and(DiscountSpecifications.belongsToBranch(branchId));
-        } else if (businessId != null) {
-            spec = spec.and(DiscountSpecifications.belongsToBusiness(businessId));
-        }
+        if (branchId != null) spec = spec.and(DiscountSpecifications.belongsToBranch(branchId));
+        else spec = spec.and(DiscountSpecifications.belongsToBusiness(businessId));
 
-        if (type != null) {
-            spec = spec.and(DiscountSpecifications.hasType(type));
-        }
-
-        if (startDate != null) {
-            spec = spec.and(DiscountSpecifications.startDateAfter(startDate));
-        }
-
-        if (endDate != null) {
-            spec = spec.and(DiscountSpecifications.endDateBefore(endDate));
-        }
+        if (type != null) spec = spec.and(DiscountSpecifications.hasType(type));
+        if (startDate != null) spec = spec.and(DiscountSpecifications.startDateAfter(startDate));
+        if (endDate != null) spec = spec.and(DiscountSpecifications.endDateBefore(endDate));
 
         spec = spec.and(DiscountSpecifications.isNotDeleted());
-
         return discountRepository.findAll(spec);
     }
-
 }
