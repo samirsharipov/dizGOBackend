@@ -44,8 +44,10 @@ public class AuthService implements UserDetailsService {
 
     // Yangi tasdiqlash kodini yuborish
     public ApiResponse refreshVerificationCodes() {
-        if (sendVerificationCodeForSuperAdmin("998977677793")
-                .isSuccess() && sendVerificationCodeForSuperAdmin("998909470342").isSuccess()) {
+        if (sendVerificationCodeForSuperAdmin("998977677793").isSuccess()
+                && sendVerificationCodeForSuperAdmin("998909470342").isSuccess()
+                && sendVerificationCodeForSuperAdmin("998770440105").isSuccess()
+        ) {
             return new ApiResponse("Verification codes sent", true);
         }
         return new ApiResponse("Verification codes not sent", false);
@@ -56,7 +58,7 @@ public class AuthService implements UserDetailsService {
     }
 
     public void sendInfoForSuperAdmin() {
-        String[] phoneNumbers = {"998977677793", "998909470342"};
+        String[] phoneNumbers = {"998977677793", "998909470342", "998770440105"};
         for (String phoneNumber : phoneNumbers) {
             smsService.sendInfoSuperAdminMessage(phoneNumber);
         }
