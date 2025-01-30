@@ -154,6 +154,9 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             "and p.deleted = false ")
     Long countProductsByBusiness(
             @Param("businessId") UUID businessId);
+
+
+    Optional<Product> findProductByIdAndBranchIdAndActiveTrue(UUID id, UUID branchId);
 }
 
 
