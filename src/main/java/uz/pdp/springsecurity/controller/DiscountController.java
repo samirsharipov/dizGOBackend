@@ -66,15 +66,16 @@ public class DiscountController {
     }
 
     @GetMapping("/search/{branch_id}")
-    public HttpEntity<?> search(@PathVariable UUID branch_id,
-                                @RequestParam String name,
-                                @RequestParam String language) {
+    public ResponseEntity<ApiResponse> search(@PathVariable UUID branch_id,
+                                              @RequestParam String name,
+                                              @RequestParam String language) {
         return responseEntityHelper.buildResponse(discountService.search(branch_id, name, language));
     }
 
     @GetMapping("check-products")
-    public HttpEntity<?> checkProducts(@RequestParam List<UUID> productIds) {
-        return responseEntityHelper.buildResponse(discountService.checkProductList(productIds));
+    public HttpEntity<ApiResponse> checkProducts(@RequestParam List<UUID> productIds,
+                                                 @RequestParam List<UUID> branchIds) {
+        return responseEntityHelper.buildResponse(discountService.checkProductList(productIds, branchIds));
     }
 
 }

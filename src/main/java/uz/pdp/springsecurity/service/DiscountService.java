@@ -6,14 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import uz.pdp.springsecurity.entity.Branch;
 import uz.pdp.springsecurity.entity.Discount;
-import uz.pdp.springsecurity.entity.Language;
 import uz.pdp.springsecurity.entity.Product;
 import uz.pdp.springsecurity.enums.DiscountType;
-import uz.pdp.springsecurity.mapper.converts.ProductConvert;
 import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.BranchRepository;
 import uz.pdp.springsecurity.repository.DiscountRepository;
-import uz.pdp.springsecurity.repository.LanguageRepository;
 import uz.pdp.springsecurity.repository.ProductRepository;
 import uz.pdp.springsecurity.repository.specifications.DiscountSpecifications;
 
@@ -29,7 +26,6 @@ public class DiscountService {
     private final DiscountRepository discountRepository;
     private final ProductRepository productRepository;
     private final BranchRepository branchRepository;
-    private final LanguageRepository languageRepository;
     private final ProductService productService;
 
 
@@ -56,9 +52,9 @@ public class DiscountService {
         if (discountDto.getStartDate().toLocalDateTime().toLocalDate().isEqual(LocalDate.now()))
             discount.setActive(true);
 
-        ApiResponse apiResponse = checkProductList(discountDto.getProductIds());
+        ApiResponse apiResponse = checkProductList(discountDto.getProductIds(), discountDto.getBranchIds());
         if (apiResponse.isSuccess()) {
-            return new ApiResponse(apiResponse.getMessage(), false, apiResponse.getObject());
+            return new ApiResponse("Chegirmaga tushgan maxsulotlar mavjud!", false, apiResponse.getObject());
         }
 
         this.updateProductDiscountStatusId(discountDto.getProductIds(), true);
@@ -83,74 +79,56 @@ public class DiscountService {
     }
 
     public ApiResponse updateDiscount(UUID id, DiscountEditDto discountDetails) {
-        return discountRepository.findById(id)
-                .map(discount -> {
-                    // Chegirma qiymatini yangilash
-                    discount.setValue(discountDetails.getValue());
 
-                    // Boshlanish va tugash vaqtlarini yangilash
-                    if (discountDetails.getStartTime() != null) {
-                        discount.setStartDate(discountDetails.getStartTime());
-                    }
-                    if (discountDetails.getEndTime() != null) {
-                        discount.setEndDate(discountDetails.getEndTime());
-                    }
+        Optional<Discount> optionalDiscount = discountRepository.findById(id);
+        if (optionalDiscount.isEmpty()) {
+            return new ApiResponse("Chegirma topildi", false);
+        }
 
-                    // Haftaning kunlarini yangilash
-                    if (discountDetails.getWeekDays() != null && !discountDetails.getWeekDays().isEmpty()) {
-                        discount.setWeekDays(discountDetails.getWeekDays());
-                    }
+        Discount discount = optionalDiscount.get();
+        discount.setValue(discountDetails.getValue());
+        if (discountDetails.getStartDate() != null) discount.setStartDate(discountDetails.getStartDate());
+        if (discountDetails.getEndDate() != null) discount.setEndDate(discountDetails.getEndDate());
+        if (discountDetails.getWeekDays() != null && !discountDetails.getWeekDays().isEmpty())
+            discount.setWeekDays(discountDetails.getWeekDays());
 
-                    // Chegirma amal qilish soatlarini yangilash
-                    if (discountDetails.getStartHour() != null && discountDetails.getEndHour() != null) {
-                        discount.setStartHour(discountDetails.getStartHour());
-                        discount.setEndHour(discountDetails.getEndHour());
-                        discount.setTime(true); // Soat bo‘yicha cheklovni faollashtirish
-                    } else {
-                        discount.setTime(false);
-                    }
+        if (discountDetails.getStartHour() != null && discountDetails.getEndHour() != null) {
+            discount.setStartHour(discountDetails.getStartHour());
+            discount.setEndHour(discountDetails.getEndHour());
+            discount.setTime(true); // Soat bo‘yicha cheklovni faollashtirish
+        } else {
+            discount.setTime(false);
+        }
 
-                    // **Mahsulotlarni yangilash** (eskilarni olib tashlash va yangilarni qo‘shish)
-                    Set<UUID> currentProductIds = new HashSet<>();
-                    if (discountDetails.getCurrentProductIds() != null) {
-                        currentProductIds.addAll(discountDetails.getCurrentProductIds());
-                    }
+        Set<Product> productSet = new HashSet<>();
+        Set<Product> newProductSet = new HashSet<>();
 
-                    // **Eskirgan mahsulotlarni olib tashlash**
-                    if (discountDetails.getOldProductIds() != null) {
-                        List<Product> oldProducts = productRepository.findAllById(discountDetails.getOldProductIds());
-                        for (Product product : oldProducts) {
-                            product.setDiscount(false);
-                        }
-                        productRepository.saveAll(oldProducts);
-                        discountDetails.getOldProductIds().forEach(currentProductIds::remove);
-                    }
+        // eski mahsulotlarni ochirish
+        if (discountDetails.getOldProductIds() != null && !discountDetails.getOldProductIds().isEmpty()) {
+            List<Product> oldProducts = productRepository.findAllById(discountDetails.getOldProductIds());
+            for (Product product : oldProducts) {
+                product.setDiscount(false);
+                productSet.add(product);
+            }
+        }
 
-                    // **Yangi mahsulotlarni qo‘shishdan oldin ularning boshqa chegirmalarda borligini tekshirish**
-                    List<Product> newProducts = new ArrayList<>();
-                    if (discountDetails.getNewProductIds() != null) {
-                        List<Product> potentialNewProducts = productRepository.findAllById(discountDetails.getNewProductIds());
+        //yangi mahsulotlarni qoshish
+        if (discountDetails.getNewProductIds() != null && !discountDetails.getNewProductIds().isEmpty()) {
+            List<Product> newProducts = productRepository.findAllById(discountDetails.getNewProductIds());
+            for (Product product : newProducts) {
+                product.setDiscount(true);
+                productSet.add(product);
+                newProductSet.add(product);
+            }
+        }
 
-                        for (Product product : potentialNewProducts) {
-                            if (product.getDiscount() != null) {
-                                return new ApiResponse("Mahsulot allaqachon boshqa chegirmaga bog‘langan: " + product.getName(), false);
-                            }
-                            product.setDiscount(true);
-                            newProducts.add(product);
-                        }
-
-                        productRepository.saveAll(newProducts);
-                        currentProductIds.addAll(discountDetails.getNewProductIds());
-                    }
-
-                    // **Yangilangan mahsulotlar ro‘yxatini saqlash**
-                    List<Product> updatedProducts = productRepository.findAllById(currentProductIds);
-                    discount.setProducts(updatedProducts);
-
-                    discountRepository.save(discount);
-                    return new ApiResponse("Chegirma muvaffaqiyatli yangilandi", true, mapToDto(discount));
-                })
-                .orElseGet(() -> new ApiResponse("Chegirma topilmadi", false));
+        if (!productSet.isEmpty()) {
+            discount.getProducts().clear();
+            discount.setProducts(new ArrayList<>(newProductSet));
+            productRepository.saveAll(productSet);
+        }
+        discountRepository.save(discount);
+        return new ApiResponse("Chegirma muvaffaqiyatli yangilandi", true);
     }
 
 
@@ -198,6 +176,9 @@ public class DiscountService {
         List<UUID> branchIds = discount.getBranches().stream()
                 .map(Branch::getId) // Branch obyektidan faqat id maydonini olamiz
                 .collect(Collectors.toList());
+        List<String> branchNames = discount.getBranches().stream()
+                .map(Branch::getName)
+                .toList();
 
         return new DiscountGetDto(
                 discount.getId(),
@@ -212,7 +193,8 @@ public class DiscountService {
                 discount.getEndHour(),
                 discount.getWeekDays(),
                 discount.getType(),
-                branchIds
+                branchIds,
+                branchNames
         );
     }
 
@@ -227,14 +209,25 @@ public class DiscountService {
         productRepository.saveAll(products);
     }
 
-    public ApiResponse checkProductList(List<UUID> productIds) {
-        List<Product> products = productRepository.findAllById(productIds);
+    public ApiResponse checkProductList(List<UUID> productIds, List<UUID> branchIds) {
+        Set<UUID> productSet = new HashSet<>();
+
+        for (UUID branchId : branchIds) {
+            for (UUID productId : productIds) {
+                if (discountRepository.existsByProductIdAndBranchId(productId, branchId)) {
+                    productSet.add(productId);
+                }
+            }
+        }
+
+        List<Product> products = productRepository.findAllById(productSet);
         List<DiscountGetDto.ProductInfo> productInfoList = new ArrayList<>();
         products.forEach(product -> {
             if (product.getDiscount() != null && product.getDiscount()) {
                 productInfoList.add(new DiscountGetDto.ProductInfo(product.getId(), product.getName(), product.getSalePrice()));
             }
         });
+
         if (productInfoList.isEmpty()) {
             return new ApiResponse("not found products", false);
         }
@@ -284,7 +277,6 @@ public class DiscountService {
 
         if (branchId != null) spec = spec.and(DiscountSpecifications.belongsToBranch(branchId));
         else spec = spec.and(DiscountSpecifications.belongsToBusiness(businessId));
-
         if (type != null) spec = spec.and(DiscountSpecifications.hasType(type));
         if (startDate != null) spec = spec.and(DiscountSpecifications.startDateAfter(startDate));
         if (endDate != null) spec = spec.and(DiscountSpecifications.endDateBefore(endDate));

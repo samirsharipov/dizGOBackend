@@ -30,6 +30,7 @@ public class DiscountGetDto {
     private Set<Integer> weekDays;
     private DiscountType discountType;
     private List<UUID> brancheIdList;
+    private List<String> branchNameList;
 
     @Data
     @AllArgsConstructor
