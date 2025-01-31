@@ -26,9 +26,11 @@ public interface DiscountRepository extends JpaRepository<Discount, UUID> {
 
 
     @Query("SELECT d FROM Discount d JOIN d.products p JOIN d.branches b " +
-            "WHERE p.id = :productId AND b.id = :branchId")
+            "WHERE p.id = :productId AND b.id = :branchId " +
+            "AND d.active = true AND d.deleted = false")
     Optional<Discount> findByProductIdAndBranchId(@Param("productId") UUID productId,
                                                   @Param("branchId") UUID branchId);
+
 
 
     @Query("SELECT COUNT(d) > 0 FROM Discount d JOIN d.products p JOIN d.branches b " +

@@ -2,6 +2,7 @@ package uz.pdp.springsecurity.payload;
 
 import lombok.Data;
 
+import javax.validation.constraints.FutureOrPresent;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
@@ -14,6 +15,8 @@ public class DiscountDto {
     private String description;
     private String type; // Enum sifatida qabul qilinadi
     private double value;
+    
+    @FutureOrPresent(message = "Sana bugungi kundan oldin bo'lishi mumkin emas!")
     private Timestamp startDate;
     private Timestamp endDate;
     private Time startHour;

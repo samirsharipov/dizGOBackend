@@ -12,11 +12,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.pdp.springsecurity.entity.*;
+import uz.pdp.springsecurity.enums.DiscountType;
 import uz.pdp.springsecurity.mapper.converts.ProductConvert;
 import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
 import uz.pdp.springsecurity.repository.specifications.ProductSpecifications;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -39,6 +43,7 @@ public class ProductService {
     private final LanguageRepository languageRepository;
     private final ProductTranslateRepository productTranslateRepository;
     private final ProductConvert productConvert;
+    private final DiscountRepository discountRepository;
 
     @Transactional
     public ApiResponse editProduct(UUID productId, ProductEditDto productEditDto) {
@@ -123,7 +128,7 @@ public class ProductService {
         Optional<Product> optionalProduct = productRepository.findById(id);
 
         return optionalProduct.map(product -> {
-            ProductGetDto productGetDto = productConvert.convertToDto(product);
+            ProductGetDto productGetDto = productConvert.convertToDto(product,null);
             List<ProductTranslateDTO> translates = productTranslateRepository.findAllByProductId(product.getId())
                     .stream()
                     .map(this::productTranslateToDto)
@@ -161,7 +166,7 @@ public class ProductService {
                 .or(() -> productRepository.findByBarcodeAndBusinessId(barcode, mainBranch.getBusiness().getId()));
 
         return optionalProduct.map(product -> {
-            ProductGetDto productGetDto = productConvert.convertToDto(product);
+            ProductGetDto productGetDto = productConvert.convertToDto(product,null);
 
             List<ProductTranslateDTO> translates = productTranslateRepository.findAllByProductId(product.getId())
                     .stream()
@@ -197,14 +202,14 @@ public class ProductService {
     }
 
     @NotNull
-    public List<ProductGetDto> getProductGetDtoList(List<Product> products, String code) {
+    public List<ProductGetDto> getProductGetDtoList(List<Product> products, String code,UUID branchId) {
 
         Language language = languageRepository.findByCode(code)
                 .orElseThrow(() -> new RuntimeException("LANGUAGE NOT FOUND"));
 
         return products.stream()
                 .map(product -> {
-                    ProductGetDto productGetDto = productConvert.convertToDto(product);
+                    ProductGetDto productGetDto = productConvert.convertToDto(product,branchId);
 
                     product.getTranslations().stream()
                             .filter(translate -> translate.getLanguage().getId().equals(language.getId()))
@@ -361,7 +366,7 @@ public class ProductService {
 
         List<ProductGetDto> productViewDtoList = productPage.getContent().stream()
                 .map(product -> {
-                    ProductGetDto dto = productConvert.convertToDto(product);
+                    ProductGetDto dto = productConvert.convertToDto(product,branchId);
                     addTranslationToDto(dto, product, lang);
                     return dto;
                 })
@@ -681,7 +686,7 @@ public class ProductService {
         if (products.isEmpty()) {
             return new ApiResponse("not found", false);
         }
-        List<ProductGetDto> productGetDtoList = getProductGetDtoList(products, code);
+        List<ProductGetDto> productGetDtoList = getProductGetDtoList(products, code,branchId);
 
         return new ApiResponse("all", true, productGetDtoList);
     }
@@ -962,6 +967,10 @@ public class ProductService {
             return new ApiResponse(notFoundMessage, false);
         }
 
+        all.stream()
+                .filter(ProductResponseDTO::getDiscount)
+                .forEach(productResponseDTO -> updateDiscount(productResponseDTO, branchId));
+
         // 6️⃣ Mahsulot topilsa, xabarni qaytarish
         String foundMessage = messages.getOrDefault(language + "_found", messages.get("uz_found"));
         return new ApiResponse(foundMessage, true, all);
@@ -970,5 +979,38 @@ public class ProductService {
     private List<ProductResponseDTO> findProductByKeyword(UUID branchId, String keyword, String language) {
         if (keyword == null || keyword.isBlank()) return new ArrayList<>();
         return productRepository.findProductsByBranchIdAndKeyword(branchId, keyword, language);
+    }
+
+    private void updateDiscount(ProductResponseDTO productResponseDTO, UUID branchId) {
+        LocalDate today = LocalDate.now();
+        int dayNumber = today.getDayOfWeek().getValue(); // 1 (Dushanba) - 7 (Yakshanba)
+        LocalTime now = LocalTime.now();
+
+        discountRepository.findByProductIdAndBranchId(productResponseDTO.getId(), branchId)
+                .ifPresent(discount -> {
+
+                    boolean matchesWeek = discount.isWeekday()
+                            && discount.getWeekDays().contains(dayNumber);
+
+                    boolean matchesTime = discount.isTime() &&
+                            (!now.isBefore(discount.getStartHour().toLocalTime())
+                                    && !now.isAfter(discount.getEndHour().toLocalTime()));
+
+                    productResponseDTO.setPercentage(discount.getType().equals(DiscountType.PERCENTAGE));
+                    productResponseDTO.setDiscountValue(discount.getValue());
+
+                    if (matchesWeek) {
+                        if (matchesTime) {
+                            productResponseDTO.setPercentage(discount.getType().equals(DiscountType.PERCENTAGE));
+                            productResponseDTO.setDiscountValue(discount.getValue());
+                        }
+                        productResponseDTO.setPercentage(discount.getType().equals(DiscountType.PERCENTAGE));
+                        productResponseDTO.setDiscountValue(discount.getValue());
+                    }
+                    if (matchesTime) {
+                        productResponseDTO.setPercentage(discount.getType().equals(DiscountType.PERCENTAGE));
+                        productResponseDTO.setDiscountValue(discount.getValue());
+                    }
+                });
     }
 }

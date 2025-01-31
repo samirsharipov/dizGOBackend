@@ -17,6 +17,11 @@ public class SelectedProductsGetDto {
     private double salePrice;
     private String barcode;
     private String MXIKCode;
+    private Boolean discount;
 
     private UUID branchId;
+
+    // for discount
+    private Double discountValue;
+    private Boolean percentage;
 }

@@ -7,13 +7,15 @@ import uz.pdp.springsecurity.entity.Language;
 import uz.pdp.springsecurity.entity.Product;
 import uz.pdp.springsecurity.entity.ProductTranslate;
 import uz.pdp.springsecurity.entity.SelectedProducts;
+import uz.pdp.springsecurity.enums.DiscountType;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.SelectedProductsGetDto;
 import uz.pdp.springsecurity.repository.*;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,6 +26,7 @@ public class SelectedProductsService {
     private final BranchRepository branchRepository;
     private final LanguageRepository languageRepository;
     private final ProductTranslateRepository productTranslateRepository;
+    private final DiscountRepository discountRepository;
 
     // 🔥 Universal createSelectedProducts (bitta yoki ro'yxatni bir xil metodda saqlash)
     public ApiResponse createSelectedProducts(List<SelectedProducts> selectedProductsList) {
@@ -86,6 +89,12 @@ public class SelectedProductsService {
                     .findFirst()
                     .ifPresent(product -> dtoList.add(convertToDto(selectedProduct, product, language)));
         }
+        if (dtoList.isEmpty()) {
+            return new ApiResponse("No products found for the branch", false);
+        }
+        dtoList.stream()
+                .filter(SelectedProductsGetDto::getDiscount)
+                .forEach(selectedProductsGetDto -> updateDiscount(selectedProductsGetDto, branchId));
 
         return new ApiResponse("Successfully selected products", true, dtoList);
     }
@@ -99,6 +108,7 @@ public class SelectedProductsService {
         dto.setBranchId(selectedProduct.getBranchId());
         dto.setBarcode(product.getBarcode());
         dto.setMXIKCode(product.getMXIKCode());
+        dto.setDiscount(product.getDiscount());
         dto.setName(language != null
                 ? getProductTranslatedName(product.getId(), language.getId(), product.getName())
                 : product.getName());
@@ -118,5 +128,38 @@ public class SelectedProductsService {
 
         repository.deleteById(id);
         return new ApiResponse("Successfully deleted selected product", true);
+    }
+
+    private void updateDiscount(SelectedProductsGetDto selectedProductsGetDto, UUID branchId) {
+        LocalDate today = LocalDate.now();
+        int dayNumber = today.getDayOfWeek().getValue(); // 1 (Dushanba) - 7 (Yakshanba)
+        LocalTime now = LocalTime.now();
+
+        discountRepository.findByProductIdAndBranchId(selectedProductsGetDto.getId(), branchId)
+                .ifPresent(discount -> {
+
+                    boolean matchesWeek = discount.isWeekday()
+                            && discount.getWeekDays().contains(dayNumber);
+
+                    boolean matchesTime = discount.isTime() &&
+                            (!now.isBefore(discount.getStartHour().toLocalTime())
+                                    && !now.isAfter(discount.getEndHour().toLocalTime()));
+
+                    if (Boolean.FALSE.equals(matchesWeek) && Boolean.FALSE.equals(matchesTime)) {
+                        selectedProductsGetDto.setPercentage(discount.getType().equals(DiscountType.PERCENTAGE));
+                        selectedProductsGetDto.setDiscountValue(discount.getValue());
+                    } else if (Boolean.TRUE.equals(matchesWeek)) {
+                        if (Boolean.TRUE.equals(matchesTime)) {
+                            selectedProductsGetDto.setPercentage(discount.getType().equals(DiscountType.PERCENTAGE));
+                            selectedProductsGetDto.setDiscountValue(discount.getValue());
+                        } else {
+                            selectedProductsGetDto.setPercentage(discount.getType().equals(DiscountType.PERCENTAGE));
+                            selectedProductsGetDto.setDiscountValue(discount.getValue());
+                        }
+                    } else if (Boolean.TRUE.equals(matchesTime)) {
+                        selectedProductsGetDto.setPercentage(discount.getType().equals(DiscountType.PERCENTAGE));
+                        selectedProductsGetDto.setDiscountValue(discount.getValue());
+                    }
+                });
     }
 }
