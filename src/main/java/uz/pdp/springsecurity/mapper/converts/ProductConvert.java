@@ -8,7 +8,9 @@ import uz.pdp.springsecurity.entity.Warehouse;
 import uz.pdp.springsecurity.payload.ProductGetDto;
 import uz.pdp.springsecurity.repository.WarehouseRepository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -17,13 +19,13 @@ public class ProductConvert {
 
     private final WarehouseRepository warehouseRepository;
 
-    public ProductGetDto convertToDto(Product product) {
+    public ProductGetDto convertToDto(Product product, UUID branchId) {
         ProductGetDto dto = new ProductGetDto();
         fillBasicInfo(dto, product);
         fillTechnicalInfo(dto, product);
         fillAgreementInfo(dto, product);
         fillRelationsInfo(dto, product);
-        fillWarehouseAndBranchesInfo(dto, product);
+        fillWarehouseAndBranchesInfo(dto, product, branchId);
         return dto;
     }
 
@@ -77,10 +79,23 @@ public class ProductConvert {
         dto.setPhotoId(getEntityId(product.getPhoto()));
     }
 
-    private void fillWarehouseAndBranchesInfo(ProductGetDto dto, Product product) {
-        Optional<Warehouse> optionalWarehouse =
-                warehouseRepository.findByProduct_Id(product.getId());
-        dto.setWarehouseCount(optionalWarehouse.map(Warehouse::getAmount).orElse(0d));
+    private void fillWarehouseAndBranchesInfo(ProductGetDto dto, Product product, UUID branchId) {
+
+
+        if (branchId != null) {
+            Optional<Warehouse> optionalWarehouse =
+                    warehouseRepository.findByProduct_IdAndBranchId(product.getId(), branchId);
+            dto.setWarehouseCount(optionalWarehouse.map(Warehouse::getAmount).orElse(0d));
+        } else {
+            List<Warehouse> warehouseList =
+                    warehouseRepository.findAllByProduct_Id(product.getId());
+            double totalAmount = 0.0;
+            for (Warehouse warehouse : warehouseList) {
+                totalAmount += warehouse.getAmount();
+            }
+            dto.setWarehouseCount(totalAmount);
+        }
+
 
         dto.setBusinessName(getEntityName(product.getBusiness()));
         dto.setBranches(product.getBranch() != null

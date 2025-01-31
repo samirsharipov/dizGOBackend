@@ -11,6 +11,7 @@ import uz.pdp.springsecurity.payload.DiscountDto;
 import uz.pdp.springsecurity.payload.DiscountEditDto;
 import uz.pdp.springsecurity.service.DiscountService;
 
+import javax.validation.Valid;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
@@ -25,7 +26,7 @@ public class DiscountController {
 
     // Chegirma yaratish
     @PostMapping
-    public ResponseEntity<ApiResponse> createDiscount(@RequestBody DiscountDto discountDto) {
+    public ResponseEntity<ApiResponse> createDiscount(@RequestBody @Valid DiscountDto discountDto) {
         return responseEntityHelper.buildResponse(discountService.createDiscount(discountDto));
     }
 

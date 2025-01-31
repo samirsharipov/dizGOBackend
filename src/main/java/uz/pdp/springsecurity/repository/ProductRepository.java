@@ -127,8 +127,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     @Query("SELECT new uz.pdp.springsecurity.payload.ProductResponseDTO( " +
             "p.id, " +
             "COALESCE(pt.name, p.name), " +
-            "p.salePrice,p.barcode,p.MXIKCode ,p.stockAmount" +
-            ") " +
+            "p.salePrice, p.barcode, p.MXIKCode, " +
+            "p.discount) " +
             "FROM Product p " +
             "LEFT JOIN p.translations pt ON pt.language.code = :languageCode " +
             "WHERE p.business.id IN (SELECT b.business.id FROM branches b WHERE b.id = :branchId) " +
@@ -137,8 +137,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     List<ProductResponseDTO> findProductsByBranchIdAndKeyword(
             @Param("branchId") UUID branchId,
             @Param("keyword") String keyword,
-            @Param("languageCode") String languageCode
-    );
+            @Param("languageCode") String languageCode);
 
     @Query("select count(p.id) from Product p " +
             "join p.branch b " +

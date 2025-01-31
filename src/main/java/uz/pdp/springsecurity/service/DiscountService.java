@@ -32,6 +32,10 @@ public class DiscountService {
     public ApiResponse createDiscount(DiscountDto discountDto) {
         Discount discount = new Discount();
 
+        if (discountDto.getStartDate().toLocalDateTime().isBefore(LocalDate.now().atStartOfDay())) {
+            return new ApiResponse("Sana bugungi kundan oldin bo'lishi mumkin emas!",false);
+        }
+
         discount.setName(discountDto.getName());
         discount.setDescription(discountDto.getDescription());
         discount.setType(DiscountType.valueOf(discountDto.getType()));
@@ -250,7 +254,7 @@ public class DiscountService {
             return new ApiResponse("not found", false);
         }
 
-        List<ProductGetDto> productGetDtoList = productService.getProductGetDtoList(products, code);
+        List<ProductGetDto> productGetDtoList = productService.getProductGetDtoList(products, code,branchId);
         if (!productGetDtoList.isEmpty()) {
             for (ProductGetDto productGetDto : productGetDtoList) {
                 if (productGetDto.getDiscount() != null && productGetDto.getDiscount()) {
