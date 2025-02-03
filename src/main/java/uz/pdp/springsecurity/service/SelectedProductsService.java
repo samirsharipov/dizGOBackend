@@ -138,10 +138,10 @@ public class SelectedProductsService {
         discountRepository.findByProductIdAndBranchId(selectedProductsGetDto.getId(), branchId)
                 .ifPresent(discount -> {
 
-                    boolean matchesWeek = discount.isWeekday()
+                    boolean matchesWeek = discount.getIsWeekday()
                             && discount.getWeekDays().contains(dayNumber);
 
-                    boolean matchesTime = discount.isTime() &&
+                    boolean matchesTime = discount.getIsTime() &&
                             (!now.isBefore(discount.getStartHour().toLocalTime())
                                     && !now.isAfter(discount.getEndHour().toLocalTime()));
 
