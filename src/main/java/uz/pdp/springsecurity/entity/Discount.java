@@ -35,8 +35,8 @@ public class Discount extends AbsEntity {
     private Time startHour; // Kun davomida chegirma boshlanish soati
     private Time endHour; // Kun davomida chegirma tugash soati
 
-    private boolean isWeekday; // Hafta kunlarida faollikni tekshirish uchun
-    private boolean isTime; // Soatlarni tekshirish uchun
+    private Boolean isWeekday; // Hafta kunlarida faollikni tekshirish uchun
+    private Boolean isTime; // Soatlarni tekshirish uchun
 
     @ElementCollection
     private Set<Integer> weekDays; // Chegirma amal qiladigan hafta kunlari (1 = Dushanba, 7 = Yakshanba)

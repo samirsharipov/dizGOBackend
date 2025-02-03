@@ -47,8 +47,8 @@ public class DiscountService {
         discount.setWeekDays(discountDto.getWeekDays());
         discount.setActive(false);
 
-        discount.setWeekday(discountDto.getWeekDays() != null && !discountDto.getWeekDays().isEmpty());
-        discount.setTime(discountDto.getStartHour() != null && discountDto.getEndHour() != null);
+        discount.setIsWeekday(discountDto.getWeekDays() != null && !discountDto.getWeekDays().isEmpty());
+        discount.setIsTime(discountDto.getStartHour() != null && discountDto.getEndHour() != null);
 
         discount.setProducts(productRepository.findAllById(discountDto.getProductIds()));
         discount.setBranches(branchRepository.findAllById(discountDto.getBranchIds()));
@@ -99,9 +99,9 @@ public class DiscountService {
         if (discountDetails.getStartHour() != null && discountDetails.getEndHour() != null) {
             discount.setStartHour(discountDetails.getStartHour());
             discount.setEndHour(discountDetails.getEndHour());
-            discount.setTime(true); // Soat bo‘yicha cheklovni faollashtirish
+            discount.setIsTime(true); // Soat bo‘yicha cheklovni faollashtirish
         } else {
-            discount.setTime(false);
+            discount.setIsTime(false);
         }
 
         Set<Product> productSet = new HashSet<>();
