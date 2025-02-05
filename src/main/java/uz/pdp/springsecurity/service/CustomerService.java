@@ -116,6 +116,13 @@ public class CustomerService {
                 userRepository.save(user);
             }
 
+            if (customerDto.getUserId() == null) {
+                Optional<User> optionalUser = userRepository.findByPhoneNumber(customerDto.getPhoneNumber());
+                if (optionalUser.isPresent()) {
+                    user = optionalUser.get();
+                }
+            }
+
             // 4. Customer yaratish va User bilan bog'lash
             Customer customer = new Customer();
             customer.setName(customerDto.getFirstName());

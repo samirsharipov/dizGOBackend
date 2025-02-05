@@ -276,7 +276,16 @@ public class PurchaseService {
         UUID productId = purchaseProductDto.getProductId();
 
         if (purchaseProductDto.isNew()) {
-            product = productEntityHelper.cloneProduct(productId, branch);
+            Optional<Product> optionalProduct = productRepository.findById(productId);
+            if (optionalProduct.isPresent()) {
+                product = optionalProduct.get();
+                List<Branch> branches = product.getBranch();
+                branches.add(branch);
+                product.setBranch(branches);
+                productRepository.save(product);
+            } else {
+                product = productEntityHelper.cloneProduct(productId, branch);
+            }
         } else {
             Optional<Product> optional = productRepository.findById(productId);
             if (optional.isEmpty()) return null;

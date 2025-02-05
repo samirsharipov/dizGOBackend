@@ -92,8 +92,8 @@ public class SupplierController {
      */
     @CheckPermission("ADD_SUPPLIER")
     @PostMapping("/repayment/{id}")
-    public HttpEntity<?> addRepayment(@PathVariable UUID id, @RequestBody RepaymentDto repaymentDto, @CurrentUser User user){
-        ApiResponse response = supplierService.storeRepayment(id, repaymentDto,user);
+    public HttpEntity<?> addRepayment(@PathVariable UUID id, @RequestBody RepaymentDto repaymentDto){
+        ApiResponse response = supplierService.storeRepayment(id, repaymentDto);
         return ResponseEntity.status(response.isSuccess() ? 201 : 409).body(response);
     }
 
