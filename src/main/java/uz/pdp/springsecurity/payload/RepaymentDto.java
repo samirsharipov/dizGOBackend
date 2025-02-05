@@ -10,13 +10,18 @@ import java.util.UUID;
 public class RepaymentDto {
     @NotNull
     private Double repayment;
+
     private Double repaymentDollar;
+
     private Boolean isDollar;
 
     private Timestamp payDate;
 
     private String description;
+
     private UUID paymentMethodId;
 
     private UUID branchId;
+
+    private UUID userId;
 }

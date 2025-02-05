@@ -27,7 +27,7 @@ public class SupplierService {
     private final SupplierBalanceHistoryRepository supplierBalanceHistoryRepository;
     private final CustomerSupplierRepository customerSupplierRepository;
     private final CustomerSupplierService customerSupplierService;
-//    private final CustomerService customerService;
+    private final UserRepository userRepository;
 
     public ApiResponse add(SupplierDto supplierDto) {
         Optional<Business> optionalBusiness = businessRepository.findById(supplierDto.getBusinessId());
@@ -107,9 +107,15 @@ public class SupplierService {
     }
 
     @Transactional
-    public ApiResponse storeRepayment(UUID id, RepaymentDto repaymentDto, User user) {
+    public ApiResponse storeRepayment(UUID id, RepaymentDto repaymentDto) {
         Optional<Supplier> supplierOptional = supplierRepository.findById(id);
         if (supplierOptional.isEmpty()) return new ApiResponse("Not Found Supplier", false);
+
+        Optional<User> optionalUser = userRepository.findById(repaymentDto.getUserId());
+        if (optionalUser.isEmpty()) {
+            return new ApiResponse("User NOT FOUND", false);
+        }
+
         Supplier supplier = supplierOptional.get();
         if (repaymentDto.getRepayment() != null) {
             supplier.setDebt(supplier.getDebt() - repaymentDto.getRepayment());
@@ -119,12 +125,13 @@ public class SupplierService {
             try {
                 storeRepaymentHelper(repaymentDto.getRepayment(), supplier);
                 balanceService.edit(repaymentDto.getBranchId(), repaymentDto.getRepayment(), false, repaymentDto.getPaymentMethodId(), repaymentDto.getIsDollar(),"supplier");
+
                 supplierBalanceHistoryRepository.save(new SupplierBalanceHistory(
                         repaymentDto.getRepayment(),
                         payMethodRepository.findById(repaymentDto.getPaymentMethodId()).orElseThrow(),
                         save,
                         repaymentDto.getDescription(),
-                        user,
+                        optionalUser.get(),
                         branchRepository.findById(repaymentDto.getBranchId()).orElseThrow()
                 ));
                 return new ApiResponse("Repayment Store !", true);
