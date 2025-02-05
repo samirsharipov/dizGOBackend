@@ -37,6 +37,7 @@ public class CategoryService {
 
         Category category = new Category();
         category.setBusiness(optionalBusiness.get());
+        category.setName(categoryDto.getName());
 
         if (categoryDto.getParentCategoryId() != null) {
             Optional<Category> optionalParentCategory = categoryRepository.findById(categoryDto.getParentCategoryId());
@@ -77,6 +78,7 @@ public class CategoryService {
         }
 
         Category category = optionalCategory.get();
+        category.setName(categoryDto.getName());
         if (categoryDto.getParentCategoryId() != null) {
             Optional<Category> parentCategoryOptional = categoryRepository.findById(categoryDto.getParentCategoryId());
             parentCategoryOptional.ifPresent(category::setParentCategory);
