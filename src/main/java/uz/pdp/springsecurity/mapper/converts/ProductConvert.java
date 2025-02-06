@@ -1,12 +1,15 @@
 package uz.pdp.springsecurity.mapper.converts;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import uz.pdp.springsecurity.entity.Branch;
-import uz.pdp.springsecurity.entity.Product;
-import uz.pdp.springsecurity.entity.Warehouse;
+import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.payload.ProductGetDto;
+import uz.pdp.springsecurity.repository.CategoryTranslateRepository;
+import uz.pdp.springsecurity.repository.MeasurementTranslateRepository;
 import uz.pdp.springsecurity.repository.WarehouseRepository;
+import uz.pdp.springsecurity.security.JwtProvider;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,13 +21,16 @@ import java.util.stream.Collectors;
 public class ProductConvert {
 
     private final WarehouseRepository warehouseRepository;
+    private final CategoryTranslateRepository categoryTranslateRepository;
+    private final MeasurementTranslateRepository measurementTranslateRepository;
+    Logger log = LoggerFactory.getLogger(JwtProvider.class);
 
-    public ProductGetDto convertToDto(Product product, UUID branchId) {
+    public ProductGetDto convertToDto(Product product, UUID branchId, String languageCode) {
         ProductGetDto dto = new ProductGetDto();
         fillBasicInfo(dto, product);
         fillTechnicalInfo(dto, product);
         fillAgreementInfo(dto, product);
-        fillRelationsInfo(dto, product);
+        fillRelationsInfo(dto, product, languageCode);
         fillWarehouseAndBranchesInfo(dto, product, branchId);
         return dto;
     }
@@ -69,15 +75,6 @@ public class ProductConvert {
         dto.setShippingClass(product.getShippingClass());
     }
 
-    private void fillRelationsInfo(ProductGetDto dto, Product product) {
-        dto.setBrandName(getEntityName(product.getBrand()));
-        dto.setBrandId(getEntityId(product.getBrand()));
-        dto.setCategoryName(getEntityName(product.getCategory()));
-        dto.setCategoryId(getEntityId(product.getCategory()));
-        dto.setMeasurementUnit(getEntityName(product.getMeasurement()));
-        dto.setMeasurementUnitId(getEntityId(product.getMeasurement()));
-        dto.setPhotoId(getEntityId(product.getPhoto()));
-    }
 
     private void fillWarehouseAndBranchesInfo(ProductGetDto dto, Product product, UUID branchId) {
 
@@ -105,24 +102,66 @@ public class ProductConvert {
                 ? product.getBranch().stream().map(Branch::getId).collect(Collectors.toList())
                 : null);
     }
+    private void fillRelationsInfo(ProductGetDto dto, Product product, String languageCode) {
+        dto.setBrandName(getEntityName(product.getBrand()));
+        dto.setBrandId(getEntityId(product.getBrand()));
+        dto.setCategoryName(getTranslationName(languageCode, getEntityId(product.getCategory()), getEntityName(product.getCategory()), CategoryTranslate.class));
+        dto.setCategoryId(getEntityId(product.getCategory()));
+        dto.setMeasurementUnit(getTranslationName(languageCode, getEntityId(product.getMeasurement()), getEntityName(product.getMeasurement()), MeasurementTranslate.class));
+        dto.setMeasurementUnitId(getEntityId(product.getMeasurement()));
+        dto.setPhotoId(getEntityId(product.getPhoto()));
+    }
 
-    // Bog'langan ob'ektlardan nomini olish
     private String getEntityName(Object entity) {
-        if (entity == null) return null;
+        return entity == null ? null : invokeGetter(entity, "getName");
+    }
+
+    private <T> T getEntityId(Object entity) {
+        return entity == null ? null : invokeGetter(entity, "getId");
+    }
+
+    private <T> T invokeGetter(Object entity, String methodName) {
         try {
-            return (String) entity.getClass().getMethod("getName").invoke(entity);
+            Object result = entity.getClass().getMethod(methodName).invoke(entity);
+
+            // Cast qilishdan oldin natijani tekshiramiz
+            if (result != null && entity.getClass().getMethod(methodName).getReturnType().isAssignableFrom(result.getClass())) {
+                return (T) result; // Xavfsiz cast qilish
+            }
+            return null;
         } catch (Exception e) {
+            // Logni yozish
+            log.error("Error invoking getter {} on entity {}", methodName, entity, e);
             return null;
         }
     }
 
-    // Bog'langan ob'ektlardan ID olish
-    private <T> T getEntityId(Object entity) {
-        if (entity == null) return null;
-        try {
-            return (T) entity.getClass().getMethod("getId").invoke(entity);
-        } catch (Exception e) {
-            return null;
+
+    // General method for retrieving translated names
+    private String getTranslationName(String languageCode, UUID entityId, String defaultName, Class<?> translationClass) {
+
+       if (languageCode == null) {
+           return defaultName;
+       }
+           Optional<?> optionalTranslation = getTranslation(entityId, languageCode, translationClass);
+
+        return optionalTranslation.map(translation -> {
+            try {
+                return (String) translation.getClass().getMethod("getName").invoke(translation);
+            } catch (Exception e) {
+                return defaultName;
+            }
+        }).orElse(defaultName);
+    }
+
+    // Method to handle translation retrieval for different entities
+    private Optional<?> getTranslation(UUID entityId, String languageCode, Class<?> translationClass) {
+        if (CategoryTranslate.class.equals(translationClass)) {
+            return categoryTranslateRepository.findByCategory_IdAndLanguage_Code(entityId, languageCode);
+        } else if (MeasurementTranslate.class.equals(translationClass)) {
+            return measurementTranslateRepository.findByMeasurement_idAndLanguage_Code(entityId, languageCode);
+        } else {
+            return Optional.empty();
         }
     }
 }
