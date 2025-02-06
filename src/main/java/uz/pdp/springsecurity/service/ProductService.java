@@ -128,7 +128,7 @@ public class ProductService {
         Optional<Product> optionalProduct = productRepository.findById(id);
 
         return optionalProduct.map(product -> {
-            ProductGetDto productGetDto = productConvert.convertToDto(product,null);
+            ProductGetDto productGetDto = productConvert.convertToDto(product, null, null);
             List<ProductTranslateDTO> translates = productTranslateRepository.findAllByProductId(product.getId())
                     .stream()
                     .map(this::productTranslateToDto)
@@ -166,7 +166,7 @@ public class ProductService {
                 .or(() -> productRepository.findByBarcodeAndBusinessId(barcode, mainBranch.getBusiness().getId()));
 
         return optionalProduct.map(product -> {
-            ProductGetDto productGetDto = productConvert.convertToDto(product,null);
+            ProductGetDto productGetDto = productConvert.convertToDto(product, null, null);
 
             List<ProductTranslateDTO> translates = productTranslateRepository.findAllByProductId(product.getId())
                     .stream()
@@ -202,14 +202,14 @@ public class ProductService {
     }
 
     @NotNull
-    public List<ProductGetDto> getProductGetDtoList(List<Product> products, String code,UUID branchId) {
+    public List<ProductGetDto> getProductGetDtoList(List<Product> products, String code, UUID branchId) {
 
         Language language = languageRepository.findByCode(code)
                 .orElseThrow(() -> new RuntimeException("LANGUAGE NOT FOUND"));
 
         return products.stream()
                 .map(product -> {
-                    ProductGetDto productGetDto = productConvert.convertToDto(product,branchId);
+                    ProductGetDto productGetDto = productConvert.convertToDto(product, branchId, code);
 
                     product.getTranslations().stream()
                             .filter(translate -> translate.getLanguage().getId().equals(language.getId()))
@@ -366,7 +366,7 @@ public class ProductService {
 
         List<ProductGetDto> productViewDtoList = productPage.getContent().stream()
                 .map(product -> {
-                    ProductGetDto dto = productConvert.convertToDto(product,branchId);
+                    ProductGetDto dto = productConvert.convertToDto(product, branchId, lang);
                     addTranslationToDto(dto, product, lang);
                     return dto;
                 })
@@ -686,7 +686,7 @@ public class ProductService {
         if (products.isEmpty()) {
             return new ApiResponse("not found", false);
         }
-        List<ProductGetDto> productGetDtoList = getProductGetDtoList(products, code,branchId);
+        List<ProductGetDto> productGetDtoList = getProductGetDtoList(products, code, branchId);
 
         return new ApiResponse("all", true, productGetDtoList);
     }
