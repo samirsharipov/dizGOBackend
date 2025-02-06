@@ -968,7 +968,7 @@ public class ProductService {
         }
 
         all.stream()
-                .filter(ProductResponseDTO::getDiscount)
+                .filter(productResponseDTO -> Boolean.TRUE.equals(productResponseDTO.getDiscount()))
                 .forEach(productResponseDTO -> updateDiscount(productResponseDTO, branchId));
 
         // 6️⃣ Mahsulot topilsa, xabarni qaytarish
