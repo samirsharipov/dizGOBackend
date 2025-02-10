@@ -186,4 +186,10 @@ public class ProductController {
         ApiResponse apiResponse = productService.getContentProduct(branchId, productId, page, size);
         return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
     }
+
+    @GetMapping("/generate-barcode/{businessId}")
+    public HttpEntity<?> generateBarcode(@PathVariable UUID businessId) {
+       return responseEntityHelper.buildResponse(productService.generateBarcode(businessId));
+    }
+
 }

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 import uz.pdp.springsecurity.entity.Product;
 import uz.pdp.springsecurity.payload.ProductResponseDTO;
 import uz.pdp.springsecurity.payload.ProductShortDto;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Repository
 public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     boolean existsByBarcodeAndBusinessIdAndActiveTrue(String barcode, UUID businessId);
@@ -27,8 +29,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     Optional<Product> findByBarcodeAndBusinessId(String barcode, UUID business_id);
 
     List<Product> findAllByBrandIdAndCategoryIdAndBranchIdAndActiveTrue(UUID brand_id, UUID category_id, UUID branchId);
-
-    List<Product> findAllByBrandIdAndActiveIsTrue(UUID brand_id);
 
     boolean existsByPluCodeAndBusiness_Id(String pluCode, UUID business_id);
 
@@ -57,7 +57,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     List<ProductShortDto> findAllByBrandIdAndActiveOrderByNameAsc(
             @Param("brandId") UUID brandId,
             @Param("languageCode") String languageCode);
-
 
     Page<Product> findAllByCategory_IdAndBranch_IdAndActiveTrue(UUID category_id, UUID branch_id, Pageable pageable);
 
@@ -103,7 +102,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     Page<Product> findAll(Specification<Product> spec, Pageable pageable);
 
-
     @Query("SELECT COUNT(p) FROM Product p WHERE p.createdAt BETWEEN :startDate AND :endDate")
     long countTotalBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
 
@@ -123,7 +121,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             @Param("businessId") UUID businessId,
             @Param("keyword") String keyword);
 
-
     @Query("SELECT new uz.pdp.springsecurity.payload.ProductResponseDTO( " +
             "p.id, " +
             "COALESCE(pt.name, p.name), " +
@@ -139,6 +136,19 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             @Param("keyword") String keyword,
             @Param("languageCode") String languageCode);
 
+
+    // Business ID bo‘yicha mahsulot qidirish
+    @Query("SELECT p FROM Product p WHERE p.business.id = :businessId AND LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%'))")
+    Page<Product> findByBusinessIdAndNameContainingIgnoreCase(@Param("businessId") UUID businessId,
+                                                              @Param("search") String search,
+                                                              Pageable pageable);
+
+    // Branch ID bo‘yicha mahsulot qidirish (ManyToMany bo‘lgani uchun JOIN ishlatamiz)
+    @Query("SELECT p FROM Product p JOIN p.branch b WHERE b.id = :branchId AND LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%'))")
+    Page<Product> findByBranchIdAndNameContainingIgnoreCase(@Param("branchId") UUID branchId,
+                                                            @Param("search") String search,
+                                                            Pageable pageable);
+
     @Query("select count(p.id) from Product p " +
             "join p.branch b " +
             "where b.id = :branchId " +
@@ -153,9 +163,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             "and p.deleted = false ")
     Long countProductsByBusiness(
             @Param("businessId") UUID businessId);
-
-
-    Optional<Product> findProductByIdAndBranchIdAndActiveTrue(UUID id, UUID branchId);
 }
 
 

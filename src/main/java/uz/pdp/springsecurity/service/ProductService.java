@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.pdp.springsecurity.entity.*;
@@ -18,7 +17,6 @@ import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
 import uz.pdp.springsecurity.repository.specifications.ProductSpecifications;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
@@ -157,8 +155,9 @@ public class ProductService {
 
     public ApiResponse getByBarcode(String barcode, UUID branchId) {
         Branch branch = findByIdOrThrow(branchRepository, branchId, "branch");
+
         Branch mainBranch = branch.getMainBranchId() != null
-                ? findByIdOrThrow(branchRepository, branch.getMainBranchId(), "product")
+                ? findByIdOrThrow(branchRepository, branch.getMainBranchId(), "branch")
                 : branch;
 
         Optional<Product> optionalProduct = productRepository
@@ -353,18 +352,25 @@ public class ProductService {
     public ApiResponse getByBusinessPageableWithTranslations(UUID businessId, UUID branchId, UUID brandId, UUID catId, String search, int page, int size, String lang) {
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.ASC, "name");
 
-        // Dinamik filtrlash
-        Specification<Product> spec = Specification
-                .where(ProductSpecifications.isActiveTrue())
-                .and(branchId != null ? ProductSpecifications.belongsToBranch(branchId) : ProductSpecifications.belongsToBusiness(businessId))
-                .and(search != null && !search.isBlank() ? ProductSpecifications.nameOrBarcodeContains(search) : null)
-                .and(catId != null ? ProductSpecifications.belongsToCategory(catId) : null)
-                .and(brandId != null ? ProductSpecifications.belongsToBrand(brandId) : null);
+        Page<Product> productPage = null;
+        if (!search.isBlank()) {
+            if (branchId == null) {
+                productPage = productRepository.findByBusinessIdAndNameContainingIgnoreCase(businessId, search, pageable);
+            } else {
+                productPage = productRepository.findByBranchIdAndNameContainingIgnoreCase(branchId, search, pageable);
+            }
+        } else {
+            // Dinamik filtrlash
+            Specification<Product> spec = Specification
+                    .where(ProductSpecifications.isActiveTrue())
+                    .and(branchId != null ? ProductSpecifications.belongsToBranch(branchId) : ProductSpecifications.belongsToBusiness(businessId))
+                    .and(catId != null ? ProductSpecifications.belongsToCategory(catId) : null)
+                    .and(brandId != null ? ProductSpecifications.belongsToBrand(brandId) : null);
+            productPage = productRepository.findAll(spec, pageable);
+        }
 
-        Page<Product> productPage = productRepository.findAll(spec, pageable);
 
-
-        List<ProductGetDto> productViewDtoList = productPage.getContent().stream()
+        List<ProductGetDto> productViewDtoList = productPage.stream()
                 .map(product -> {
                     ProductGetDto dto = productConvert.convertToDto(product, branchId, lang);
                     addTranslationToDto(dto, product, lang);
@@ -675,7 +681,7 @@ public class ProductService {
 
         Branch branch = findByIdOrThrow(branchRepository, branchId, "branch");
         UUID mainBranchBusinessId = branch.getMainBranchId() != null
-                ? findByIdOrThrow(branchRepository, branch.getMainBranchId(), "product").getBusiness().getId()
+                ? findByIdOrThrow(branchRepository, branch.getMainBranchId(), "branch").getBusiness().getId()
                 : branch.getBusiness().getId();
 
         List<Product> products = productRepository.findAllProductsWithTranslates(branch.getBusiness().getId(), name);
@@ -1012,5 +1018,17 @@ public class ProductService {
                         productResponseDTO.setDiscountValue(discount.getValue());
                     }
                 });
+    }
+
+    public ApiResponse generateBarcode(UUID businessId) {
+        Random random = new Random();
+        int randomPart = random.nextInt(1_000_000);
+        String barcode = String.format("300%06d", randomPart);
+        boolean exist = productRepository.existsByBarcodeAndBusinessId(barcode, businessId);
+        if (exist) {
+            generateBarcode(businessId);
+        }
+
+        return new ApiResponse("success", true, barcode);
     }
 }

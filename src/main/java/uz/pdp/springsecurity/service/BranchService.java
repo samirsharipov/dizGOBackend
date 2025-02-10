@@ -33,6 +33,7 @@ public class BranchService {
     private final BranchCategoryRepository branchCategoryRepository;
     private final CreateEntityHelper createEntityHelper;
     private final LocationRepository locationRepository;
+    private final ProductRepository productRepository;
 
     public ApiResponse addBranch(BranchDto branchDto) {
         Branch branch = new Branch();
@@ -85,6 +86,10 @@ public class BranchService {
 
         createBalance(branch, balanceRepository, payMethodRepository);
 
+        if (save.getBranchCategory() == null) {
+            setAllProducts(businessId, save);
+        }
+
         createProjectStatus(branch);
         Location location = new Location();
         location.setBranchId(save.getId());
@@ -95,6 +100,16 @@ public class BranchService {
 
 
         return new ApiResponse("Added", true);
+    }
+
+    private void setAllProducts(UUID businessId, Branch branch) {
+        List<Product> allProduct = productRepository.findAllByBusiness_IdAndActiveTrue(businessId);
+        for (Product product : allProduct) {
+            List<Branch> branches = product.getBranch();
+            branches.add(branch);
+            product.setBranch(branches);
+        }
+        productRepository.saveAll(allProduct);
     }
 
     private void createProjectStatus(Branch branch) {

@@ -82,6 +82,8 @@ public class CategoryService {
         if (categoryDto.getParentCategoryId() != null) {
             Optional<Category> parentCategoryOptional = categoryRepository.findById(categoryDto.getParentCategoryId());
             parentCategoryOptional.ifPresent(category::setParentCategory);
+        }else {
+            category.setParentCategory(null);
         }
 
         // Tarjimalarni yangilash
