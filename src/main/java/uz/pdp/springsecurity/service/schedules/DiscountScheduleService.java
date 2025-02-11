@@ -14,8 +14,8 @@ public class DiscountScheduleService {
 
     private final DiscountTransactionService discountTransactionService;
 
-//    @Scheduled(cron = "0 0 0 * * ?") // Har kuni soat 00:00 da ishga tushadi
-    @Scheduled(cron = "43 45 * * * ?")
+    @Scheduled(cron = "0 0 0 * * ?") // Har kuni soat 00:00 da ishga tushadi
+//    @Scheduled(cron = "43 45 * * * ?")
     public void processDiscounts() {
         try {
             logger.info("🔄 Removing expired discounts...");
