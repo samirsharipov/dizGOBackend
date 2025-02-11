@@ -7,6 +7,8 @@ import org.springframework.data.repository.query.Param;
 import uz.pdp.springsecurity.entity.Discount;
 import uz.pdp.springsecurity.entity.Product;
 
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -17,12 +19,12 @@ public interface DiscountRepository extends JpaRepository<Discount, UUID> {
     List<Discount> findAll(Specification<Discount> spec);
 
     @Query("SELECT d FROM Discount d WHERE d.endDate BETWEEN :startOfDay AND :endOfDay")
-    List<Discount> findExpiredDiscounts(@Param("startOfDay") LocalDateTime startOfDay,
-                                        @Param("endOfDay") LocalDateTime endOfDay);
+    List<Discount> findExpiredDiscounts(@Param("startOfDay") Timestamp startOfDay,
+                                        @Param("endOfDay") Timestamp endOfDay);
 
     @Query("SELECT d FROM Discount d WHERE d.startDate BETWEEN :startOfDay AND :endOfDay")
-    List<Discount> findScheduledDiscounts(@Param("startOfDay") LocalDateTime startOfDay,
-                                          @Param("endOfDay") LocalDateTime endOfDay);
+    List<Discount> findScheduledDiscounts(@Param("startOfDay") Timestamp startOfDay,
+                                          @Param("endOfDay") Timestamp endOfDay);
 
 
     @Query("SELECT d FROM Discount d JOIN d.products p JOIN d.branches b " +
