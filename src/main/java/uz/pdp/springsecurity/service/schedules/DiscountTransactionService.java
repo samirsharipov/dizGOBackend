@@ -10,10 +10,12 @@ import uz.pdp.springsecurity.entity.Product;
 import uz.pdp.springsecurity.repository.DiscountRepository;
 import uz.pdp.springsecurity.repository.ProductRepository;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,60 +29,67 @@ public class DiscountTransactionService {
 
     @Transactional
     public void removeExpiredDiscounts() {
-        LocalDate today = LocalDate.now();
-        LocalDateTime startOfDay = today.atStartOfDay();
-        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
-
-        List<Discount> expiredDiscounts = discountRepository.findExpiredDiscounts(startOfDay, endOfDay);
-
-        if (!expiredDiscounts.isEmpty()) {
-            expiredDiscounts.forEach(discount -> {
-                discount.setActive(false);
-                discount.setDeleted(true);
-            });
-
-            // ❌ Chegirmasi tugagan mahsulotlar uchun discount ni false qilish
-            List<Product> productsToUpdate = expiredDiscounts.stream()
-                    .flatMap(discount -> discount.getProducts().stream())
-                    .distinct()
-                    .peek(product -> product.setDiscount(false))
-                    .collect(Collectors.toList());
-
-            productRepository.saveAll(productsToUpdate); // ✅ Mahsulotlar saqlanadi
-            discountRepository.saveAll(expiredDiscounts); // ✅ Chegirmalar o‘chiriladi
-
-            logger.info("✅ {} expired discounts removed and {} products updated at: {}",
-                    expiredDiscounts.size(), productsToUpdate.size(), LocalDateTime.now());
-        } else {
-            logger.info("⏳ No expired discounts found at: {}", LocalDateTime.now());
-        }
+        processDiscounts(
+                discountRepository::findExpiredDiscounts,
+                discount -> {
+                    discount.setActive(false);
+                    discount.setDeleted(true);
+                },
+                false,
+                "expired"
+        );
     }
 
     @Transactional
     public void activateScheduledDiscounts() {
-        LocalDate today = LocalDate.now();
-        LocalDateTime startOfDay = today.atStartOfDay();
-        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
+        processDiscounts(
+                discountRepository::findScheduledDiscounts,
+                discount -> discount.setActive(true),
+                true,
+                "scheduled"
+        );
+    }
 
-        List<Discount> discountsToActivate = discountRepository.findScheduledDiscounts(startOfDay, endOfDay);
+    private void processDiscounts(
+            DiscountFinder discountFinder,
+            Consumer<Discount> discountUpdater,
+            boolean newDiscountState,
+            String discountType
+    ) {
+        Timestamp[] timestamps = getTimestampRangeForToday();
+        List<Discount> discounts = discountFinder.findDiscounts(timestamps[0], timestamps[1]);
 
-        if (!discountsToActivate.isEmpty()) {
-            discountsToActivate.forEach(discount -> discount.setActive(true));
+        if (!discounts.isEmpty()) {
+            discounts.forEach(discountUpdater);
 
-            // ✅ Faollashgan chegirmalar uchun mahsulotlarni yangilash
-            List<Product> productsToUpdate = discountsToActivate.stream()
+            List<Product> productsToUpdate = discounts.stream()
                     .flatMap(discount -> discount.getProducts().stream())
                     .distinct()
-                    .peek(product -> product.setDiscount(true))
+                    .peek(product -> product.setDiscount(newDiscountState))
                     .collect(Collectors.toList());
 
-            productRepository.saveAll(productsToUpdate); // ✅ Mahsulotlar saqlanadi
-            discountRepository.saveAll(discountsToActivate); // ✅ Chegirmalar yangilanadi
+            productRepository.saveAll(productsToUpdate);
+            discountRepository.saveAll(discounts);
 
-            logger.info("✅ {} scheduled discounts activated and {} products updated at: {}",
-                    discountsToActivate.size(), productsToUpdate.size(), LocalDateTime.now());
+            logResults(discounts.size(), productsToUpdate.size(), discountType);
         } else {
-            logger.info("⏳ No scheduled discounts found at: {}", LocalDateTime.now());
+            logger.info("⏳ No {} discounts found at: {}", discountType, LocalDateTime.now());
         }
+    }
+
+    private Timestamp[] getTimestampRangeForToday() {
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+        return new Timestamp[]{Timestamp.valueOf(startOfDay), Timestamp.valueOf(endOfDay)};
+    }
+
+    private void logResults(int discountCount, int productCount, String discountType) {
+        logger.info("✅ {} {} discounts processed and {} products updated at: {}",
+                discountCount, discountType, productCount, LocalDateTime.now());
+    }
+
+    @FunctionalInterface
+    private interface DiscountFinder {
+        List<Discount> findDiscounts(Timestamp start, Timestamp end);
     }
 }
