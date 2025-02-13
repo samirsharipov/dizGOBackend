@@ -276,7 +276,7 @@ public class PurchaseService {
         UUID productId = purchaseProductDto.getProductId();
 
         if (purchaseProductDto.isNew()) {
-            Optional<Product> optionalProduct = productRepository.findById(productId);
+            Optional<Product> optionalProduct = productRepository.findByIdAndBusinessId(productId, branch.getBusiness().getId());
             if (optionalProduct.isPresent()) {
                 product = optionalProduct.get();
                 List<Branch> branches = product.getBranch();

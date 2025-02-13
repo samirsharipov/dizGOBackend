@@ -20,6 +20,8 @@ import java.util.UUID;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, UUID> {
 
+    Optional<Product> findByIdAndBusinessId(UUID id, UUID businessId);
+
     boolean existsByBarcodeAndBusinessIdAndActiveTrue(String barcode, UUID businessId);
 
     boolean existsByBarcodeAndBusinessId(String barcode, UUID businessId);
