@@ -153,16 +153,30 @@ public class ProductService {
         return new ApiResponse("NOT FOUND", false);
     }
 
-    public ApiResponse getByBarcode(String barcode, UUID branchId) {
+    public ApiResponse getByBarcode(String barcode, UUID branchId, String language) {
+
+        Map<String, String> messages = Map.of(
+                "uz_not_found", "Ushbu maxsulot allaqachon mavjud!",
+                "en_not_found", "This product already exists!",
+                "ru_not_found", "Этот продукт уже существует!"
+        );
+
+
         Branch branch = findByIdOrThrow(branchRepository, branchId, "branch");
 
         Branch mainBranch = branch.getMainBranchId() != null
                 ? findByIdOrThrow(branchRepository, branch.getMainBranchId(), "branch")
                 : branch;
 
+
+        if (productRepository
+                .existsByBarcodeAndBusinessId(barcode,
+                        branch.getBusiness().getId())) {
+            return new ApiResponse(messages.get(language + "_not_found"), false);
+        }
+
         Optional<Product> optionalProduct = productRepository
-                .findByBarcodeAndBusinessId(barcode, branch.getBusiness().getId())
-                .or(() -> productRepository.findByBarcodeAndBusinessId(barcode, mainBranch.getBusiness().getId()));
+                .findByBarcodeAndBusinessId(barcode, mainBranch.getBusiness().getId());
 
         return optionalProduct.map(product -> {
             ProductGetDto productGetDto = productConvert.convertToDto(product, null, null);

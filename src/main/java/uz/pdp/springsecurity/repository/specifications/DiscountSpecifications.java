@@ -1,4 +1,5 @@
 package uz.pdp.springsecurity.repository.specifications;
+
 import org.springframework.data.jpa.domain.Specification;
 import uz.pdp.springsecurity.entity.Discount;
 import uz.pdp.springsecurity.entity.Branch;
@@ -38,7 +39,10 @@ public class DiscountSpecifications {
         return (root, query, cb) -> cb.lessThanOrEqualTo(root.get("endDate"), endDate);
     }
 
-    public static Specification<Discount> isNotDeleted() {
-        return (root, query, cb) -> cb.equal(root.get("deleted"), false);
+    public static Specification<Discount> isActiveOrNotDeletedSortedByCreatedAtDesc() {
+        return (root, query, cb) -> {
+            query.orderBy(cb.desc(root.get("createdAt"))); // 🆕 DESC tartibda saralash
+            return cb.equal(root.get("deleted"), false);
+        };
     }
 }

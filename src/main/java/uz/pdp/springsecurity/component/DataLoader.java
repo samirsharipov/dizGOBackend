@@ -54,11 +54,15 @@ public class DataLoader implements CommandLineRunner {
 
     @Value("${spring.sql.init.mode}")
     private String initMode;
+
+    @Value("${spring.jpa.hibernate.ddl-auto:}")
+    private String ddlAuto;
+
     private final ShablonRepository shablonRepository;
 
     @Override
     public void run(String... args) {
-        if (initMode.equals("always")) {
+        if (initMode.equals("always") && ddlAuto.equals("create")) {
 
             Timestamp startDay = new Timestamp(System.currentTimeMillis());
             LocalDate date = LocalDate.now().plusMonths(1);

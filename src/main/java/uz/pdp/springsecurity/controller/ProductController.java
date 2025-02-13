@@ -70,9 +70,10 @@ public class ProductController {
 
     @CheckPermission("VIEW_PRODUCT")
     @GetMapping("/get-by-barcode/{barcode}/{branchId}")
-    public HttpEntity<?> getByBarcode(@PathVariable String barcode, @PathVariable UUID branchId) {
-        ApiResponse apiResponse = productService.getByBarcode(barcode, branchId);
-        return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
+    public HttpEntity<?> getByBarcode(@PathVariable String barcode,
+                                      @PathVariable UUID branchId,
+                                      @RequestParam String language) {
+        return responseEntityHelper.buildResponse(productService.getByBarcode(barcode, branchId, language));
     }
 
     @CheckPermission("VIEW_PRODUCT")
@@ -80,8 +81,7 @@ public class ProductController {
     public HttpEntity<?> search(@PathVariable UUID branch_id,
                                 @RequestParam String name,
                                 @RequestParam String language) {
-        ApiResponse apiResponse = productService.search(branch_id, name, language);
-        return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
+        return responseEntityHelper.buildResponse(productService.search(branch_id, name, language));
     }
 
 
@@ -90,8 +90,7 @@ public class ProductController {
     public HttpEntity<?> searchTrade(@PathVariable UUID branch_id,
                                      @RequestParam String name,
                                      @RequestParam String language) {
-        ApiResponse apiResponse = productService.searchTrade(branch_id, name, language);
-        return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
+        return responseEntityHelper.buildResponse(productService.searchTrade(branch_id, name, language));
     }
 
 
@@ -106,29 +105,31 @@ public class ProductController {
     @GetMapping("/get-by-brand/{brand_id}")
     public HttpEntity<?> getByBrand(@PathVariable UUID brand_id,
                                     @RequestParam String code) {
-        return responseEntityHelper.buildResponse(productService.getByBrand(brand_id,code));
+        return responseEntityHelper.buildResponse(productService.getByBrand(brand_id, code));
     }
 
     @CheckPermission("VIEW_PRODUCT")
     @PostMapping("/get-by-branch-and-barcode/{branch_id}")
-    public HttpEntity<?> getByBranch(@PathVariable UUID branch_id, @CurrentUser User user, @RequestBody ProductBarcodeDto productBarcodeDto) {
-        ApiResponse apiResponse = productService.getByBranchAndBarcode(branch_id, user, productBarcodeDto);
-        return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
+    public HttpEntity<?> getByBranch(@PathVariable UUID branch_id,
+                                     @CurrentUser User user,
+                                     @RequestBody ProductBarcodeDto productBarcodeDto) {
+        return responseEntityHelper.buildResponse(productService.getByBranchAndBarcode(branch_id, user, productBarcodeDto));
     }
 
     @CheckPermission("VIEW_PRODUCT")
     @GetMapping("/get-by-branch/{branch_id}")
     public HttpEntity<?> getByBranchAndBarcode(@PathVariable UUID branch_id) {
-        ApiResponse apiResponse = productService.getByBranch(branch_id);
-        return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
+        return responseEntityHelper.buildResponse(productService.getByBranch(branch_id));
     }
 
 
     @CheckPermission("VIEW_PRODUCT")
     @GetMapping("/get-by-branch-for-trade/{branch_id}")
-    public HttpEntity<?> getByBranchForTrade(@PathVariable UUID branch_id, @RequestParam(required = false) UUID category_id, @RequestParam int page, @RequestParam int size, @RequestParam(required = false) String searchValue) {
-        ApiResponse apiResponse = productService.getByBranchForTrade(searchValue, branch_id, category_id, page, size);
-        return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
+    public HttpEntity<?> getByBranchForTrade(@PathVariable UUID branch_id,
+                                             @RequestParam(required = false) UUID category_id,
+                                             @RequestParam int page, @RequestParam int size,
+                                             @RequestParam(required = false) String searchValue) {
+        return responseEntityHelper.buildResponse(productService.getByBranchForTrade(searchValue, branch_id, category_id, page, size));
     }
 
     @CheckPermission("VIEW_PRODUCT")
@@ -189,7 +190,7 @@ public class ProductController {
 
     @GetMapping("/generate-barcode/{businessId}")
     public HttpEntity<?> generateBarcode(@PathVariable UUID businessId) {
-       return responseEntityHelper.buildResponse(productService.generateBarcode(businessId));
+        return responseEntityHelper.buildResponse(productService.generateBarcode(businessId));
     }
 
 }

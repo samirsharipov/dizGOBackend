@@ -285,7 +285,7 @@ public class DiscountService {
         if (startDate != null) spec = spec.and(DiscountSpecifications.startDateAfter(startDate));
         if (endDate != null) spec = spec.and(DiscountSpecifications.endDateBefore(endDate));
 
-        spec = spec.and(DiscountSpecifications.isNotDeleted());
+        spec = spec.and(DiscountSpecifications.isActiveOrNotDeletedSortedByCreatedAtDesc());
         return discountRepository.findAll(spec);
     }
 }
