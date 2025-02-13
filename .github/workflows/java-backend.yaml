@@ -1,62 +1,62 @@
-# name: Deploy Spring Boot Project
+name: Deploy Spring Boot Project
 
-# on:
-#   push:
-#     branches:
-#       - main  # yoki boshqa asosiy branch
+on:
+  push:
+    branches:
+      - main  # yoki boshqa asosiy branch
 
-# jobs:
-#   deploy:
-#     runs-on: ubuntu-latest
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-#     steps:
-#     - name: Kodingizni tekshirish
-#       uses: actions/checkout@v2
+    steps:
+    - name: Kodingizni tekshirish
+      uses: actions/checkout@v2
 
-#     - name: SSH Private Keyni yaratish
-#       run: |
-#         mkdir -p ~/.ssh
-#         echo "$PRIVATE_KEY" > ~/.ssh/id_rsa
-#       env:
-#         PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: SSH Private Keyni yaratish
+      run: |
+        mkdir -p ~/.ssh
+        echo "$PRIVATE_KEY" > ~/.ssh/id_rsa
+      env:
+        PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-#     - name: SSH ruxsatlarini o‘rnatish
-#       run: chmod 600 ~/.ssh/id_rsa
+    - name: SSH ruxsatlarini o‘rnatish
+      run: chmod 600 ~/.ssh/id_rsa
 
-#     - name: Host key verificationni o‘tkazib yuborish
-#       run: |
-#         mkdir -p ~/.ssh
-#         echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    - name: Host key verificationni o‘tkazib yuborish
+      run: |
+        mkdir -p ~/.ssh
+        echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
 
-#     - name: Serverda git pull qilish (Agar loyihangiz mavjud bo'lsa)
-#       run: |
-#         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'cd /home/root/deploy/optimitBackend && git pull origin main'
+    - name: Serverda git pull qilish (Agar loyihangiz mavjud bo'lsa)
+      run: |
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'cd /home/root/deploy/optimitBackend && git pull origin main'
 
-#     - name: Maven build qilish
-#       run: |
-#         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'cd /home/root/deploy/optimitBackend && mvn clean install -DskipTests'
+    - name: Maven build qilish
+      run: |
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'cd /home/root/deploy/optimitBackend && mvn clean install -DskipTests'
 
-#     - name: Deploy qilish
-#       run: |
-#         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 '
-#         JAR_PATH="/home/root/deploy/optimitBackend/target/spring-security.jar"
-#         SCREEN_NAME="spring_app"
-#         LOG_DIR="/home/root/deploy/optimitBackend/logs"
-#         LOG_FILE="$LOG_DIR/spring_app.log"
+    - name: Deploy qilish
+      run: |
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 '
+        JAR_PATH="/home/root/deploy/optimitBackend/target/spring-security.jar"
+        SCREEN_NAME="spring_app"
+        LOG_DIR="/home/root/deploy/optimitBackend/logs"
+        LOG_FILE="$LOG_DIR/spring_app.log"
   
-#         # Loglar uchun papka mavjudligini tekshirish, yo‘q bo‘lsa yaratish
-#         if [ ! -d "$LOG_DIR" ]; then
-#           mkdir -p "$LOG_DIR"
-#         fi
+        # Loglar uchun papka mavjudligini tekshirish, yo‘q bo‘lsa yaratish
+        if [ ! -d "$LOG_DIR" ]; then
+          mkdir -p "$LOG_DIR"
+        fi
 
-#         # Agar screen sessiyasi mavjud bo‘lsa, uni to‘xtatish
-#         if screen -list | grep -q "$SCREEN_NAME"; then
-#           echo "Stopping existing jar process..."
-#           screen -S $SCREEN_NAME -X quit
-#         fi
+        # Agar screen sessiyasi mavjud bo‘lsa, uni to‘xtatish
+        if screen -list | grep -q "$SCREEN_NAME"; then
+          echo "Stopping existing jar process..."
+          screen -S $SCREEN_NAME -X quit
+        fi
 
-#         # Yangi jar faylni screen orqali ishga tushirish va loglarni yozish
-#         echo "Starting new jar process..."
-#         screen -dmS $SCREEN_NAME bash -c "java -jar $JAR_PATH > $LOG_FILE 2>&1"
-#         echo "Application deployed successfully."
-#         '
+        # Yangi jar faylni screen orqali ishga tushirish va loglarni yozish
+        echo "Starting new jar process..."
+        screen -dmS $SCREEN_NAME bash -c "java -jar $JAR_PATH > $LOG_FILE 2>&1"
+        echo "Application deployed successfully."
+        '
