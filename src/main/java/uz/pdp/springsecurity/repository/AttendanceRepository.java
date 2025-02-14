@@ -4,7 +4,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import uz.pdp.springsecurity.entity.Attendance;
+import uz.pdp.springsecurity.payload.AttendanceGetDto;
+import uz.pdp.springsecurity.payload.EmployeeWorkDurationDto;
 import uz.pdp.springsecurity.payload.statistics.AttendanceStat;
 
 import java.sql.Timestamp;
@@ -38,4 +41,25 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
 
 
     Page<Attendance> findAllByEmployeeId(UUID userId, Pageable pageable);
+
+    // Branch bo‘yicha hodimlarning umumiy ishlagan vaqtini hisoblash
+    @Query("SELECT new uz.pdp.springsecurity.payload.EmployeeWorkDurationDto(e.id, CONCAT(e.firstName, ' ', e.lastName), SUM(a.workDuration)) " +
+            "FROM Attendance a " +
+            "JOIN users e ON a.employeeId = e.id " +
+            "WHERE a.branchId = :branchId AND a.createdAt BETWEEN :start AND :end " +
+            "GROUP BY e.id, e.firstName, e.lastName")
+    List<EmployeeWorkDurationDto> findTotalWorkDurationByBranch(UUID branchId, Timestamp start, Timestamp end);
+
+    // Business bo‘yicha hodimlarning umumiy ishlagan vaqtini hisoblash
+    @Query("SELECT new uz.pdp.springsecurity.payload.EmployeeWorkDurationDto(e.id, CONCAT(e.firstName, ' ', e.lastName), SUM(a.workDuration)) " +
+            "FROM Attendance a " +
+            "JOIN users e ON a.employeeId = e.id " +
+            "WHERE e.business.id = :businessId AND a.createdAt BETWEEN :start AND :end " +
+            "GROUP BY e.id, e.firstName, e.lastName")
+    List<EmployeeWorkDurationDto> findTotalWorkDurationByBusiness(UUID businessId, Timestamp start, Timestamp end);
+
+
+    List<Attendance> findAllByEmployeeIdAndCreatedAtBetween(UUID employeeId, Timestamp createdAtAfter, Timestamp createdAtBefore);
+
+
 }

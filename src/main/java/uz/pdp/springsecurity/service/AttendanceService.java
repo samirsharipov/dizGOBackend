@@ -12,6 +12,7 @@ import uz.pdp.springsecurity.entity.Location;
 import uz.pdp.springsecurity.entity.User;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.AttendanceGetDto;
+import uz.pdp.springsecurity.payload.EmployeeWorkDurationDto;
 import uz.pdp.springsecurity.repository.AttendanceRepository;
 import uz.pdp.springsecurity.repository.BranchRepository;
 import uz.pdp.springsecurity.repository.LocationRepository;
@@ -122,7 +123,7 @@ public class AttendanceService {
     }
 
     public ApiResponse getUserId(UUID userId, int size, int page) {
-        Pageable pageable = PageRequest.of(page, size,  Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
 
         Page<Attendance> all = attendanceRepository.findAllByEmployeeId(userId, pageable);
 
@@ -131,11 +132,25 @@ public class AttendanceService {
         }
 
         List<AttendanceGetDto> attendanceGetDtoList = new ArrayList<>();
-        for (Attendance attendance : all.stream().toList()) {
+        List<Attendance> list = all.stream().toList();
+
+        getDto(list, attendanceGetDtoList);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", attendanceGetDtoList);
+        response.put("totalElements", all.getTotalElements());
+        response.put("totalPages", all.getTotalPages());
+
+        return new ApiResponse("found", true, response);
+    }
+
+    private void getDto(List<Attendance> list, List<AttendanceGetDto> attendanceGetDtoList) {
+        for (Attendance attendance : list) {
             AttendanceGetDto attendanceGetDto = new AttendanceGetDto();
             attendanceGetDto.setCheckInTime(attendance.getCheckInTime() != null ? attendance.getCheckInTime() : null);
             attendanceGetDto.setCheckOutTime(attendance.getCheckOutTime() != null ? attendance.getCheckOutTime() : null);
             attendanceGetDto.setArrived(attendance.getIsArrived());
+            attendanceGetDto.setWorkDuration(attendance.getWorkDuration());
             if (attendance.getBranchId() != null) {
                 Optional<Branch> optionalBranch = branchRepository.findById(attendance.getBranchId());
                 optionalBranch.ifPresent(branch -> {
@@ -144,13 +159,31 @@ public class AttendanceService {
             }
             attendanceGetDtoList.add(attendanceGetDto);
         }
+    }
+
+    public ApiResponse getByBusinessId(UUID businessId, UUID branchId, Timestamp startDate, Timestamp endDate) {
+
+        List<EmployeeWorkDurationDto> totalWorkDurationList = new ArrayList<>();
+        if (branchId != null)
+            totalWorkDurationList = attendanceRepository.findTotalWorkDurationByBranch(branchId, startDate, endDate);
+        else
+            totalWorkDurationList = attendanceRepository.findTotalWorkDurationByBusiness(businessId, startDate, endDate);
+
+        if (totalWorkDurationList.isEmpty())
+            return new ApiResponse("not found", false);
 
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("data", attendanceGetDtoList);
-        response.put("totalElements", all.getTotalElements());
-        response.put("totalPages", all.getTotalPages());
+        return new ApiResponse("found", true, totalWorkDurationList);
+    }
 
-        return new ApiResponse("found", true, response);
+    public ApiResponse getUserIdDiagram(UUID userId, Timestamp startDate, Timestamp endDate) {
+        List<Attendance> all =
+                attendanceRepository.findAllByEmployeeIdAndCreatedAtBetween(userId, startDate, endDate);
+        if (all.isEmpty()) {
+            return new ApiResponse("not found", false);
+        }
+        List<AttendanceGetDto> attendanceGetDtoList = new ArrayList<>();
+        getDto(all, attendanceGetDtoList);
+        return new ApiResponse("found", true, attendanceGetDtoList);
     }
 }
