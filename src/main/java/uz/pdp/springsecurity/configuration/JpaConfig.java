@@ -15,7 +15,7 @@ public class JpaConfig {
             if (!ddlAuto.equalsIgnoreCase("update") && !ddlAuto.equalsIgnoreCase("none")) {
                 throw new IllegalStateException("❌ `spring.jpa.hibernate.ddl-auto` faqat `update` yoki `none` bo‘lishi kerak!");
             }
-            properties.put("hibernate.hbm2ddl.auto", "none"); // ❗ Har doim `none` yoki `update`
+            properties.put("hibernate.hbm2ddl.auto", "update"); // ❗ Har doim `none` yoki `update`
         };
     }
 }

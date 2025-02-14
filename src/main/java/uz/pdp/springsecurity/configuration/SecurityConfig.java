@@ -96,7 +96,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/api/language/**",
                         "/api/customer/registration",
                         "/api/verification/**",
-                        "/api/customer/check-number"
+                        "/api/customer/check-number",
+                        "/api/user/get-by-phone-number/*"
                 )
                 .permitAll()
                 .anyRequest()

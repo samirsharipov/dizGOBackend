@@ -8,6 +8,7 @@ import uz.pdp.springsecurity.entity.template.AbsEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.PreUpdate;
 import java.sql.Timestamp;
 import java.util.UUID;
 
@@ -43,4 +44,14 @@ public class Attendance extends AbsEntity {
     private Double outcomeDistance = 0.0; // chiqish radiusi
 
     private UUID branchId;
+
+    @Column
+    private Long workDuration; // Ishlagan vaqt (sekundlarda)
+
+    @PreUpdate
+    void calculateWorkDuration() {
+        if (checkInTime != null && checkOutTime != null) {
+            this.workDuration = (checkOutTime.getTime() - checkInTime.getTime()) / 1000; // Sekundlarda hisoblash
+        }
+    }
 }

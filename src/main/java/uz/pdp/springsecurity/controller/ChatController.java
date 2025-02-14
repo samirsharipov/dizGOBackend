@@ -5,10 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+//import org.springframework.messaging.handler.annotation.MessageMapping;
+//import org.springframework.messaging.handler.annotation.Payload;
+//import org.springframework.messaging.handler.annotation.SendTo;
+//import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +29,7 @@ import java.util.*;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ChatController {
 
-    private final SimpMessagingTemplate simpMessagingTemplate;
+//    private final SimpMessagingTemplate simpMessagingTemplate;
     private final MessageRepository messageRepository;
     private final MessageMapper mapper;
     private final UserRepository userRepository;
@@ -39,27 +39,27 @@ public class ChatController {
     @Qualifier("sessionRegistry")
     private final SessionRegistry sessionRegistry;
 
-    @MessageMapping("/message")
-    @SendTo("/chatroom/public")
-    public MessageDto receiveMessage(@Payload MessageDto messageDto) throws InterruptedException {
-        Message message = new Message();
-        message.setMessage(messageDto.getMessage());
-        message.setReceiverId(messageDto.getReceiverId());
-        if (messageDto.getAttachmentId() != null) {
-            Optional<Attachment> optionalAttachment = attachmentRepository.findById(messageDto.getAttachmentId());
-            optionalAttachment.ifPresent(message::setAttachment);
-        }
-        message.setSenderId(messageDto.getSenderId());
-        messageRepository.save(message);
-        Thread.sleep(1000);
-        return messageDto;
-    }
+//    @MessageMapping("/message")
+//    @SendTo("/chatroom/public")
+//    public MessageDto receiveMessage(@Payload MessageDto messageDto) throws InterruptedException {
+//        Message message = new Message();
+//        message.setMessage(messageDto.getMessage());
+//        message.setReceiverId(messageDto.getReceiverId());
+//        if (messageDto.getAttachmentId() != null) {
+//            Optional<Attachment> optionalAttachment = attachmentRepository.findById(messageDto.getAttachmentId());
+//            optionalAttachment.ifPresent(message::setAttachment);
+//        }
+//        message.setSenderId(messageDto.getSenderId());
+//        messageRepository.save(message);
+//        Thread.sleep(1000);
+//        return messageDto;
+//    }
 
-    @MessageMapping("/private-message")
-    public MessageDto recMessage(@Payload MessageDto messageDto) {
-        simpMessagingTemplate.convertAndSendToUser(messageDto.getReceiverName(), "/private", messageDto);
-        return messageDto;
-    }
+//    @MessageMapping("/private-message")
+//    public MessageDto recMessage(@Payload MessageDto messageDto) {
+//        simpMessagingTemplate.convertAndSendToUser(messageDto.getReceiverName(), "/private", messageDto);
+//        return messageDto;
+//    }
 
     @GetMapping("/api/{senderId}/{receivedId}")
     public HttpEntity<?> getMessageList(@PathVariable UUID senderId, @PathVariable UUID receivedId) {
