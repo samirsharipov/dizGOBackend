@@ -54,7 +54,7 @@ public class BusinessController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    @CheckPermission("VIEW_BUSINESS")
+//    @CheckPermission("VIEW_BUSINESS")
     @GetMapping("/all")
     public HttpEntity<?> getAll() {
         ApiResponse apiResponse = businessService.getAll();
