@@ -21,6 +21,7 @@ public class RepaymentDebt extends AbsEntity {
     private Double debtSum;
     @Column(columnDefinition = "numeric default 0.0")
     private Double debtSumDollar;
+
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private boolean isDollarRepayment;
 

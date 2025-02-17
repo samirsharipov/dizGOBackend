@@ -4,16 +4,13 @@ import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.UUID;
 
 @Data
 public class RepaymentDto {
     @NotNull
-    private Double repayment;
-
-    private Double repaymentDollar;
-
-    private Boolean isDollar;
+    private Double totalPaidSum;
 
     private Timestamp payDate;
 
@@ -24,4 +21,6 @@ public class RepaymentDto {
     private UUID branchId;
 
     private UUID userId;
+
+    List<UUID> purchaseIdList;
 }

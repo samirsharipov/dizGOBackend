@@ -269,18 +269,18 @@ public class CustomerService {
         if (optionalCustomer.isEmpty()) return new ApiResponse("CUSTOMER NOT FOUND", false);
         if (repaymentDto.getPayDate() == null) return new ApiResponse("PAY_DATE NOT FOUND", false);
         Customer customer = optionalCustomer.get();
-        if (repaymentDto.getRepayment() != null) {
-            customer.setDebt(customer.getDebt() - repaymentDto.getRepayment());
+        if (repaymentDto.getTotalPaidSum() != null) {
+            customer.setDebt(customer.getDebt() - repaymentDto.getTotalPaidSum());
             customer.setPayDate(repaymentDto.getPayDate());
             customerRepository.save(customer);
             Optional<CustomerSupplier> optionalCustomerSupplier = customerSupplierRepository.findByCustomerId(customer.getId());
             optionalCustomerSupplier.ifPresent(customerSupplierService::calculation);
             try {
 
-                repaymentHelper(repaymentDto.getRepayment(), customer, repaymentDto.getPaymentMethodId(), repaymentDto.getPayDate(), repaymentDto.getRepaymentDollar(), repaymentDto.getIsDollar()
+                repaymentHelper(repaymentDto.getTotalPaidSum(), customer, repaymentDto.getPaymentMethodId(), repaymentDto.getPayDate(), 0.0, false
                         , repaymentDto.getDescription());
 
-                balanceService.edit(customer.getBranch().getId(), repaymentDto.getRepayment(), true, repaymentDto.getPaymentMethodId(), repaymentDto.getIsDollar(), "customer");
+                balanceService.edit(customer.getBranch().getId(), repaymentDto.getTotalPaidSum(), true, repaymentDto.getPaymentMethodId(), false, "customer");
 
                 UUID paymentMethodId = repaymentDto.getPaymentMethodId();
                 Optional<PaymentMethod> optionalPaymentMethod = payMethodRepository.findById(paymentMethodId);
@@ -288,9 +288,9 @@ public class CustomerService {
                         repaymentDebtRepository.save(
                                 new RepaymentDebt(
                                         customer,
-                                        repaymentDto.getRepayment(),
-                                        repaymentDto.getRepaymentDollar(),
-                                        repaymentDto.getIsDollar(),
+                                        repaymentDto.getTotalPaidSum(),
+                                        0.0,
+                                        false,
                                         paymentMethod,
                                         repaymentDto.getDescription(),
                                         false,
@@ -300,7 +300,7 @@ public class CustomerService {
                     if (customer.getChatId() != null) {
                         String text = "<b>#YANGI_TOLOV</b>\n\n" +
                                 "<b>MIJOZ: </b>" + customer.getName() + "\n" +
-                                "<b>TO'LOV SUMMASI: </b>" + repaymentDto.getRepayment() + "UZS" + "\n" +
+                                "<b>TO'LOV SUMMASI: </b>" + repaymentDto.getTotalPaidSum() + "UZS" + "\n" +
                                 "<b>TO'LOV TURI: </b>" + optionalPaymentMethod.get().getType() + "\n\n" +
                                 "<b>HOZIRGI " + (customer.getDebt() < 0 ? "HAQINGIZ" : "QARZINGIZ") + "</b>: " + (customer.getDebt() < 0 ? Math.abs(customer.getDebt()) : customer.getDebt());
 //                        SendMessage sendMessage = SendMessage
