@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -19,4 +20,5 @@ public class SupplierHistory {
     private String supplier;
     private Date date;
     private String description;
+    List<UUID> purchaseIdList;
 }

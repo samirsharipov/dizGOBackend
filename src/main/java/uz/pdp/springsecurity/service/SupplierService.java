@@ -1,18 +1,23 @@
 package uz.pdp.springsecurity.service;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.enums.StatusName;
 import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
 
+
 import javax.transaction.Transactional;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,169 +33,206 @@ public class SupplierService {
     private final CustomerSupplierRepository customerSupplierRepository;
     private final CustomerSupplierService customerSupplierService;
     private final UserRepository userRepository;
+    private final MessageService messageService;
 
     public ApiResponse add(SupplierDto supplierDto) {
-        Optional<Business> optionalBusiness = businessRepository.findById(supplierDto.getBusinessId());
-        if (optionalBusiness.isEmpty()) {
-            return new ApiResponse("BUSINESS NOT FOUND", false);
-        }
-        Supplier supplier = new Supplier(
-                supplierDto.getName(),
-                supplierDto.getPhoneNumber(),
-                supplierDto.getTelegram(),
-                optionalBusiness.get()
-        );
+        Business business = businessRepository.findById(supplierDto.getBusinessId())
+                .orElseThrow(() -> new RuntimeException(messageService.getMessage("business.not.found")));
 
-        if (supplierDto.isJuridical()) {
-            supplier.setJuridical(true);
-            supplier.setInn(supplierDto.getInn());
-            supplier.setCompanyName(supplierDto.getCompanyName());
-        }
-        supplier.setDebt(supplierDto.getDebt());
+        Supplier supplier = setSupplier(supplierDto, business, new Supplier());
         supplierRepository.save(supplier);
 
-        if (supplierDto.getCustomerDto()!=null) {
-            CustomerDto customerDto = supplierDto.getCustomerDto();
-//            customerDto.setName(supplierDto.getName());
-            customerDto.setPhoneNumber(supplierDto.getPhoneNumber());
-//            customerDto.setTelegram(supplierDto.getTelegram());
-//            ApiResponse apiResponse = customerService.add(customerDto);
-            CustomerSupplier customerSupplier = new CustomerSupplier();
-            customerSupplier.setSupplier(supplier);
-//            customerSupplier.setCustomer((Customer) apiResponse.getObject());
-            customerSupplierRepository.save(customerSupplier);
-        }
-
-        return new ApiResponse("ADDED", true);
+        return new ApiResponse(messageService.getMessage("added.successfully"), true);
     }
 
+    @Transactional
     public ApiResponse edit(UUID id, SupplierDto supplierDto) {
-        if (!supplierRepository.existsById(id)) return new ApiResponse("supplier NOT FOUND", false);
+        Supplier supplier = supplierRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("supplier.not.found"));
 
-        Supplier supplier = supplierRepository.getById(id);
-        supplier.setName(supplierDto.getName());
-        supplier.setPhoneNumber(supplierDto.getPhoneNumber());
-        supplier.setTelegram(supplierDto.getTelegram());
-
-        if (supplierDto.isJuridical()) {
-            supplier.setJuridical(true);
-            supplier.setInn(supplierDto.getInn());
-            supplier.setCompanyName(supplierDto.getCompanyName());
-        }
-
-
-        supplier.setDebt(supplierDto.getDebt());
+        setSupplier(supplierDto, supplier.getBusiness(), supplier);
         supplierRepository.save(supplier);
-        return new ApiResponse("EDITED", true);
+
+        return new ApiResponse(messageService.getMessage("edited.successfully"), true);
     }
 
     public ApiResponse get(UUID id) {
-        if (!supplierRepository.existsById(id)) return new ApiResponse("SUPPLIER NOT FOUND", false);
-        return new ApiResponse("FOUND", true, supplierRepository.findById(id).get());
+        return supplierRepository.findById(id)
+                .map(supplier ->
+                        new ApiResponse(messageService.getMessage("supplier.found"), true, convertToDto(supplier)))
+                .orElseGet(() ->
+                        new ApiResponse(messageService.getMessage("supplier.not.found"), false));
     }
 
     public ApiResponse delete(UUID id) {
-        if (!supplierRepository.existsById(id)) return new ApiResponse("SUPPLIER NOT FOUND", false);
-        try {
-            supplierRepository.deleteById(id);
-            return new ApiResponse("DELETED", true);
-        } catch (Exception e) {
-            return new ApiResponse("TAMINOTCHI BILAN BOG'LIQ MA'LUMOTLAR MAVJUD", false);
+        Optional<Supplier> supplierOptional = supplierRepository.findById(id);
+
+        if (supplierOptional.isEmpty()) {
+            return new ApiResponse(messageService.getMessage("supplier.not.found"), false);
         }
+
+        Supplier supplier = supplierOptional.get();
+        supplier.setDeleted(true);
+        supplier.setActive(false);
+        supplierRepository.save(supplier);
+
+        return new ApiResponse(messageService.getMessage("deleted.successfully"), true);
     }
 
 
-    public ApiResponse getAllByBusiness(UUID businessId) {
-        List<Supplier> allByBusinessId = supplierRepository.findAllByBusinessId(businessId);
-        if (allByBusinessId.isEmpty()) return new ApiResponse("NOT FOUND", false);
-        return new ApiResponse("FOUND", true, allByBusinessId);
+    public ApiResponse getAllByBusiness(UUID businessId, int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Supplier> suppliers = supplierRepository.findAllByBusinessId(businessId, pageable);
+
+        if (suppliers.isEmpty()) {
+            return new ApiResponse(messageService.getMessage("supplier.not.found"), false);
+        }
+
+        List<SupplierGetDto> supplierGetDtoList = suppliers.getContent().stream()
+                .map(this::convertToDto).toList();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("suppliers", supplierGetDtoList);
+        response.put("totalElements", suppliers.getTotalElements());
+        response.put("totalPages", suppliers.getTotalPages());
+        response.put("currentPage", suppliers.getNumber());
+        response.put("pageSize", suppliers.getSize());
+
+        return new ApiResponse(messageService.getMessage("supplier.found"), true, response);
     }
 
     @Transactional
     public ApiResponse storeRepayment(UUID id, RepaymentDto repaymentDto) {
-        Optional<Supplier> supplierOptional = supplierRepository.findById(id);
-        if (supplierOptional.isEmpty()) return new ApiResponse("Not Found Supplier", false);
+        Supplier supplier = supplierRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException(messageService.getMessage("supplier.not.found")));
 
-        Optional<User> optionalUser = userRepository.findById(repaymentDto.getUserId());
-        if (optionalUser.isEmpty()) {
-            return new ApiResponse("User NOT FOUND", false);
+        User user = userRepository.findById(repaymentDto.getUserId())
+                .orElseThrow(() -> new RuntimeException(messageService.getMessage("user.not.found")));
+
+        Double totalPaidSum = repaymentDto.getTotalPaidSum();
+        if (totalPaidSum == null) {
+            return new ApiResponse(messageService.getMessage("repayment.not.found"), false);
         }
 
-        Supplier supplier = supplierOptional.get();
-        if (repaymentDto.getRepayment() != null) {
-            supplier.setDebt(supplier.getDebt() - repaymentDto.getRepayment());
-            Supplier save = supplierRepository.save(supplier);
-            Optional<CustomerSupplier> optionalCustomerSupplier = customerSupplierRepository.findBySupplierId(supplier.getId());
-            optionalCustomerSupplier.ifPresent(customerSupplierService::calculation);
-            try {
-                storeRepaymentHelper(repaymentDto.getRepayment(), supplier);
-                balanceService.edit(repaymentDto.getBranchId(), repaymentDto.getRepayment(), false, repaymentDto.getPaymentMethodId(), repaymentDto.getIsDollar(),"supplier");
+        // Qarzni yangilash
+        supplier.setDebt(supplier.getDebt() - totalPaidSum);
+        supplierRepository.save(supplier);
 
-                supplierBalanceHistoryRepository.save(new SupplierBalanceHistory(
-                        repaymentDto.getRepayment(),
-                        payMethodRepository.findById(repaymentDto.getPaymentMethodId()).orElseThrow(),
-                        save,
-                        repaymentDto.getDescription(),
-                        optionalUser.get(),
-                        branchRepository.findById(repaymentDto.getBranchId()).orElseThrow()
-                ));
-                return new ApiResponse("Repayment Store !", true);
-            } catch (Exception e) {
-                return new ApiResponse("ERROR", false);
-            }
-        } else {
-            return new ApiResponse("Repayment Not Found !", false);
+        // Supplierga bog‘liq mijoz hisobini qayta hisoblash
+        customerSupplierRepository.findBySupplierId(supplier.getId())
+                .ifPresent(customerSupplierService::calculation);
+
+        try {
+            // To‘lovni bo‘lib-bo‘lib hisoblash
+            setRepaymentHelper(totalPaidSum, repaymentDto.getPurchaseIdList());
+
+            // Balansni yangilash
+            balanceService.edit(
+                    repaymentDto.getBranchId(), totalPaidSum, false,
+                    repaymentDto.getPaymentMethodId(), false, "supplier"
+            );
+
+            // To‘lov usulini va filialni olish
+            PaymentMethod paymentMethod = payMethodRepository.findById(repaymentDto.getPaymentMethodId())
+                    .orElseThrow(() -> new RuntimeException(messageService.getMessage("payment.method.not.found")));
+            Branch branch = branchRepository.findById(repaymentDto.getBranchId())
+                    .orElseThrow(() -> new RuntimeException(messageService.getMessage("branch.not.found")));
+
+            // Supplier balans tarixini saqlash
+            supplierBalanceHistoryRepository.save(new SupplierBalanceHistory(
+                    totalPaidSum, paymentMethod, supplier,
+                    repaymentDto.getDescription(), user, branch,
+                    repaymentDto.getPurchaseIdList()
+            ));
+
+            return new ApiResponse(messageService.getMessage("repayment.stored"), true);
+        } catch (Exception e) {
+            return new ApiResponse(messageService.getMessage("error.message", new Object[]{e.getMessage()}), false);
         }
     }
 
-    private void storeRepaymentHelper(Double paidSum, Supplier supplier) {
-        PaymentStatus tolangan = paymentStatusRepository.findByStatus(StatusName.TOLANGAN.name());
-        PaymentStatus qisman_tolangan = paymentStatusRepository.findByStatus(StatusName.QISMAN_TOLANGAN.name());
-        List<Purchase> purchaseList = purchaseRepository.findAllBySupplierId(supplier.getId());
-        for (Purchase purchase : purchaseList) {
-            if (paidSum > purchase.getDebtSum()) {
-                paidSum -= purchase.getDebtSum();
-                purchase.setDebtSum(0);
-                purchase.setPaidSum(purchase.getTotalSum());
-                purchase.setPaymentStatus(tolangan);
-            } else if (paidSum == purchase.getDebtSum()) {
-                purchase.setDebtSum(0);
-                purchase.setPaidSum(purchase.getTotalSum());
-                purchase.setPaymentStatus(tolangan);
-                break;
-            } else {
-                purchase.setDebtSum(purchase.getDebtSum() - paidSum);
-                purchase.setPaidSum(purchase.getPaidSum() + paidSum);
-                purchase.setPaymentStatus(qisman_tolangan);
-                break;
-            }
+    private void setRepaymentHelper(Double paidSum, List<UUID> purchaseIdList) {
+        PaymentStatus paid = paymentStatusRepository.findByStatus(StatusName.TOLANGAN.name());
+        PaymentStatus partiallyPaid = paymentStatusRepository.findByStatus(StatusName.QISMAN_TOLANGAN.name());
+        List<Purchase> purchases = purchaseRepository.findAllById(purchaseIdList);
+
+        // Purchases ro'yxatini createdAt bo'yicha asc tartibda saralash
+        purchases.sort(Comparator.comparing(Purchase::getCreatedAt));
+
+        for (Purchase purchase : purchases) {
+            double debt = purchase.getDebtSum();
+            double paidAmount = Math.min(paidSum, debt);
+
+            purchase.setDebtSum(debt - paidAmount);
+            purchase.setPaidSum(purchase.getPaidSum() + paidAmount);
+            purchase.setPaymentStatus(purchase.getDebtSum() == 0 ? paid : partiallyPaid);
+
+            paidSum -= paidAmount;
+            if (paidSum == 0) break;
         }
-        purchaseRepository.saveAll(purchaseList);
+
+        purchaseRepository.saveAll(purchases);
     }
 
     public ApiResponse supplierHistory(UUID id) {
-        List<SupplierHistory> histories = new LinkedList<>();
-        for (SupplierBalanceHistory supplierBalanceHistory : supplierBalanceHistoryRepository.findAllBySupplierIdOrderByCreatedAtDesc(id)) {
-            histories.add(new SupplierHistory(
-                    supplierBalanceHistory.getId(),
-                    supplierBalanceHistory.getPaymentMethod().getType(),
-                    supplierBalanceHistory.getAmount(),
-                    supplierBalanceHistory.getBranch().getName(),
-                    supplierBalanceHistory.getUser().getFirstName(),
-                    supplierBalanceHistory.getSupplier().getName(),
-                    supplierBalanceHistory.getCreatedAt(),
-                    supplierBalanceHistory.getDescription() == null ? "Mavjud emas !" : supplierBalanceHistory.getDescription()
-            ));
+        List<SupplierBalanceHistory> supplierBalanceHistories = supplierBalanceHistoryRepository.findAllBySupplierIdOrderByCreatedAtDesc(id);
+
+        if (supplierBalanceHistories.isEmpty()) {
+            return new ApiResponse(messageService.getMessage("supplier.history.not.found"), false);
         }
-        return new ApiResponse("Taminotchi istoriyasi", true, histories);
+
+        List<SupplierHistory> histories = supplierBalanceHistories.stream()
+                .map(supplierBalanceHistory -> new SupplierHistory(
+                        supplierBalanceHistory.getId(),
+                        supplierBalanceHistory.getPaymentMethod().getType(),
+                        supplierBalanceHistory.getAmount(),
+                        supplierBalanceHistory.getBranch().getName(),
+                        supplierBalanceHistory.getUser().getFirstName(),
+                        supplierBalanceHistory.getSupplier().getName(),
+                        supplierBalanceHistory.getCreatedAt(),
+                        supplierBalanceHistory.getDescription() != null ? supplierBalanceHistory.getDescription() : "Mavjud emas !",
+                        supplierBalanceHistory.getPurchaseIdList()
+                ))
+                .collect(Collectors.toList());
+
+        return new ApiResponse(messageService.getMessage("found"), true, histories);
     }
 
     public ApiResponse ourMoney(UUID businessId) {
-        Double allOurMoney = supplierRepository.allOurMoney(businessId);
-        Double allYourMoney = supplierRepository.allYourMoney(businessId);
         Map<String, Object> data = new HashMap<>();
-        data.put("all_our_money", allOurMoney);
-        data.put("all_your_money", allYourMoney);
+        data.put("all_our_money", supplierRepository.allOurMoney(businessId));
+        data.put("all_your_money", supplierRepository.allYourMoney(businessId));
         return new ApiResponse(true, data);
+    }
+
+    @NotNull
+    private static Supplier setSupplier(SupplierDto supplierDto, Business business, Supplier supplier) {
+
+        supplier.setName(supplierDto.getName());
+        supplier.setPhoneNumber(supplierDto.getPhoneNumber());
+        supplier.setTelegram(supplierDto.getTelegram());
+        supplier.setDebt(supplierDto.getDebt());
+        supplier.setBusiness(business);
+
+        // Agar supplier juridical bo'lsa, qo'shimcha ma'lumotlarni o'rnatish
+        if (supplierDto.isJuridical()) {
+            supplier.setJuridical(true);
+            supplier.setInn(supplierDto.getInn());
+            supplier.setCompanyName(supplierDto.getCompanyName());
+        }
+        return supplier;
+    }
+
+    private SupplierGetDto convertToDto(Supplier supplier) {
+        return new SupplierGetDto(
+                supplier.getId(),
+                supplier.getName(),
+                supplier.getPhoneNumber(),
+                supplier.isJuridical(),
+                supplier.getInn(),
+                supplier.getBusiness().getId(),
+                supplier.getDebt()
+        );
     }
 }

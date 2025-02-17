@@ -29,6 +29,8 @@ public class SupplierDto {
 
     private double debt;
 
+
+    // Ham taminotchi va ham mijoz bolganda ishlatiladi CustomerSupplier.class
     private CustomerDto customerDto;
 
 }

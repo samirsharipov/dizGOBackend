@@ -2,12 +2,9 @@ package uz.pdp.springsecurity.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uz.pdp.springsecurity.annotations.CheckPermission;
-import uz.pdp.springsecurity.annotations.CurrentUser;
-import uz.pdp.springsecurity.entity.User;
-import uz.pdp.springsecurity.payload.ApiResponse;
+import uz.pdp.springsecurity.helpers.ResponseEntityHelper;
 import uz.pdp.springsecurity.payload.RepaymentDto;
 import uz.pdp.springsecurity.payload.SupplierDto;
 import uz.pdp.springsecurity.service.SupplierService;
@@ -20,71 +17,36 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class SupplierController {
     private final SupplierService supplierService;
+    private final ResponseEntityHelper responseEntityHelper;
 
-    /**
-     * TA'MINOTCHI QOSHISH
-     *
-     * @param supplierDto
-     * @return ApiResponse(success - > true, message - > ADDED)
-     */
     @CheckPermission("ADD_SUPPLIER")
     @PostMapping
     public HttpEntity<?> add(@Valid @RequestBody SupplierDto supplierDto) {
-        ApiResponse apiResponse = supplierService.add(supplierDto);
-        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+        return responseEntityHelper.buildResponse(supplierService.add(supplierDto));
     }
 
-    /**
-     * ID ORQALI TA'MINOTCHINI TAHRIRLASH
-     *
-     * @param id
-     * @param supplierDto
-     * @return ApiResponse(success - > true, message - > EDITED)
-     */
     @CheckPermission("EDIT_SUPPLIER")
     @PutMapping("/{id}")
     public HttpEntity<?> edit(@PathVariable UUID id, @RequestBody SupplierDto supplierDto) {
-        ApiResponse apiResponse = supplierService.edit(id, supplierDto);
-        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+        return responseEntityHelper.buildResponse(supplierService.edit(id, supplierDto));
     }
 
-    /**
-     * ID ORQALI BITTA TA'MINOTCHINI OLIB CHIQISH
-     *
-     * @param id
-     * @return ApiResponse(success - > true, message - > FOUND)
-     */
     @CheckPermission("VIEW_SUPPLIER")
     @GetMapping("/{id}")
     public HttpEntity<?> get(@PathVariable UUID id) {
-        ApiResponse apiResponse = supplierService.get(id);
-        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+        return responseEntityHelper.buildResponse(supplierService.get(id));
     }
 
-    /**
-     * ID ORQALI BITTA TA'MINOTCHINI DELETE QILISH
-     *
-     * @param id
-     * @return ApiResponse(success - > true, message - > DELETED)
-     */
     @CheckPermission("DELETE_SUPPLIER")
     @DeleteMapping("/{id}")
     public HttpEntity<?> delete(@PathVariable UUID id) {
-        ApiResponse apiResponse = supplierService.delete(id);
-        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+        return responseEntityHelper.buildResponse(supplierService.delete(id));
     }
 
-    /**
-     * BUSINESS ID'SI ORQALI BARCHA TA'MINOTCHILARNI OLIB CHIQISH
-     *
-     * @return ApiResponse(success - > true, message - > FOUND)
-     * @Id businessId
-     */
     @CheckPermission("VIEW_SUPPLIER")
     @GetMapping("/get-by-business/{businessId}")
-    public HttpEntity<?> getAllByBusiness(@PathVariable UUID businessId) {
-        ApiResponse apiResponse = supplierService.getAllByBusiness(businessId);
-        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    public HttpEntity<?> getAllByBusiness(@PathVariable UUID businessId, @RequestParam int page, @RequestParam int size) {
+        return responseEntityHelper.buildResponse(supplierService.getAllByBusiness(businessId, page, size));
     }
 
     /**
@@ -92,22 +54,21 @@ public class SupplierController {
      */
     @CheckPermission("ADD_SUPPLIER")
     @PostMapping("/repayment/{id}")
-    public HttpEntity<?> addRepayment(@PathVariable UUID id, @RequestBody RepaymentDto repaymentDto){
-        ApiResponse response = supplierService.storeRepayment(id, repaymentDto);
-        return ResponseEntity.status(response.isSuccess() ? 201 : 409).body(response);
+    public HttpEntity<?> addRepayment(@PathVariable UUID id, @RequestBody RepaymentDto repaymentDto) {
+        return responseEntityHelper.buildResponse(supplierService.storeRepayment(id, repaymentDto));
     }
 
+
     @GetMapping("/history/{id}")
-    public HttpEntity<?> supplierHistory(@PathVariable UUID id){
-        ApiResponse response = supplierService.supplierHistory(id);
-        return ResponseEntity.status(response.isSuccess() ? 201 : 409).body(response);
+    public HttpEntity<?> supplierHistory(@PathVariable UUID id) {
+        return responseEntityHelper.buildResponse(supplierService.supplierHistory(id));
     }
+
     /**
      * BIZNING DEALERLARDA QANCHA PULIMIZ BOR? YOKI QANCHA QARZIMIZ BOR?
      */
     @GetMapping("/ourMoney/{businessId}")
-    public HttpEntity<?> ourMoney(@PathVariable UUID businessId){
-        ApiResponse response = supplierService.ourMoney(businessId);
-        return ResponseEntity.status(response.isSuccess() ? 201 : 409).body(response);
+    public HttpEntity<?> ourMoney(@PathVariable UUID businessId) {
+        return responseEntityHelper.buildResponse(supplierService.ourMoney(businessId));
     }
 }

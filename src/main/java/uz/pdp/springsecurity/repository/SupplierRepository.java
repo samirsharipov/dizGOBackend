@@ -1,17 +1,18 @@
 package uz.pdp.springsecurity.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import uz.pdp.springsecurity.entity.Supplier;
 
 import java.sql.Timestamp;
-import java.util.List;
 import java.util.UUID;
 
 public interface SupplierRepository extends JpaRepository<Supplier,UUID> {
 
-    List<Supplier> findAllByBusinessId(UUID business_id);
+    Page<Supplier> findAllByBusinessId(UUID businessId, Pageable pageable);
 
     @Query(nativeQuery = true, value = "Select sum(debt) as totalOurMoney from supplier where debt < 0 and business_id = :businessId")
     Double allOurMoney(UUID businessId);
