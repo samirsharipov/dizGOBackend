@@ -11,6 +11,7 @@ import uz.pdp.springsecurity.service.PurchaseService;
 import uz.pdp.springsecurity.utils.AppConstant;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.UUID;
 
 @RestController
@@ -71,10 +72,12 @@ public class PurchaseController {
     public HttpEntity<?> getByBusiness(@PathVariable UUID businessId,
                                        @RequestParam(required = false) UUID userId,
                                        @RequestParam(required = false) UUID supplierId,
-                                       @RequestParam(required = false) Date date,
+                                       @RequestParam(required = false) Timestamp startDate,
+                                       @RequestParam(required = false) Timestamp endDate,
+                                       @RequestParam(required = false) String status,
                                        @RequestParam(defaultValue = AppConstant.DEFAULT_PAGE) int page,
                                        @RequestParam(defaultValue = AppConstant.DEFAULT_SIZE) int size) {
-        ApiResponse apiResponse = purchaseService.getByBusiness(businessId, userId, supplierId, date, page, size);
+        ApiResponse apiResponse = purchaseService.getByBusiness(businessId, userId, supplierId, startDate,endDate,status, page, size);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 }

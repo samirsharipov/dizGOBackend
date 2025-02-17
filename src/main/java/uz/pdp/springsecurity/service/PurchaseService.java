@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import uz.pdp.springsecurity.entity.Currency;
@@ -13,10 +14,12 @@ import uz.pdp.springsecurity.enums.HistoryName;
 import uz.pdp.springsecurity.helpers.ProductEntityHelper;
 import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
+import uz.pdp.springsecurity.repository.specifications.PurchaseSpecification;
 import uz.pdp.springsecurity.utils.Constants;
 import uz.pdp.springsecurity.utils.AppConstant;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -395,26 +398,13 @@ public class PurchaseService {
         return getAllHelper(purchasePage);
     }
 
-    public ApiResponse getByBusiness(UUID busId, UUID userId, UUID supId, Date date, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
-        Page<Purchase> purchasePage;
-        if (userId != null && supId != null && date != null)
-            purchasePage = purchaseRepository.findAllByBranch_BusinessIdAndSellerIdAndSupplierIdAndDate(busId, userId, supId, date, pageable);
-        else if (userId != null && supId != null)
-            purchasePage = purchaseRepository.findAllByBranch_BusinessIdAndSellerIdAndSupplierId(busId, userId, supId, pageable);
-        else if (userId != null && date != null)
-            purchasePage = purchaseRepository.findAllByBranch_BusinessIdAndSellerIdAndDate(busId, userId, date, pageable);
-        else if (supId != null && date != null)
-            purchasePage = purchaseRepository.findAllByBranch_BusinessIdAndSupplierIdAndDate(busId, supId, date, pageable);
-        else if (userId != null)
-            purchasePage = purchaseRepository.findAllByBranch_BusinessIdAndSellerId(busId, userId, pageable);
-        else if (supId != null)
-            purchasePage = purchaseRepository.findAllByBranch_BusinessIdAndSupplierId(busId, supId, pageable);
-        else if (date != null)
-            purchasePage = purchaseRepository.findAllByBranch_BusinessIdAndDate(busId, date, pageable);
-        else
-            purchasePage = purchaseRepository.findAllByBranch_BusinessId(busId, pageable);
-        return getAllHelper(purchasePage);
+    public ApiResponse getByBusiness(UUID businessId, UUID userId, UUID supplierId, Timestamp startDate, Timestamp endDate, String status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Specification<Purchase> specification = PurchaseSpecification.filterPurchases(businessId, userId, supplierId, startDate, endDate, status);
+
+        Page<Purchase> purchasePage = purchaseRepository.findAll(specification, pageable);
+
+        return new ApiResponse("Found", true, purchasePage);
     }
 
     private ApiResponse getAllHelper(Page<Purchase> purchasePage) {

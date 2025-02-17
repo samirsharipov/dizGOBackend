@@ -22,4 +22,6 @@ public class BusinessGetDto {
     private Timestamp contractStartDate;
     private Timestamp contractEndDate;
 
+    private String businessCategoryName;
+
 }

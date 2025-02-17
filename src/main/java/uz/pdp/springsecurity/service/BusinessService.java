@@ -197,9 +197,34 @@ public class BusinessService {
     }
 
     public ApiResponse getAll() {
-        return new ApiResponse("all business", true, businessMapper
-                .toDtoList(businessRepository
-                        .findAllByDeletedIsFalse()));
+
+        List<BusinessGetDto> businessGetDtoList = new ArrayList<>();
+        List<Business> all = businessRepository.findAll();
+        for (Business business : all) {
+            BusinessGetDto businessGetDto = new BusinessGetDto();
+            businessGetDto.setId(business.getId());
+            businessGetDto.setName(business.getName());
+            businessGetDto.setDescription(business.getDescription());
+            businessGetDto.setActive(business.isActive());
+            businessGetDto.setCreatedAt(business.getCreatedAt());
+            businessGetDto.setUpdateAt(business.getUpdateAt());
+            businessGetDto.setContractStartDate(business.getContractStartDate());
+            businessGetDto.setContractEndDate(business.getContractEndDate());
+            List<Branch> branches = branchRepository.findAllByBusiness_Id(business.getId());
+            for (Branch branch : branches) {
+                if (branch.getMainBranchId() != null) {
+                    Optional<Branch> optionalBranch = branchRepository.findById(branch.getMainBranchId());
+                    if (optionalBranch.isPresent()) {
+                        Branch mainBranch = optionalBranch.get();
+                        BranchCategory branchCategory = mainBranch.getBranchCategory();
+                        businessGetDto.setBusinessCategoryName(branchCategory.getName());
+                        break;
+                    }
+                }
+            }
+            businessGetDtoList.add(businessGetDto);
+        }
+        return new ApiResponse("all business", true, businessGetDtoList);
     }
 
     public ApiResponse deActive(UUID businessId) {
