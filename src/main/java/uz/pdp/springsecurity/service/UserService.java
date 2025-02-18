@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import uz.pdp.springsecurity.entity.*;
 import uz.pdp.springsecurity.mapper.UserMapper;
 import uz.pdp.springsecurity.payload.*;
+import uz.pdp.springsecurity.payload.projections.UserProjection;
 import uz.pdp.springsecurity.repository.*;
 import uz.pdp.springsecurity.utils.Constants;
 
@@ -39,6 +40,7 @@ public class UserService {
     private final VerificationCodeService verificationService;
     private final CustomerService customerService;
     private final CustomerRepository customerRepository;
+    private final MessageService messageService;
 
 
     public ApiResponse add(UserDTO userDto, boolean isNewUser) {
@@ -46,7 +48,7 @@ public class UserService {
         ApiResponse validateUsername
                 = validateUsername(userDto.getUsername());
 
-        if (!validateUsername.isSuccess()){
+        if (!validateUsername.isSuccess()) {
             return validateUsername;
         }
 
@@ -646,5 +648,15 @@ public class UserService {
                 .collect(Collectors.toSet());
         userDTO.setBranchIds(branchesIdList);
         return userDTO;
+    }
+
+    public ApiResponse getBusinessOrBranch(UUID businessId, UUID branchId) {
+        List<UserProjection> users = (branchId != null)
+                ? userRepository.findUsersByBranch(branchId)
+                : userRepository.findUsersByBusiness(businessId);
+
+        return users.isEmpty()
+                ? new ApiResponse(messageService.getMessage("not.found"), false)
+                : new ApiResponse(messageService.getMessage("found"), true, users);
     }
 }

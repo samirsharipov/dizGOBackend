@@ -14,15 +14,14 @@ import uz.pdp.springsecurity.enums.HistoryName;
 import uz.pdp.springsecurity.helpers.ProductEntityHelper;
 import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
-import uz.pdp.springsecurity.repository.specifications.ProductSpecifications;
 import uz.pdp.springsecurity.repository.specifications.PurchaseSpecification;
 import uz.pdp.springsecurity.utils.Constants;
 import uz.pdp.springsecurity.utils.AppConstant;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -382,41 +381,60 @@ public class PurchaseService {
                                      Timestamp startDate, Timestamp endDate, String status,
                                      int page, int size) {
 
-        Pageable pageable = PageRequest.of(page, size);
-
         Specification<Purchase> spec = Specification
-                .where(branchId != null
-                        ? PurchaseSpecification.belongsToBranch(branchId)
-                        : PurchaseSpecification.belongsToBusiness(businessId))
-                .and(userId != null ? PurchaseSpecification.belongsToUser(userId) : null)
-                .and(supplierId != null ? PurchaseSpecification.belongsToSupplier(supplierId) : null)
+                .where(Optional.ofNullable(branchId)
+                        .map(PurchaseSpecification::belongsToBranch)
+                        .orElseGet(() -> PurchaseSpecification.belongsToBusiness(businessId)))
+                .and(Optional.ofNullable(userId).map(PurchaseSpecification::belongsToUser).orElse(null))
+                .and(Optional.ofNullable(supplierId).map(PurchaseSpecification::belongsToSupplier).orElse(null))
                 .and((startDate != null && endDate != null) ? PurchaseSpecification.hasCreatedAtBetween(startDate, endDate) : null)
-                .and(status != null && !status.isBlank() ? PurchaseSpecification.hasPurchaseStatus(status) : null);
+                .and(Optional.ofNullable(status).filter(s -> !s.isBlank()).map(PurchaseSpecification::hasPurchaseStatus).orElse(null));
 
+        return getPurchasesResponse(spec, page, size);
+    }
+
+    public ApiResponse getDebtPurchaseBySupplierId(UUID supplierId, int page, int size) {
+        Specification<Purchase> spec = Specification
+                .where(PurchaseSpecification.belongsToSupplier(supplierId))
+                .and(PurchaseSpecification.hasDebtGreaterThanZero());
+
+        return getPurchasesResponse(spec, page, size);
+    }
+
+    // 🔹 Natijalarni olish va qaytarish uchun umumiy metod
+    private ApiResponse getPurchasesResponse(Specification<Purchase> spec, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Purchase> purchases = purchaseRepository.findAll(spec, pageable);
 
-        if (purchases.isEmpty())
+        if (purchases.isEmpty()) {
             return new ApiResponse(messageService.getMessage("not.found"), false);
-
+        }
 
         return new ApiResponse(messageService.getMessage("found"), true, Map.of(
-                "list", purchases.getContent(),
+                "list", getPurchases(purchases.getContent()),
                 "currentPage", purchases.getNumber(),
                 "totalPage", purchases.getTotalPages(),
                 "totalItem", purchases.getTotalElements()
         ));
     }
 
-    public ApiResponse getDebtPurchaseBySupplierId(UUID supplierId) {
-        Specification<Purchase> spec = Specification
-                .where(PurchaseSpecification.belongsToSupplier(supplierId))
-                .and(PurchaseSpecification.hasDebtGreaterThanZero())
-                .and(PurchaseSpecification.orderByCreatedAtDesc());
-        List<Purchase> all = purchaseRepository.findAll(spec);
+    public PurchaseGetDto convertToDTO(Purchase purchase) {
+        PurchaseGetDto dto = new PurchaseGetDto();
+        dto.setId(purchase.getId());
+        dto.setCreatedAt(purchase.getCreatedAt());
+        dto.setInvoice(purchase.getInvoice());
+        dto.setBranchName(purchase.getBranch() != null ? purchase.getBranch().getName() : null);
+        dto.setSupplierName(purchase.getSupplier() != null ? purchase.getSupplier().getName() : null);
+        dto.setDebt(purchase.getDebtSum());
+        dto.setStatus(purchase.getPurchaseStatus() != null ? purchase.getPaymentStatus().getStatus() : null);
+        dto.setTotal(purchase.getTotalSum());
+        dto.setSellerFullName(purchase.getSeller() != null ? purchase.getSeller().getFirstName() + " " + purchase.getSeller().getLastName() : null);
+        return dto;
+    }
 
-        if (all.isEmpty())
-            return new ApiResponse(messageService.getMessage("not.found"), false);
-
-        return new ApiResponse(messageService.getMessage("found"), true, all);
+    public List<PurchaseGetDto> getPurchases(List<Purchase> purchases) {
+        return purchases.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 }

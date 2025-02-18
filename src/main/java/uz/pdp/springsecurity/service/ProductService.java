@@ -17,6 +17,7 @@ import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
 import uz.pdp.springsecurity.repository.specifications.ProductSpecifications;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
@@ -42,6 +43,8 @@ public class ProductService {
     private final ProductTranslateRepository productTranslateRepository;
     private final ProductConvert productConvert;
     private final DiscountRepository discountRepository;
+    private final MessageService messageService;
+    private final HttpServletRequest request;
 
     @Transactional
     public ApiResponse editProduct(UUID productId, ProductEditDto productEditDto) {
@@ -704,11 +707,11 @@ public class ProductService {
         }
 
         if (products.isEmpty()) {
-            return new ApiResponse("not found", false);
+            return new ApiResponse(messageService.getMessage("not.found"), false);
         }
         List<ProductGetDto> productGetDtoList = getProductGetDtoList(products, code, branchId);
 
-        return new ApiResponse("all", true, productGetDtoList);
+        return new ApiResponse(messageService.getMessage("found"), true, productGetDtoList);
     }
 
     @Transactional

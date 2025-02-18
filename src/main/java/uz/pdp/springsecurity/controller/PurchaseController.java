@@ -69,7 +69,9 @@ public class PurchaseController {
     }
 
     @GetMapping("/get-debt-purchase-by-supplierId/{supplierId}")
-    public HttpEntity<?> getDebtPurchaseBySupplierId(@PathVariable UUID supplierId) {
-        return responseEntityHelper.buildResponse(purchaseService.getDebtPurchaseBySupplierId(supplierId));
+    public HttpEntity<?> getDebtPurchaseBySupplierId(@PathVariable UUID supplierId,
+                                                     @RequestParam(defaultValue = AppConstant.DEFAULT_PAGE) int page,
+                                                     @RequestParam(defaultValue = AppConstant.DEFAULT_SIZE) int size) {
+        return responseEntityHelper.buildResponse(purchaseService.getDebtPurchaseBySupplierId(supplierId, page, size));
     }
 }
