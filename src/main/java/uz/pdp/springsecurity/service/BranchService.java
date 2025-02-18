@@ -170,8 +170,6 @@ public class BranchService {
         Business business = optionalBusiness.get();
         branch.setBusiness(business);
 
-        branch.setMainBranchId(branchDto.getMainBranchId());
-
         Optional<Location> optionalLocation = locationRepository.findByBranchId(branch.getId());
 
         optionalLocation.ifPresent(location -> {
@@ -243,4 +241,32 @@ public class BranchService {
     }
 
 
+    public ApiResponse editMainBranch(UUID businessId, UUID branchCategoryId) {
+        Optional<Business> optionalBusiness = businessRepository.findById(businessId);
+        if (optionalBusiness.isEmpty()) return new ApiResponse("BUSINESS NOT FOUND", false);
+        Business business = optionalBusiness.get();
+
+        Optional<BranchCategory> optionalBranchCategory = branchCategoryRepository.findById(branchCategoryId);
+        if (optionalBranchCategory.isEmpty()) {
+            return new ApiResponse("BRANCH CATEGORY NOT FOUND", false);
+        }
+
+        try {
+            Optional<Branch> optionalMainBranch = branchRepository.findByBranchCategory_Id(branchCategoryId);
+            if (optionalMainBranch.isEmpty()) {
+                return new ApiResponse("ushbu kategoryga tegishli branch topilmadi", false);
+            }
+            Branch mainBranch = optionalMainBranch.get();
+            List<Branch> all = branchRepository.findAllByBusiness_Id(business.getId());
+            for (Branch branch1 : all) {
+                branch1.setMainBranchId(mainBranch.getId());
+            }
+            branchRepository.saveAll(all);
+
+        } catch (Exception e) {
+            return new ApiResponse("ushbu kategory ga tegishli 1 dan ortiq branch mavjud! faqat bitta branch bitta categoryga tegishli bolishi mumkin!", false);
+        }
+
+        return new ApiResponse("EDITED", true);
+    }
 }

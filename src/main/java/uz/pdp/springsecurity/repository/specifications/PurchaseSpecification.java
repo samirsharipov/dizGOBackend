@@ -3,37 +3,50 @@ package uz.pdp.springsecurity.repository.specifications;
 import org.springframework.data.jpa.domain.Specification;
 import uz.pdp.springsecurity.entity.Purchase;
 
-import javax.persistence.criteria.Predicate;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class PurchaseSpecification {
-    public static Specification<Purchase> filterPurchases(UUID businessId, UUID userId, UUID supplierId, Timestamp startDate, Timestamp endDate, String status) {
+
+    public static Specification<Purchase> belongsToBusiness(UUID businessId) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("branch").get("business").get("id"), businessId);
+    }
+
+    public static Specification<Purchase> belongsToBranch(UUID branchId) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("branch").get("id"), branchId);
+    }
+
+    public static Specification<Purchase> belongsToUser(UUID userId) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("seller").get("id"), userId);
+    }
+
+    public static Specification<Purchase> belongsToSupplier(UUID supplierId) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("supplier").get("id"), supplierId);
+    }
+
+    public static Specification<Purchase> hasCreatedAtBetween(Timestamp startDate, Timestamp endDate) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.between(root.get("createdAt"), startDate, endDate);
+    }
+
+    public static Specification<Purchase> hasPurchaseStatus(String statusName) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("purchaseStatus").get("name"), statusName);
+    }
+
+    public static Specification<Purchase> hasDebtGreaterThanZero() {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.greaterThan(root.get("debtSum"), 0);
+    }
+
+    public static Specification<Purchase> orderByCreatedAtDesc() {
         return (root, query, criteriaBuilder) -> {
-            List<Predicate> predicates = new ArrayList<>();
-
-            if (businessId != null) {
-                predicates.add(criteriaBuilder.equal(root.get("branch").get("business").get("id"), businessId));
-            }
-            if (userId != null) {
-                predicates.add(criteriaBuilder.equal(root.get("seller").get("id"), userId));
-            }
-            if (supplierId != null) {
-                predicates.add(criteriaBuilder.equal(root.get("supplier").get("id"), supplierId));
-            }
-            if (startDate != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("date"), startDate));
-            }
-            if (endDate != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("date"), endDate));
-            }
-            if (status != null) {
-                predicates.add(criteriaBuilder.equal(root.get("purchaseStatus").get("status"), status));
-            }
-
-            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+            query.orderBy(criteriaBuilder.desc(root.get("createdAt")));
+            return criteriaBuilder.conjunction();
         };
     }
 }

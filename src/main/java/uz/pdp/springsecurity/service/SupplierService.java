@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -100,6 +101,16 @@ public class SupplierService {
         response.put("pageSize", suppliers.getSize());
 
         return new ApiResponse(messageService.getMessage("supplier.found"), true, response);
+    }
+
+    public ApiResponse getAllByBusinessWithoutPageAble(UUID businessId) {
+
+        List<Supplier> suppliers = supplierRepository.findAllByBusiness_Id(businessId);
+
+        if (suppliers.isEmpty())
+            return new ApiResponse(messageService.getMessage("supplier.not.found"), false);
+
+        return new ApiResponse(messageService.getMessage("supplier.found"), true, suppliers.stream().map(this::convertToDto));
     }
 
     @Transactional
@@ -235,4 +246,6 @@ public class SupplierService {
                 supplier.getDebt()
         );
     }
+
+
 }

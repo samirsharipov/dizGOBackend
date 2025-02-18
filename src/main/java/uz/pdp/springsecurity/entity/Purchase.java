@@ -28,6 +28,7 @@ public class Purchase extends AbsEntity {
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Branch branch;
+
     private Date date;
     private String description;
     private String invoice;

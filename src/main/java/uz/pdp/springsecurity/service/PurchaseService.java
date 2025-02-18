@@ -14,6 +14,7 @@ import uz.pdp.springsecurity.enums.HistoryName;
 import uz.pdp.springsecurity.helpers.ProductEntityHelper;
 import uz.pdp.springsecurity.payload.*;
 import uz.pdp.springsecurity.repository.*;
+import uz.pdp.springsecurity.repository.specifications.ProductSpecifications;
 import uz.pdp.springsecurity.repository.specifications.PurchaseSpecification;
 import uz.pdp.springsecurity.utils.Constants;
 import uz.pdp.springsecurity.utils.AppConstant;
@@ -46,6 +47,7 @@ public class PurchaseService {
     private final PurchaseOutlayCategoryRepository purchaseOutlayCategoryRepository;
     private final PurchaseOutlayRepository purchaseOutlayRepository;
     private final ProductEntityHelper productEntityHelper;
+    private final MessageService messageService;
 
     public ApiResponse add(PurchaseDto purchaseDto) {
         Optional<Purchase> optionalPurchase = purchaseRepository.findFirstByBranchIdOrderByCreatedAtDesc(purchaseDto.getBranchId());
@@ -376,46 +378,45 @@ public class PurchaseService {
         return new ApiResponse("DELETED", true);
     }
 
-    public ApiResponse getByBranch(UUID brId, UUID userId, UUID supId, Date date, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
-        Page<Purchase> purchasePage;
-        if (userId != null && supId != null && date != null)
-            purchasePage = purchaseRepository.findAllByBranchIdAndSellerIdAndSupplierIdAndDate(brId, userId, supId, date, pageable);
-        else if (userId != null && supId != null)
-            purchasePage = purchaseRepository.findAllByBranchIdAndSellerIdAndSupplierId(brId, userId, supId, pageable);
-        else if (userId != null && date != null)
-            purchasePage = purchaseRepository.findAllByBranchIdAndSellerIdAndDate(brId, userId, date, pageable);
-        else if (supId != null && date != null)
-            purchasePage = purchaseRepository.findAllByBranchIdAndSupplierIdAndDate(brId, supId, date, pageable);
-        else if (userId != null)
-            purchasePage = purchaseRepository.findAllByBranchIdAndSellerId(brId, userId, pageable);
-        else if (supId != null)
-            purchasePage = purchaseRepository.findAllByBranchIdAndSupplierId(brId, supId, pageable);
-        else if (date != null)
-            purchasePage = purchaseRepository.findAllByBranchIdAndDate(brId, date, pageable);
-        else
-            purchasePage = purchaseRepository.findAllByBranchId(brId, pageable);
-        return getAllHelper(purchasePage);
-    }
+    public ApiResponse getByBusiness(UUID businessId, UUID branchId, UUID userId, UUID supplierId,
+                                     Timestamp startDate, Timestamp endDate, String status,
+                                     int page, int size) {
 
-    public ApiResponse getByBusiness(UUID businessId, UUID userId, UUID supplierId, Timestamp startDate, Timestamp endDate, String status, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Specification<Purchase> specification = PurchaseSpecification.filterPurchases(businessId, userId, supplierId, startDate, endDate, status);
 
-        Page<Purchase> purchasePage = purchaseRepository.findAll(specification, pageable);
+        Specification<Purchase> spec = Specification
+                .where(branchId != null
+                        ? PurchaseSpecification.belongsToBranch(branchId)
+                        : PurchaseSpecification.belongsToBusiness(businessId))
+                .and(userId != null ? PurchaseSpecification.belongsToUser(userId) : null)
+                .and(supplierId != null ? PurchaseSpecification.belongsToSupplier(supplierId) : null)
+                .and((startDate != null && endDate != null) ? PurchaseSpecification.hasCreatedAtBetween(startDate, endDate) : null)
+                .and(status != null && !status.isBlank() ? PurchaseSpecification.hasPurchaseStatus(status) : null);
 
-        return new ApiResponse("Found", true, purchasePage);
+        Page<Purchase> purchases = purchaseRepository.findAll(spec, pageable);
+
+        if (purchases.isEmpty())
+            return new ApiResponse(messageService.getMessage("not.found"), false);
+
+
+        return new ApiResponse(messageService.getMessage("found"), true, Map.of(
+                "list", purchases.getContent(),
+                "currentPage", purchases.getNumber(),
+                "totalPage", purchases.getTotalPages(),
+                "totalItem", purchases.getTotalElements()
+        ));
     }
 
-    private ApiResponse getAllHelper(Page<Purchase> purchasePage) {
-        if (purchasePage.isEmpty()) {
-            return new ApiResponse("MA'LUMOT TOPILMADI", false);
-        }
-        Map<String, Object> response = new HashMap<>();
-        response.put("list", purchasePage.getContent());
-        response.put("currentPage", purchasePage.getNumber());
-        response.put("totalPage", purchasePage.getTotalPages());
-        response.put("totalItem", purchasePage.getTotalElements());
-        return new ApiResponse(true, response);
+    public ApiResponse getDebtPurchaseBySupplierId(UUID supplierId) {
+        Specification<Purchase> spec = Specification
+                .where(PurchaseSpecification.belongsToSupplier(supplierId))
+                .and(PurchaseSpecification.hasDebtGreaterThanZero())
+                .and(PurchaseSpecification.orderByCreatedAtDesc());
+        List<Purchase> all = purchaseRepository.findAll(spec);
+
+        if (all.isEmpty())
+            return new ApiResponse(messageService.getMessage("not.found"), false);
+
+        return new ApiResponse(messageService.getMessage("found"), true, all);
     }
 }

@@ -49,6 +49,12 @@ public class SupplierController {
         return responseEntityHelper.buildResponse(supplierService.getAllByBusiness(businessId, page, size));
     }
 
+    @CheckPermission("VIEW_SUPPLIER")
+    @GetMapping("/get-by-business-without-pageable/{businessId}")
+    public HttpEntity<?> getAllByBusinessWithoutPageAble(@PathVariable UUID businessId) {
+        return responseEntityHelper.buildResponse(supplierService.getAllByBusinessWithoutPageAble(businessId));
+    }
+
     /**
      * DO'KON QARZINI TO'LASHI
      */
