@@ -3,6 +3,7 @@ package uz.pdp.springsecurity.controller.MainPageController;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uz.pdp.springsecurity.helpers.ResponseEntityHelper;
 import uz.pdp.springsecurity.payload.ApiResponse;

@@ -74,7 +74,7 @@ public class UserController {
                                             @RequestParam String nameOrPhoneNumber,
                                             @RequestParam int size,
                                             @RequestParam int page) {
-        ApiResponse apiResponse = userService.getAllByBusinessId(business_id,nameOrPhoneNumber,size,page);
+        ApiResponse apiResponse = userService.getAllByBusinessId(business_id, nameOrPhoneNumber, size, page);
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
@@ -145,5 +145,11 @@ public class UserController {
     @GetMapping("/get-by-phone-number/{phoneNumber}")
     public HttpEntity<?> getByPhoneNumber(@PathVariable String phoneNumber) {
         return responseEntityHelper.buildResponse(userService.getByPhoneNumber(phoneNumber));
+    }
+
+    @GetMapping("/get-by-business-or-branch/{businessId}")
+    public ResponseEntity<?> getBusinessOrBranch(@PathVariable UUID businessId,
+                                                 @RequestParam(required = false) UUID branchId) {
+        return responseEntityHelper.buildResponse(userService.getBusinessOrBranch(businessId, branchId));
     }
 }

@@ -15,7 +15,7 @@ public class LocaleConfig {
     @Bean(name = "customLocaleResolver")
     public LocaleResolver localeResolver() {
         AcceptHeaderLocaleResolver localeResolver = new AcceptHeaderLocaleResolver();
-        localeResolver.setDefaultLocale(new Locale("uz"));  // Standart tilni O'zbekcha qilib o'rnatamiz
+        localeResolver.setDefaultLocale(new Locale("uz","UZ"));  // Standart tilni O'zbekcha qilib o'rnatamiz
         return localeResolver;
     }
 

@@ -35,7 +35,7 @@ public class PurchaseSpecification {
 
     public static Specification<Purchase> hasPurchaseStatus(String statusName) {
         return (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("purchaseStatus").get("name"), statusName);
+                criteriaBuilder.equal(root.get("paymentStatus").get("status"), statusName);
     }
 
     public static Specification<Purchase> hasDebtGreaterThanZero() {

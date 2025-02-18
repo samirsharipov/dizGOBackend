@@ -9,6 +9,7 @@ import uz.pdp.springsecurity.entity.Role;
 import uz.pdp.springsecurity.entity.User;
 import uz.pdp.springsecurity.enums.Permissions;
 import uz.pdp.springsecurity.payload.MonthlyEmploymentDismissalReportDto;
+import uz.pdp.springsecurity.payload.projections.UserProjection;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -98,4 +99,15 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
 
     Optional<User> findByRoleName(String role);
+
+    @Query("SELECT new uz.pdp.springsecurity.payload.projections.UserProjection(u.id, CONCAT(u.firstName, ' ', u.lastName)) " +
+            "FROM users u " +
+            "WHERE u.business.id = :businessId ")
+    List<UserProjection> findUsersByBusiness(@Param("businessId") UUID businessId);
+
+    @Query("SELECT new uz.pdp.springsecurity.payload.projections.UserProjection(u.id, CONCAT(u.firstName, ' ', u.lastName)) " +
+            "FROM users u " +
+            "join u.branches b " +
+            "WHERE b.id = :branchId ")
+    List<UserProjection> findUsersByBranch(@Param("branchId") UUID branchId);
 }

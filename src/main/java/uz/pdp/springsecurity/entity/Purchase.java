@@ -37,4 +37,18 @@ public class Purchase extends AbsEntity {
     private double paidSum;
     private double debtSum = 0;
     private boolean editable = true;
+
+    public String getBranchName() {
+        return this.branch != null ? this.branch.getName() : null;
+    }
+
+    // Supplier nomini olish uchun method
+    public String getSupplierName() {
+        return this.supplier != null ? this.supplier.getName() : null;
+    }
+
+    // Seller nomini olish uchun method
+    public String getSellerFullName() {
+        return this.seller != null ? this.seller.getFirstName() + " " + this.seller.getLastName() : null;
+    }
 }
