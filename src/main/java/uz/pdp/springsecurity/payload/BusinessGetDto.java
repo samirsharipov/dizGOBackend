@@ -23,5 +23,6 @@ public class BusinessGetDto {
     private Timestamp contractEndDate;
 
     private String businessCategoryName;
+    private UUID businessCategoryId;
 
 }

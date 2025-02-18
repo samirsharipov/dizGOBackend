@@ -33,6 +33,13 @@ public class BranchController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
+    @CheckPermission("EDIT_BRANCH")
+    @PutMapping("edit-main-branch/{businessId}")
+    public HttpEntity<?> editMainBranch(@PathVariable UUID businessId, @RequestParam UUID branchCategoryId) {
+        ApiResponse apiResponse = branchService.editMainBranch(businessId, branchCategoryId);
+        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+    }
+
     @CheckPermission("VIEW_BRANCH")
     @GetMapping("/{id}")
     public HttpEntity<?> get(@PathVariable UUID id) {

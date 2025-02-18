@@ -217,7 +217,8 @@ public class BusinessService {
                     if (optionalBranch.isPresent()) {
                         Branch mainBranch = optionalBranch.get();
                         BranchCategory branchCategory = mainBranch.getBranchCategory();
-                        businessGetDto.setBusinessCategoryName(branchCategory!=null?branchCategory.getName():mainBranch.getName()+" catgeroysi mavjud bomagan branchga boglangan");
+                        businessGetDto.setBusinessCategoryName(branchCategory != null ? branchCategory.getName() : mainBranch.getName() + " catgeroysi mavjud bomagan branchga boglangan");
+                        businessGetDto.setBusinessCategoryId(branchCategory != null ? branchCategory.getId() : mainBranch.getId());
                         break;
                     }
                 }

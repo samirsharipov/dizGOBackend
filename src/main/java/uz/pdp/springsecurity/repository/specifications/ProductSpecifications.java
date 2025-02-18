@@ -2,11 +2,8 @@ package uz.pdp.springsecurity.repository.specifications;
 
 import org.springframework.data.jpa.domain.Specification;
 import uz.pdp.springsecurity.entity.Product;
-import uz.pdp.springsecurity.payload.ProductSearchCriteria;
 
 import javax.persistence.criteria.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class ProductSpecifications {

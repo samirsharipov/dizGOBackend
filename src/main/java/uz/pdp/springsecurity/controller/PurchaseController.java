@@ -5,6 +5,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uz.pdp.springsecurity.annotations.CheckPermission;
+import uz.pdp.springsecurity.helpers.ResponseEntityHelper;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.PurchaseDto;
 import uz.pdp.springsecurity.service.PurchaseService;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PurchaseController {
     private final PurchaseService purchaseService;
+    private final ResponseEntityHelper responseEntityHelper;
 
     @CheckPermission("ADD_PURCHASE")
     @PostMapping
@@ -55,29 +57,19 @@ public class PurchaseController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    @CheckPermission("VIEW_PURCHASE")
-    @GetMapping("/get-by-branch/{branchId}")
-    public HttpEntity<?> getByBranch(@PathVariable UUID branchId,
-                                     @RequestParam(required = false) UUID userId,
-                                     @RequestParam(required = false) UUID supplierId,
-                                     @RequestParam(required = false) Date date,
-                                     @RequestParam(defaultValue = AppConstant.DEFAULT_PAGE) int page,
-                                     @RequestParam(defaultValue = AppConstant.DEFAULT_SIZE) int size) {
-        ApiResponse apiResponse = purchaseService.getByBranch(branchId, userId, supplierId, date, page, size);
-        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
-    }
-
     @CheckPermission("VIEW_PURCHASE_ADMIN")
     @GetMapping("/get-by-business/{businessId}")
-    public HttpEntity<?> getByBusiness(@PathVariable UUID businessId,
-                                       @RequestParam(required = false) UUID userId,
-                                       @RequestParam(required = false) UUID supplierId,
-                                       @RequestParam(required = false) Timestamp startDate,
-                                       @RequestParam(required = false) Timestamp endDate,
+    public HttpEntity<?> getByBusiness(@PathVariable UUID businessId, @RequestParam(required = false) UUID branchId,
+                                       @RequestParam(required = false) UUID userId, @RequestParam(required = false) UUID supplierId,
+                                       @RequestParam(required = false) Timestamp startDate, @RequestParam(required = false) Timestamp endDate,
                                        @RequestParam(required = false) String status,
                                        @RequestParam(defaultValue = AppConstant.DEFAULT_PAGE) int page,
                                        @RequestParam(defaultValue = AppConstant.DEFAULT_SIZE) int size) {
-        ApiResponse apiResponse = purchaseService.getByBusiness(businessId, userId, supplierId, startDate,endDate,status, page, size);
-        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+        return responseEntityHelper.buildResponse(purchaseService.getByBusiness(businessId, branchId, userId, supplierId, startDate, endDate, status, page, size));
+    }
+
+    @GetMapping("/get-debt-purchase-by-supplierId/{supplierId}")
+    public HttpEntity<?> getDebtPurchaseBySupplierId(@PathVariable UUID supplierId) {
+        return responseEntityHelper.buildResponse(purchaseService.getDebtPurchaseBySupplierId(supplierId));
     }
 }
