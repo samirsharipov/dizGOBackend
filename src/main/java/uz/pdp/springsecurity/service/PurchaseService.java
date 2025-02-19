@@ -289,6 +289,8 @@ public class PurchaseService {
                 productRepository.save(product);
             } else {
                 product = productEntityHelper.cloneProduct(productId, branch);
+                if (product==null)
+                    return null;
             }
         } else {
             Optional<Product> optional = productRepository.findById(productId);

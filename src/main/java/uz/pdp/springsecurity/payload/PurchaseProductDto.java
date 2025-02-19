@@ -32,5 +32,6 @@ public class PurchaseProductDto {
     private boolean delete = false;
 
     private double margin;
+
     private boolean qqs;
 }
