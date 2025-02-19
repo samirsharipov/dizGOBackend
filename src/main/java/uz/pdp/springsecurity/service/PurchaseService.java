@@ -284,11 +284,22 @@ public class PurchaseService {
                     .orElseThrow(() -> new RuntimeException("Globaldan kelgan maxsulot " + messageService.getMessage("not.found")));
             Optional<Product> optionalProduct = productRepository.findByBarcodeAndBusinessId(mainProduct.getBarcode(),
                     branch.getBusiness().getId());
+
+            if (optionalProduct.isEmpty()) {
+                Optional<Product> optional =
+                        productRepository.findByBarcodeAndBusinessIdAndActiveFalseAndDeletedTrue(mainProduct.getBarcode(), branch.getBusiness().getId());
+                if (optional.isPresent()) {
+                    optionalProduct = optional;
+                }
+            }
+
             if (optionalProduct.isPresent()) {
                 product = optionalProduct.get();
                 List<Branch> branches = product.getBranch();
                 branches.add(branch);
                 product.setBranch(branches);
+                product.setActive(true);
+                product.setDeleted(false);
             } else {
                 product = productEntityHelper.cloneProduct(productId, branch);
             }
