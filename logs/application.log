@@ -22289,3 +22289,67 @@ Caused by: org.hibernate.HibernateException: Access to DialectResolutionInfo can
 2025-02-19 14:20:32 [RMI TCP Connection(1)-192.168.1.50] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
 2025-02-19 14:20:32 [RMI TCP Connection(1)-192.168.1.50] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
 2025-02-19 14:20:32 [RMI TCP Connection(1)-192.168.1.50] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 4 ms
+2025-02-19 14:21:52 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-02-19 14:21:52 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-02-19 14:21:52 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-02-19 14:22:05 [main] INFO  u.p.s.SpringSecurityApplication - Starting SpringSecurityApplication using Java 17.0.14 on Samirs-Air.home with PID 18032 (/Users/samirsharipov/biznesNavigator/optimitBackend/target/classes started by samirsharipov in /Users/samirsharipov/biznesNavigator/optimitBackend)
+2025-02-19 14:22:05 [main] INFO  u.p.s.SpringSecurityApplication - The following profiles are active: dev
+2025-02-19 14:22:05 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-02-19 14:22:06 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 134 ms. Found 123 JPA repository interfaces.
+2025-02-19 14:22:06 [main] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler@3321291a' of type [org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2025-02-19 14:22:06 [main] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'methodSecurityMetadataSource' of type [org.springframework.security.access.method.DelegatingMethodSecurityMetadataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2025-02-19 14:22:06 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8081 (http)
+2025-02-19 14:22:06 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8081"]
+2025-02-19 14:22:06 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-02-19 14:22:06 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.54]
+2025-02-19 14:22:06 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-02-19 14:22:06 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1381 ms
+2025-02-19 14:22:06 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-02-19 14:22:06 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 5.4.32.Final
+2025-02-19 14:22:06 [main] INFO  o.h.annotations.common.Version - HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2025-02-19 14:22:07 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-02-19 14:22:07 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-02-19 14:22:07 [main] INFO  org.hibernate.dialect.Dialect - HHH000400: Using dialect: org.hibernate.dialect.PostgreSQL10Dialect
+2025-02-19 14:22:09 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2025-02-19 14:22:09 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-02-19 14:22:09 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-02-19 14:22:13 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoint(s) beneath base path '/actuator'
+2025-02-19 14:22:13 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@4c190267, org.springframework.security.web.context.SecurityContextPersistenceFilter@35117447, org.springframework.security.web.header.HeaderWriterFilter@1caf5efc, org.springframework.web.filter.CorsFilter@5c6af94d, org.springframework.security.web.authentication.logout.LogoutFilter@270cddd2, uz.pdp.springsecurity.security.JwtFilter@3bfc7d53, org.springframework.security.web.session.ConcurrentSessionFilter@d024531, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@74dc7276, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@44d6039d, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@55148d9b, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@608de3fb, org.springframework.security.web.session.SessionManagementFilter@6ddaffc4, org.springframework.security.web.access.ExceptionTranslationFilter@15092cac, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@86093db]
+2025-02-19 14:22:14 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8081"]
+2025-02-19 14:22:14 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port(s): 8081 (http) with context path ''
+2025-02-19 14:22:15 [main] INFO  u.p.s.SpringSecurityApplication - Started SpringSecurityApplication in 10.452 seconds (JVM running for 11.606)
+2025-02-19 14:22:15 [RMI TCP Connection(3)-192.168.1.50] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-02-19 14:22:15 [RMI TCP Connection(3)-192.168.1.50] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-02-19 14:22:15 [RMI TCP Connection(3)-192.168.1.50] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 3 ms
+2025-02-19 14:47:19 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-02-19 14:47:19 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-02-19 14:47:19 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-02-19 14:47:24 [main] INFO  u.p.s.SpringSecurityApplication - Starting SpringSecurityApplication using Java 17.0.14 on Samirs-Air.home with PID 18472 (/Users/samirsharipov/biznesNavigator/optimitBackend/target/classes started by samirsharipov in /Users/samirsharipov/biznesNavigator/optimitBackend)
+2025-02-19 14:47:24 [main] INFO  u.p.s.SpringSecurityApplication - The following profiles are active: dev
+2025-02-19 14:47:24 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-02-19 14:47:24 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 133 ms. Found 123 JPA repository interfaces.
+2025-02-19 14:47:25 [main] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler@6bd7439d' of type [org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2025-02-19 14:47:25 [main] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'methodSecurityMetadataSource' of type [org.springframework.security.access.method.DelegatingMethodSecurityMetadataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2025-02-19 14:47:25 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8081 (http)
+2025-02-19 14:47:25 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8081"]
+2025-02-19 14:47:25 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-02-19 14:47:25 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.54]
+2025-02-19 14:47:25 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-02-19 14:47:25 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1308 ms
+2025-02-19 14:47:25 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-02-19 14:47:25 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 5.4.32.Final
+2025-02-19 14:47:25 [main] INFO  o.h.annotations.common.Version - HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2025-02-19 14:47:25 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-02-19 14:47:25 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-02-19 14:47:26 [main] INFO  org.hibernate.dialect.Dialect - HHH000400: Using dialect: org.hibernate.dialect.PostgreSQL10Dialect
+2025-02-19 14:47:29 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2025-02-19 14:47:29 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-02-19 14:47:30 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-02-19 14:47:33 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoint(s) beneath base path '/actuator'
+2025-02-19 14:47:34 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@e3ce861, org.springframework.security.web.context.SecurityContextPersistenceFilter@5cb3f273, org.springframework.security.web.header.HeaderWriterFilter@569575ec, org.springframework.web.filter.CorsFilter@34942d7c, org.springframework.security.web.authentication.logout.LogoutFilter@53de300e, uz.pdp.springsecurity.security.JwtFilter@3616678d, org.springframework.security.web.session.ConcurrentSessionFilter@70c058e9, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@7e128b54, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@31be1586, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@411f5b08, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@66d774b8, org.springframework.security.web.session.SessionManagementFilter@5a0af7cb, org.springframework.security.web.access.ExceptionTranslationFilter@67b2bcbd, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@128f0a3c]
+2025-02-19 14:47:34 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8081"]
+2025-02-19 14:47:34 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port(s): 8081 (http) with context path ''
+2025-02-19 14:47:36 [main] INFO  u.p.s.SpringSecurityApplication - Started SpringSecurityApplication in 12.174 seconds (JVM running for 13.366)
+2025-02-19 14:47:36 [RMI TCP Connection(11)-192.168.1.50] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-02-19 14:47:36 [RMI TCP Connection(11)-192.168.1.50] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-02-19 14:47:36 [RMI TCP Connection(11)-192.168.1.50] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms

@@ -280,7 +280,10 @@ public class PurchaseService {
         UUID productId = purchaseProductDto.getProductId();
 
         if (purchaseProductDto.isNew()) {
-            Optional<Product> optionalProduct = productRepository.findByIdAndBusinessId(productId, branch.getBusiness().getId());
+            Product mainProduct = productRepository.findById(productId)
+                    .orElseThrow(() -> new RuntimeException("Globaldan kelgan maxsulot " + messageService.getMessage("not.found")));
+            Optional<Product> optionalProduct = productRepository.findByBarcodeAndBusinessId(mainProduct.getBarcode(),
+                    branch.getBusiness().getId());
             if (optionalProduct.isPresent()) {
                 product = optionalProduct.get();
                 List<Branch> branches = product.getBranch();
@@ -289,8 +292,6 @@ public class PurchaseService {
                 productRepository.save(product);
             } else {
                 product = productEntityHelper.cloneProduct(productId, branch);
-                if (product==null)
-                    return null;
             }
         } else {
             Optional<Product> optional = productRepository.findById(productId);

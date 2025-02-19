@@ -25,12 +25,6 @@ public class ProductEntityHelper {
 
         Business business = branch.getBusiness();
 
-        boolean exists =
-                productRepository.existsByBarcodeAndBusinessId(originalProduct.getBarcode(), business.getId());
-        if (exists) {
-            return null;
-        }
-
         Category category = null;
         if (originalProduct.getCategory() != null) {
             category = findOrCreateEntity(
