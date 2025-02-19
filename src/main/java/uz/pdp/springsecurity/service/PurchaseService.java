@@ -289,7 +289,6 @@ public class PurchaseService {
                 List<Branch> branches = product.getBranch();
                 branches.add(branch);
                 product.setBranch(branches);
-                productRepository.save(product);
             } else {
                 product = productEntityHelper.cloneProduct(productId, branch);
             }
@@ -305,6 +304,7 @@ public class PurchaseService {
         product.setMargin(purchaseProductDto.getMargin());
         product.setQqs(purchaseProductDto.isQqs());
         productRepository.save(product);
+
         purchaseProduct.setProduct(product);
         purchaseProduct.setPurchasedQuantity(purchaseProductDto.getPurchasedQuantity());
         purchaseProduct.setSalePrice(purchaseProductDto.getSalePrice());
