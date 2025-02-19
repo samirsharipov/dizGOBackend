@@ -41,7 +41,7 @@ public class PurchaseDto {
 
     private double debtSum;
 
-    private Double paidSum;
+    private double paidSum;
 
     @NotNull(message = "required line")
     private List<PurchaseProductDto> purchaseProductsDto;

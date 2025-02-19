@@ -29,8 +29,12 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     boolean existsByBarcodeAndBusinessIdAndIdIsNotAndActiveTrue(String barcode, UUID businessId, UUID productId);
 
     Optional<Product> findByBarcodeAndBusinessId(String barcode, UUID business_id);
-    Optional<Product> findByBarcodeAndBusinessIdAndActiveFalseAndDeletedTrue(String barcode, UUID business_id);
 
+    @Query(value = "SELECT * FROM product WHERE barcode = :barcode AND business_id = :businessId", nativeQuery = true)
+    Optional<Product> findByBarcodeAndBusinessIdAndActiveFalseAndDeletedTrue(
+            @Param("barcode") String barcode,
+            @Param("businessId") UUID businessId
+    );
     List<Product> findAllByBrandIdAndCategoryIdAndBranchIdAndActiveTrue(UUID brand_id, UUID category_id, UUID branchId);
 
     boolean existsByPluCodeAndBusiness_Id(String pluCode, UUID business_id);
