@@ -29,6 +29,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     boolean existsByBarcodeAndBusinessIdAndIdIsNotAndActiveTrue(String barcode, UUID businessId, UUID productId);
 
     Optional<Product> findByBarcodeAndBusinessId(String barcode, UUID business_id);
+    Optional<Product> findByBarcodeAndBusinessIdAndActiveFalseAndDeletedTrue(String barcode, UUID business_id);
 
     List<Product> findAllByBrandIdAndCategoryIdAndBranchIdAndActiveTrue(UUID brand_id, UUID category_id, UUID branchId);
 
