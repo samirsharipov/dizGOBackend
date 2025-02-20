@@ -54,4 +54,15 @@ public class Attendance extends AbsEntity {
             this.workDuration = (checkOutTime.getTime() - checkInTime.getTime()) / 1000; // Sekundlarda hisoblash
         }
     }
+
+    public Long getDuration() {
+        if (checkInTime == null) {
+            return null; // Agar check-in bo‘lmagan bo‘lsa, work duration null qaytariladi
+        }
+
+        Timestamp currentTime = new Timestamp(System.currentTimeMillis());
+        Timestamp effectiveCheckOutTime = (checkOutTime != null) ? checkOutTime : currentTime;
+
+        return (effectiveCheckOutTime.getTime() - checkInTime.getTime()) / 1000; // Sekundlarda hisoblash
+    }
 }

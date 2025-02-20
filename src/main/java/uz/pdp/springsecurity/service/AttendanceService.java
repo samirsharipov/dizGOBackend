@@ -22,6 +22,7 @@ import uz.pdp.springsecurity.service.functions.GeoCheck;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +32,6 @@ public class AttendanceService {
     private final LocationRepository locationRepository;
     private final GeoCheck geoCheck;
     private final BranchRepository branchRepository;
-    private final UserRepository userRepository;
     private final MessageService messageService;
 
     // QR kod orqali keldi-ketdi tasdiqlash
@@ -163,17 +163,44 @@ public class AttendanceService {
     }
 
     public ApiResponse getByBusinessId(UUID businessId, UUID branchId, Timestamp startDate, Timestamp endDate) {
-        List<EmployeeWorkDurationDto> totalWorkDurationList;
-        if (branchId != null)
-            totalWorkDurationList = attendanceRepository.findTotalWorkDurationByBranch(branchId, startDate, endDate);
-        else
-            totalWorkDurationList = attendanceRepository.findTotalWorkDurationByBusiness(businessId, startDate, endDate);
+        List<EmployeeWorkDurationDto> totalWorkDurationList = (branchId != null)
+                ? attendanceRepository.findTotalWorkDurationByBranch(branchId, startDate, endDate)
+                : attendanceRepository.findTotalWorkDurationByBusiness(businessId, startDate, endDate);
 
-        if (totalWorkDurationList.isEmpty())
+        if (totalWorkDurationList.isEmpty()) {
             return new ApiResponse(messageService.getMessage("not.found"), false);
+        }
 
+        // TotalWorkDuration null bo'lganlarni topamiz
+        Map<UUID, Long> durationMap = attendanceRepository.findAllById(
+                totalWorkDurationList.stream()
+                        .filter(dto -> dto.getTotalWorkDuration() == null)
+                        .map(EmployeeWorkDurationDto::getId)
+                        .toList()
+        ).stream().collect(Collectors.toMap(Attendance::getId, Attendance::getDuration));
 
-        return new ApiResponse(messageService.getMessage("found"), true, totalWorkDurationList);
+        // Faqat null bo'lganlarga duration qo‘shamiz
+        totalWorkDurationList.forEach(dto ->
+                dto.setTotalWorkDuration(dto.getTotalWorkDuration() != null
+                        ? dto.getTotalWorkDuration()
+                        : durationMap.get(dto.getId()))
+        );
+
+        // ID bo‘yicha yagona EmployeeWorkDurationDto yaratish (dublikatsiyani oldini olish)
+        List<EmployeeWorkDurationDto> optimizedList = totalWorkDurationList.stream()
+                .collect(Collectors.toMap(
+                        EmployeeWorkDurationDto::getId,
+                        dto -> dto,
+                        (existing, newDto) -> {
+                            existing.setTotalWorkDuration(
+                                    (existing.getTotalWorkDuration() == null ? 0 : existing.getTotalWorkDuration()) +
+                                            (newDto.getTotalWorkDuration() == null ? 0 : newDto.getTotalWorkDuration())
+                            );
+                            return existing;
+                        }
+                )).values().stream().toList();
+
+        return new ApiResponse(messageService.getMessage("found"), true, optimizedList);
     }
 
     public ApiResponse getUserIdDiagram(UUID userId, Timestamp startDate, Timestamp endDate) {

@@ -10,6 +10,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EmployeeWorkDurationDto {
+    private UUID id;
     private UUID employeeId;
     private String fullName;
     private Long totalWorkDuration; // Ishlagan umumiy vaqt (sekundlarda)
