@@ -42,23 +42,20 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
 
     Page<Attendance> findAllByEmployeeId(UUID userId, Pageable pageable);
 
-    @Query(value = "SELECT e.id, CONCAT(e.first_name, ' ', e.last_name) AS full_name, " +
-            "SUM(COALESCE(a.work_duration, EXTRACT(EPOCH FROM (COALESCE(a.check_out_time, now()) - a.check_in_time)))) AS total_work_duration " +
-            "FROM attendance a " +
-            "JOIN users e ON a.employee_id = e.id " +
-            "WHERE a.branch_id = :branchId AND a.created_at BETWEEN :start AND :end " +
-            "GROUP BY e.id, e.first_name, e.last_name",
-            nativeQuery = true)
+    // Branch bo‘yicha hodimlarning umumiy ishlagan vaqtini hisoblash
+    @Query("SELECT new uz.pdp.springsecurity.payload.EmployeeWorkDurationDto(a.id,e.id, CONCAT(e.firstName, ' ', e.lastName), SUM(a.workDuration)) " +
+            "FROM Attendance a " +
+            "JOIN users e ON a.employeeId = e.id " +
+            "WHERE a.branchId = :branchId AND a.createdAt BETWEEN :start AND :end " +
+            "GROUP BY a.id, e.id, e.firstName, e.lastName")
     List<EmployeeWorkDurationDto> findTotalWorkDurationByBranch(UUID branchId, Timestamp start, Timestamp end);
 
     // Business bo‘yicha hodimlarning umumiy ishlagan vaqtini hisoblash
-    @Query(value = "SELECT e.id, CONCAT(e.first_name, ' ', e.last_name) AS full_name, " +
-            "SUM(COALESCE(a.work_duration, EXTRACT(EPOCH FROM (COALESCE(a.check_out_time, now()) - a.check_in_time)))) AS total_work_duration " +
-            "FROM attendance a " +
-            "JOIN users e ON a.employee_id = e.id " +
-            "WHERE e.business_id = :businessId AND a.created_at BETWEEN :start AND :end " +
-            "GROUP BY e.id, e.first_name, e.last_name",
-            nativeQuery = true)
+    @Query("SELECT new uz.pdp.springsecurity.payload.EmployeeWorkDurationDto(a.id,e.id, CONCAT(e.firstName, ' ', e.lastName), SUM(a.workDuration)) " +
+            "FROM Attendance a " +
+            "JOIN users e ON a.employeeId = e.id " +
+            "WHERE e.business.id = :businessId AND a.createdAt BETWEEN :start AND :end " +
+            "GROUP BY  a.id, e.id, e.firstName, e.lastName")
     List<EmployeeWorkDurationDto> findTotalWorkDurationByBusiness(UUID businessId, Timestamp start, Timestamp end);
 
 
