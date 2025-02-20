@@ -181,6 +181,10 @@ public class TradeService {
                 trade.setCustomer(customer);
                 customer.setDebt(newDebt - debt);
                 customer.setPayDate(tradeDTO.getPayDate());
+
+                //customerga savdo qilgan dukonini idsini biriktirish
+                customer.addBranchId(branch.getId());
+
                 customerRepository.save(customer);
 
 

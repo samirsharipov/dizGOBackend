@@ -7,9 +7,7 @@ import org.hibernate.annotations.Where;
 import uz.pdp.springsecurity.entity.template.AbsEntity;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 @Setter
@@ -74,4 +72,16 @@ public class Customer extends AbsEntity {
     private Boolean active = true;
 
     private Long chatId;
+
+    @ElementCollection
+    private Set<UUID> branchIds = new HashSet<>(); // Set bo‘lgani uchun dublikat bo‘lmaydi
+
+    // **Branch ID qo‘shish metodi**
+    public void addBranchId(UUID branchId) {
+        if (branchIds == null) {
+            branchIds = new HashSet<>();
+        }
+        branchIds.add(branchId); // Set bo‘lgani uchun dublikat oldi olinadi
+    }
+
 }
