@@ -151,7 +151,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                                                               Pageable pageable);
 
     // Branch ID bo‘yicha mahsulot qidirish (ManyToMany bo‘lgani uchun JOIN ishlatamiz)
-    @Query("SELECT p FROM Product p JOIN p.branch b WHERE b.id = :branchId AND LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR  p.business.id = :businessId AND p.barcode = :search")
+    @Query("SELECT p FROM Product p JOIN p.branch b WHERE b.id = :branchId AND LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR  b.id = :branchId AND p.barcode = :search")
     Page<Product> findByBranchIdAndNameContainingIgnoreCase(@Param("branchId") UUID branchId,
                                                             @Param("search") String search,
                                                             Pageable pageable);
