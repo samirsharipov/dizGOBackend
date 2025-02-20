@@ -218,6 +218,7 @@ public class CustomerController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
+
     @GetMapping("/get-by-barcode")
     public HttpEntity<ApiResponse> getByBarcode(@RequestParam String barcode) {
         return responseEntityHelper.buildResponse(customerService.getByBarcode(barcode));
@@ -237,4 +238,9 @@ public class CustomerController {
     public HttpEntity<ApiResponse> searchForTrade(@RequestParam String query) {
         return responseEntityHelper.buildResponse(customerService.getForTrade(query));
     }
+
+//    @GetMapping("/get-info-customers")
+//    public ResponseEntity<ApiResponse> customerInfo() {
+//        return responseEntityHelper.buildResponse(customerService.customerInfo());
+//    }
 }

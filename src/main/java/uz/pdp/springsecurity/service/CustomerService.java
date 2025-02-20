@@ -107,8 +107,10 @@ public class CustomerService {
                 // 3. Yangi User yaratish
                 user.setFirstName(customerDto.getFirstName());
                 user.setLastName(customerDto.getLastName());
+
                 user.setUsername(customerDto.getPhoneNumber());
                 user.setPassword(passwordEncoder.encode(customerDto.getPassword()));
+
                 user.setPhoneNumber(customerDto.getPhoneNumber());
                 user.setRole(customerRole);
                 user.setEnabled(true); // Akkaunt aktiv
