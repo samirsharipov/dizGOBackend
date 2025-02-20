@@ -32,6 +32,7 @@ public class AttendanceService {
     private final GeoCheck geoCheck;
     private final BranchRepository branchRepository;
     private final UserRepository userRepository;
+    private final MessageService messageService;
 
     // QR kod orqali keldi-ketdi tasdiqlash
     public ApiResponse checkInWithQRCode(UUID branchId, UUID employeeId, String qrCodeData, boolean input) {
@@ -162,28 +163,28 @@ public class AttendanceService {
     }
 
     public ApiResponse getByBusinessId(UUID businessId, UUID branchId, Timestamp startDate, Timestamp endDate) {
-
-        List<EmployeeWorkDurationDto> totalWorkDurationList = new ArrayList<>();
+        List<EmployeeWorkDurationDto> totalWorkDurationList;
         if (branchId != null)
             totalWorkDurationList = attendanceRepository.findTotalWorkDurationByBranch(branchId, startDate, endDate);
         else
             totalWorkDurationList = attendanceRepository.findTotalWorkDurationByBusiness(businessId, startDate, endDate);
 
         if (totalWorkDurationList.isEmpty())
-            return new ApiResponse("not found", false);
+            return new ApiResponse(messageService.getMessage("not.found"), false);
 
 
-        return new ApiResponse("found", true, totalWorkDurationList);
+        return new ApiResponse(messageService.getMessage("found"), true, totalWorkDurationList);
     }
 
     public ApiResponse getUserIdDiagram(UUID userId, Timestamp startDate, Timestamp endDate) {
         List<Attendance> all =
                 attendanceRepository.findAllByEmployeeIdAndCreatedAtBetween(userId, startDate, endDate);
-        if (all.isEmpty()) {
-            return new ApiResponse("not found", false);
-        }
+        if (all.isEmpty())
+            return new ApiResponse(messageService.getMessage("not.found"), false);
+
         List<AttendanceGetDto> attendanceGetDtoList = new ArrayList<>();
         getDto(all, attendanceGetDtoList);
-        return new ApiResponse("found", true, attendanceGetDtoList);
+
+        return new ApiResponse(messageService.getMessage("found"), true, attendanceGetDtoList);
     }
 }

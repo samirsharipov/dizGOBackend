@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import uz.pdp.springsecurity.entity.Customer;
 import uz.pdp.springsecurity.payload.CustomerGet;
+import uz.pdp.springsecurity.payload.CustomerGetInfoDto;
 import uz.pdp.springsecurity.payload.CustomerResponseDto;
 import uz.pdp.springsecurity.payload.projections.InActiveUserProjection;
 
@@ -122,4 +123,16 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
     );
 
     boolean existsByUsername(String number);
+
+
+    // 1️ **Mijozlarni branchSize bo‘yicha kamayish tartibida olish**
+    @Query("SELECT new uz.pdp.springsecurity.payload.CustomerGetInfoDto(c.id, c.name, c.phoneNumber, SIZE(c.branchIds)) " +
+            "FROM Customer c ORDER BY SIZE(c.branchIds) DESC")
+    Page<CustomerGetInfoDto> getCustomersSortedByBranchSize(Pageable pageable);
+
+
+    // 3️ **Telefon raqami bo‘yicha mijozni qidirish**
+    @Query("SELECT new uz.pdp.springsecurity.payload.CustomerGetInfoDto(c.id, c.name, c.phoneNumber, SIZE(c.branchIds)) " +
+            "FROM Customer c WHERE c.phoneNumber = :phoneNumber")
+    Page<CustomerGetInfoDto> findByPhoneNumber(@Param("phoneNumber") String phoneNumber, Pageable pageable);
 }

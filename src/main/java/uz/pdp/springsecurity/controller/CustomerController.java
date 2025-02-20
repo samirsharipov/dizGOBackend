@@ -239,8 +239,10 @@ public class CustomerController {
         return responseEntityHelper.buildResponse(customerService.getForTrade(query));
     }
 
-//    @GetMapping("/get-info-customers")
-//    public ResponseEntity<ApiResponse> customerInfo() {
-//        return responseEntityHelper.buildResponse(customerService.customerInfo());
-//    }
+    @GetMapping("/get-info-customers")
+    public ResponseEntity<ApiResponse> customerInfo(@RequestParam String phoneNumber,
+                                                    @RequestParam int page,
+                                                    @RequestParam int size) {
+        return responseEntityHelper.buildResponse(customerService.customerInfo(phoneNumber,page,size));
+    }
 }
