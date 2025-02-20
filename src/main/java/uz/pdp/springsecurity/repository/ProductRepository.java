@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 import uz.pdp.springsecurity.entity.Product;
 import uz.pdp.springsecurity.payload.ProductResponseDTO;
 import uz.pdp.springsecurity.payload.ProductShortDto;
@@ -17,10 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Repository
 public interface ProductRepository extends JpaRepository<Product, UUID> {
-
-    Optional<Product> findByIdAndBusinessId(UUID id, UUID businessId);
 
     boolean existsByBarcodeAndBusinessIdAndActiveTrue(String barcode, UUID businessId);
 
@@ -171,6 +167,3 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     Long countProductsByBusiness(
             @Param("businessId") UUID businessId);
 }
-
-
-

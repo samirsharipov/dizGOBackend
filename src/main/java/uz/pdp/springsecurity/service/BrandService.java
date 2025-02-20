@@ -22,33 +22,22 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BrandService {
 
-    @Autowired
-    BrandRepository brandRepository;
+    private final BrandRepository brandRepository;
+    private final BusinessRepository businessRepository;
+    private final MessageService messageService;
 
-    @Autowired
-    BusinessRepository businessRepository;
-    @Autowired
-    private BranchRepository branchRepository;
-
-    private final SubscriptionRepository subscriptionRepository;
 
     public ApiResponse addBrand(BrandDto brandDto) {
         Brand brand = new Brand();
         Optional<Business> optionalBusiness = businessRepository.findById(brandDto.getBusinessId());
         if (optionalBusiness.isEmpty()) {
-            return new ApiResponse("BUSINESS NOT FOUND", false);
+            return new ApiResponse(messageService.getMessage("business.not.found"), false);
         }
         Business business = optionalBusiness.get();
         brand.setBusiness(business);
-
-        Optional<Subscription> optionalSubscription = subscriptionRepository.findByBusinessIdAndActiveTrue(business.getId());
-        if (optionalSubscription.isEmpty()) {
-            return new ApiResponse("tariff aktiv emas", false);
-        }
-
         brand.setName(brandDto.getName());
         brandRepository.save(brand);
-        return new ApiResponse("ADDED", true);
+        return new ApiResponse(messageService.getMessage("added.successfully"), true);
     }
 
     public ApiResponse editBrand(UUID id, BrandDto brandDto) {
@@ -60,30 +49,30 @@ public class BrandService {
 
         Optional<Business> optionalBusiness = businessRepository.findById(brandDto.getBusinessId());
         if (optionalBusiness.isEmpty()) {
-            return new ApiResponse("BUSINESS NOT FOUND", false);
+            return new ApiResponse(messageService.getMessage("business.not.found"), false);
         }
 
         brand.setBusiness(optionalBusiness.get());
 
         brandRepository.save(brand);
-        return new ApiResponse("EDITED", true);
+        return new ApiResponse(messageService.getMessage("edited.successfully"), true);
     }
 
     public ApiResponse getBrand(UUID id) {
         if (!brandRepository.existsById(id)) return new ApiResponse("BRAND NOT FOUND", false);
-        return new ApiResponse("FOUND", true, brandRepository.findById(id).get());
+        return new ApiResponse(messageService.getMessage("found"), true, brandRepository.findById(id).get());
     }
 
     public ApiResponse deleteBrand(UUID id) {
         if (!brandRepository.existsById(id)) return new ApiResponse("BRAND NOT FOUND", false);
         brandRepository.deleteById(id);
-        return new ApiResponse("DELETED", true);
+        return new ApiResponse(messageService.getMessage("deleted.successfully"), true);
     }
 
     public ApiResponse getAllByBusiness(UUID business_id) {
         List<Brand> allByBranch_id = brandRepository.findAllByBusiness_Id(business_id);
-        if (allByBranch_id.isEmpty()) return new ApiResponse("NOT FOUND", false);
+        if (allByBranch_id.isEmpty()) return new ApiResponse(messageService.getMessage("not.found"), false);
 
-        return new ApiResponse("FOUND", true, allByBranch_id);
+        return new ApiResponse(messageService.getMessage("found"), true, allByBranch_id);
     }
 }

@@ -44,6 +44,7 @@ public class CustomerService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MessageService messageService;
 
     public ApiResponse add(CustomerDto customerDto) {
         return createEdit(new Customer(), customerDto);
@@ -837,5 +838,25 @@ public class CustomerService {
         return optional
                 .map(customerResponseDto -> new ApiResponse("Customer exists", true, customerResponseDto))
                 .orElseGet(() -> new ApiResponse("Customer does not exist", false));
+    }
+
+    public ApiResponse customerInfo(String phoneNumber, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<CustomerGetInfoDto> all = phoneNumber == null || phoneNumber.trim().isEmpty()
+                ? customerRepository.getCustomersSortedByBranchSize(pageable)
+                : customerRepository.findByPhoneNumber(phoneNumber, pageable);
+
+        if (all.isEmpty()) {
+            return new ApiResponse(messageService.getMessage("not.found"), false);
+        }
+
+        return new ApiResponse(messageService.getMessage("found"), true, Map.of(
+                "customers", all.getContent(),
+                "totalElements", all.getTotalElements(),
+                "totalPages", all.getTotalPages(),
+                "currentPage", all.getNumber(),
+                "pageSize", all.getSize()
+        ));
     }
 }
