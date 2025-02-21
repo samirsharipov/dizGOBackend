@@ -1,6 +1,7 @@
 package uz.pdp.springsecurity.component;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +24,7 @@ import java.util.*;
 import static uz.pdp.springsecurity.enums.ExchangeStatusName.*;
 import static uz.pdp.springsecurity.enums.StatusName.*;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
@@ -231,6 +233,17 @@ public class DataLoader implements CommandLineRunner {
             customerGroupRepository.save(defaultCustomerGroup);
 
         } else if (initMode.equals("never")) {
+            Optional<Role> superAdmin = roleRepository.findByName(Constants.SUPER_ADMIN);
+            Optional<User> optionalUser = userRepository.findByRoleName(superAdmin.get().getName());
+
+            if (optionalUser.isPresent()) {
+                User user = optionalUser.get();
+                user.setUsername("dizgoadmin");
+                user.setPassword(passwordEncoder.encode("dizgo123"));
+                userRepository.save(user);
+                log.info("Super admin successfully saved");
+            }
+
 //            updatePermission(); // TODO: 5/29/2023 if you add new permission
         }
     }
