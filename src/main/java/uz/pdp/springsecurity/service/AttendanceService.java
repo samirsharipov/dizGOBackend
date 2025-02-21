@@ -189,7 +189,7 @@ public class AttendanceService {
         // ID bo‘yicha yagona EmployeeWorkDurationDto yaratish (dublikatsiyani oldini olish)
         List<EmployeeWorkDurationDto> optimizedList = totalWorkDurationList.stream()
                 .collect(Collectors.toMap(
-                        EmployeeWorkDurationDto::getId,
+                        EmployeeWorkDurationDto::getEmployeeId,
                         dto -> dto,
                         (existing, newDto) -> {
                             existing.setTotalWorkDuration(
