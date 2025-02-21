@@ -12,7 +12,6 @@ import javax.validation.constraints.NotNull;
 public class LoginDto {
 
     private String username;
-    private String phoneNumber;
 
     @NotNull(message = "required line")
     private String password;

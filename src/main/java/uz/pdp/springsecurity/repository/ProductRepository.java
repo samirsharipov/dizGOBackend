@@ -135,7 +135,9 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             "WHERE p.business.id IN (SELECT b.business.id FROM branches b WHERE b.id = :branchId) " +
             "AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR p.business.id IN (SELECT b.business.id FROM branches b WHERE b.id = :branchId) AND p.barcode = :keyword)" +
-            "or p.business.id in (select b.business.id from branches b where b.id = :branchId) and pt.name = :keyword")
+            "or p.business.id in (select b.business.id from branches b where b.id = :branchId) " +
+            "AND (LOWER(pt.name) LIKE LOWER(CONCAT('%', :keyword, '%')))" +
+            "group by p.id")
     List<ProductResponseDTO> findProductsByBranchIdAndKeyword(
             @Param("branchId") UUID branchId,
             @Param("keyword") String keyword,
@@ -144,14 +146,14 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     // Business ID bo‘yicha mahsulot qidirish
     @Query("""
-            SELECT p FROM Product p LEFT JOIN ProductTranslate pt ON pt.product.id = p.id WHERE p.business.id = :businessId AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR  p.business.id = :businessId  and LOWER(pt.name) LIKE LOWER(CONCAT('%', :search, '%')) OR p.business.id = :businessId  and p.barcode = :search)""")
+            SELECT p FROM Product p LEFT JOIN ProductTranslate pt ON pt.product.id = p.id WHERE p.business.id = :businessId AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR  p.business.id = :businessId  and LOWER(pt.name) LIKE LOWER(CONCAT('%', :search, '%')) OR p.business.id = :businessId  and p.barcode = :search) group by p.id""")
     Page<Product> findByBusinessIdAndNameContainingIgnoreCase(@Param("businessId") UUID businessId,
                                                               @Param("search") String search,
                                                               Pageable pageable);
 
     // Branch ID bo‘yicha mahsulot qidirish (ManyToMany bo‘lgani uchun JOIN ishlatamiz)
     @Query("""
-            SELECT p FROM Product p JOIN p.branch b LEFT JOIN ProductTranslate pt ON pt.product.id = p.id WHERE b.id = :branchId AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR b.id = :branchId AND LOWER(pt.name) LIKE LOWER(CONCAT('%', :search, '%')) OR b.id = :branchId AND p.barcode = :search)""")
+            SELECT p FROM Product p JOIN p.branch b LEFT JOIN ProductTranslate pt ON pt.product.id = p.id WHERE b.id = :branchId AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR b.id = :branchId AND LOWER(pt.name) LIKE LOWER(CONCAT('%', :search, '%')) OR b.id = :branchId AND p.barcode = :search) group by p.id""")
     Page<Product> findByBranchIdAndNameContainingIgnoreCase(@Param("branchId") UUID branchId,
                                                             @Param("search") String search,
                                                             Pageable pageable);
