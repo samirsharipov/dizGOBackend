@@ -3,6 +3,7 @@ package uz.pdp.springsecurity.controller;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,7 +15,6 @@ import uz.pdp.springsecurity.entity.User;
 import uz.pdp.springsecurity.helpers.ResponseEntityHelper;
 import uz.pdp.springsecurity.payload.ApiResponse;
 import uz.pdp.springsecurity.payload.LoginDto;
-import uz.pdp.springsecurity.repository.UserRepository;
 import uz.pdp.springsecurity.security.JwtProvider;
 import uz.pdp.springsecurity.service.AuthService;
 import uz.pdp.springsecurity.service.SalaryCountService;
@@ -24,6 +24,7 @@ import uz.pdp.springsecurity.utils.Constants;
 import javax.validation.Valid;
 import java.util.Date;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @CrossOrigin(origins = "*")
@@ -53,17 +54,15 @@ public class AuthController {
         }
 
         try {
+
+            log.info("Login request: username={}", loginDto.getUsername());
+
             // Telefon raqami yoki username bilan login qilish
-            Authentication authenticate;
-            if (loginDto.getPhoneNumber() != null) {
-                authenticate = authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(loginDto.getPhoneNumber(), loginDto.getPassword()));
-            } else {
-                authenticate = authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
-            }
+            Authentication authenticate = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
 
             User principal = (User) authenticate.getPrincipal();
+            log.info("User authenticated successfully: {}", principal.getUsername());
 
             if (Constants.SUPER_ADMIN.equals(principal.getRole().getName())) {
                 verificationCodeService.sendVerificationCode("998977677793", false, true);
@@ -80,11 +79,16 @@ public class AuthController {
             }
 
             principal.getBranches().forEach(salaryCountService::addSalaryMonth);
+            log.info("Login successful, token generated for user: {}", principal.getUsername());
 
             return ResponseEntity.ok(new ApiResponse(token, true, principal));
         } catch (AuthenticationException e) {
+            log.warn("Authentication failed for username={}, phoneNumber={}. Reason: {}",
+                    loginDto.getUsername(), loginDto.getPhoneNumber(), e.getMessage());
             return ResponseEntity.status(401).body(new ApiResponse(messageUsernameOrPasswordInvalid, false));
         } catch (Exception e) {
+            log.error("Internal server error during login process for username={}, phoneNumber={}",
+                    loginDto.getUsername(), loginDto.getPhoneNumber(), e);
             return ResponseEntity.status(500).body(new ApiResponse("Internal server error", false));
         }
     }
