@@ -39,11 +39,18 @@ public class AuthController {
 
     @PostMapping("/login")
     public HttpEntity<?> loginUser(@Valid @RequestBody LoginDto loginDto, @RequestParam(defaultValue = "uz") String lang) {
-        String messageUsernameOrPasswordInvalid = switch (lang.toLowerCase()) {
-            case "en" -> "Username, phone number or password is incorrect";
-            case "ru" -> "Имя пользователя, номер телефона или пароль неверны";
-            default -> "Login, telefon raqami yoki parol xato!";
-        };
+        String messageUsernameOrPasswordInvalid;
+        switch (lang.toLowerCase()) {
+            case "en":
+                messageUsernameOrPasswordInvalid = "Username, phone number or password is incorrect";
+                break;
+            case "ru":
+                messageUsernameOrPasswordInvalid = "Имя пользователя, номер телефона или пароль неверны";
+                break;
+            default:
+                messageUsernameOrPasswordInvalid = "Login, telefon raqami yoki parol xato!";
+                break;
+        }
 
         try {
             // Telefon raqami yoki username bilan login qilish
