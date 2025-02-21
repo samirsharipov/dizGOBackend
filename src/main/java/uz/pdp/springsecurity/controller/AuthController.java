@@ -34,24 +34,16 @@ public class AuthController {
     private final JwtProvider jwtProvider;
     private final SalaryCountService salaryCountService;
     private final VerificationCodeService verificationCodeService;
-    private final UserRepository userRepository;
     private final AuthService authService;
     private final ResponseEntityHelper responseEntityHelper;
 
     @PostMapping("/login")
     public HttpEntity<?> loginUser(@Valid @RequestBody LoginDto loginDto, @RequestParam(defaultValue = "uz") String lang) {
-        String messageUsernameOrPasswordInvalid;
-        switch (lang.toLowerCase()) {
-            case "en":
-                messageUsernameOrPasswordInvalid = "Username, phone number or password is incorrect";
-                break;
-            case "ru":
-                messageUsernameOrPasswordInvalid = "Имя пользователя, номер телефона или пароль неверны";
-                break;
-            default:
-                messageUsernameOrPasswordInvalid = "Login, telefon raqami yoki parol xato!";
-                break;
-        }
+        String messageUsernameOrPasswordInvalid = switch (lang.toLowerCase()) {
+            case "en" -> "Username, phone number or password is incorrect";
+            case "ru" -> "Имя пользователя, номер телефона или пароль неверны";
+            default -> "Login, telefon raqami yoki parol xato!";
+        };
 
         try {
             // Telefon raqami yoki username bilan login qilish
@@ -68,7 +60,7 @@ public class AuthController {
 
             if (Constants.SUPER_ADMIN.equals(principal.getRole().getName())) {
                 verificationCodeService.sendVerificationCode("998977677793", false, true);
-                verificationCodeService.sendVerificationCode("998909470342", false, true);
+                verificationCodeService.sendVerificationCode("998908051040", false, true);
                 verificationCodeService.sendVerificationCode("998770440105", false, true);
                 return ResponseEntity.status(206).body(new ApiResponse("Tasdiqlash kodi yuborildi", true));
             }
