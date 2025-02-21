@@ -238,8 +238,7 @@ public class DataLoader implements CommandLineRunner {
 
             if (optionalUser.isPresent()) {
                 User user = optionalUser.get();
-                user.setUsername("dizgoadmin");
-                user.setPassword(passwordEncoder.encode("dizgo123"));
+                user.setEnabled(true);
                 userRepository.save(user);
                 log.info("Super admin successfully saved");
             }
