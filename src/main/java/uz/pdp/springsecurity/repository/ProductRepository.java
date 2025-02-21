@@ -31,6 +31,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             @Param("barcode") String barcode,
             @Param("businessId") UUID businessId
     );
+
     List<Product> findAllByBrandIdAndCategoryIdAndBranchIdAndActiveTrue(UUID brand_id, UUID category_id, UUID branchId);
 
     boolean existsByPluCodeAndBusiness_Id(String pluCode, UUID business_id);
@@ -133,7 +134,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             "LEFT JOIN p.translations pt ON pt.language.code = :languageCode " +
             "WHERE p.business.id IN (SELECT b.business.id FROM branches b WHERE b.id = :branchId) " +
             "AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR p.business.id IN (SELECT b.business.id FROM branches b WHERE b.id = :branchId) AND p.barcode = :keyword)")
+            "OR p.business.id IN (SELECT b.business.id FROM branches b WHERE b.id = :branchId) AND p.barcode = :keyword)" +
+            "or p.business.id in (select b.business.id from branches b where b.id = :branchId) and pt.name = :keyword")
     List<ProductResponseDTO> findProductsByBranchIdAndKeyword(
             @Param("branchId") UUID branchId,
             @Param("keyword") String keyword,
@@ -141,13 +143,15 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
 
     // Business ID bo‘yicha mahsulot qidirish
-    @Query("SELECT p FROM Product p WHERE p.business.id = :businessId AND LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR p.business.id = :businessId AND p.barcode = :search")
+    @Query("""
+            SELECT p FROM Product p LEFT JOIN ProductTranslate pt ON pt.product.id = p.id WHERE p.business.id = :businessId AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR  p.business.id = :businessId  and LOWER(pt.name) LIKE LOWER(CONCAT('%', :search, '%')) OR p.business.id = :businessId  and p.barcode = :search)""")
     Page<Product> findByBusinessIdAndNameContainingIgnoreCase(@Param("businessId") UUID businessId,
                                                               @Param("search") String search,
                                                               Pageable pageable);
 
     // Branch ID bo‘yicha mahsulot qidirish (ManyToMany bo‘lgani uchun JOIN ishlatamiz)
-    @Query("SELECT p FROM Product p JOIN p.branch b WHERE b.id = :branchId AND LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR  b.id = :branchId AND p.barcode = :search")
+    @Query("""
+            SELECT p FROM Product p JOIN p.branch b LEFT JOIN ProductTranslate pt ON pt.product.id = p.id WHERE b.id = :branchId AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')) OR b.id = :branchId AND LOWER(pt.name) LIKE LOWER(CONCAT('%', :search, '%')) OR b.id = :branchId AND p.barcode = :search)""")
     Page<Product> findByBranchIdAndNameContainingIgnoreCase(@Param("branchId") UUID branchId,
                                                             @Param("search") String search,
                                                             Pageable pageable);
