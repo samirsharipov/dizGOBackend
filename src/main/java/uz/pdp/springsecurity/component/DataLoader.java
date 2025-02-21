@@ -233,16 +233,6 @@ public class DataLoader implements CommandLineRunner {
             customerGroupRepository.save(defaultCustomerGroup);
 
         } else if (initMode.equals("never")) {
-            Optional<Role> superAdmin = roleRepository.findByName(Constants.SUPER_ADMIN);
-            Optional<User> optionalUser = userRepository.findByRoleName(superAdmin.get().getName());
-
-            if (optionalUser.isPresent()) {
-                User user = optionalUser.get();
-                user.setEnabled(true);
-                userRepository.save(user);
-                log.info("Super admin successfully saved");
-            }
-
 //            updatePermission(); // TODO: 5/29/2023 if you add new permission
         }
     }
