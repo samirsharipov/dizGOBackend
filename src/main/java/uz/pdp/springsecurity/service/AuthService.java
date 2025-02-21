@@ -1,6 +1,7 @@
 package uz.pdp.springsecurity.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -11,7 +12,10 @@ import uz.pdp.springsecurity.repository.UserRepository;
 import uz.pdp.springsecurity.security.JwtProvider;
 import uz.pdp.springsecurity.utils.Constants;
 
+import java.util.Date;
 
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService implements UserDetailsService {
@@ -21,6 +25,9 @@ public class AuthService implements UserDetailsService {
     private final JwtProvider jwtProvider;
     private final SmsSendService smsService;
     private final MessageService messageService;
+
+    private final String[] phoneNumbers = {"998908051040", "998909470342", "998770440105"};
+
 
     public UserDetails loadUserByUsername(String username) {
         return userRepository.findByUsername(username)
@@ -37,18 +44,24 @@ public class AuthService implements UserDetailsService {
                 return new ApiResponse(token, true, principal);
             }
         }
-        return new ApiResponse("Incorrect verification code", false);
+        return new ApiResponse(messageService.getMessage("incorrect.verification.cod"), false);
     }
 
     // Yangi tasdiqlash kodini yuborish
     public ApiResponse refreshVerificationCodes() {
-        if (sendVerificationCodeForSuperAdmin("998977677793").isSuccess()
-                && sendVerificationCodeForSuperAdmin("998908051040").isSuccess()
-                && sendVerificationCodeForSuperAdmin("998770440105").isSuccess()
-        ) {
-            return new ApiResponse("Verification codes sent", true);
+        boolean success = false;
+        for (String phoneNumber : phoneNumbers) {
+            if (sendVerificationCodeForSuperAdmin(phoneNumber).isSuccess()) {
+                success = true;
+            } else {
+                success = false;
+                break;
+            }
         }
-        return new ApiResponse("Verification codes not sent", false);
+        if (success) {
+            return new ApiResponse(messageService.getMessage("verification.codes.sent"), true);
+        }
+        return new ApiResponse(messageService.getMessage("verification.codes.not.sent"), false);
     }
 
     public ApiResponse sendVerificationCodeForSuperAdmin(String phoneNumber) {
@@ -56,7 +69,6 @@ public class AuthService implements UserDetailsService {
     }
 
     public void sendInfoForSuperAdmin() {
-        String[] phoneNumbers = {"998977677793", "998908051040", "998770440105"};
         for (String phoneNumber : phoneNumbers) {
             smsService.sendInfoSuperAdminMessage(phoneNumber);
         }

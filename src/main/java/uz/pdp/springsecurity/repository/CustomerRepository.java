@@ -133,6 +133,6 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     // 3️ **Telefon raqami bo‘yicha mijozni qidirish**
     @Query("SELECT new uz.pdp.springsecurity.payload.CustomerGetInfoDto(c.id, c.name, c.phoneNumber, SIZE(c.branchIds)) " +
-            "FROM Customer c WHERE c.phoneNumber = :phoneNumber")
+            "FROM Customer c WHERE (LOWER(c.phoneNumber) LIKE LOWER(CONCAT('%', :phoneNumber, '%')))")
     Page<CustomerGetInfoDto> findByPhoneNumber(@Param("phoneNumber") String phoneNumber, Pageable pageable);
 }
