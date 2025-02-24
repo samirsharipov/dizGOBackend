@@ -53,6 +53,7 @@ public class DataLoader implements CommandLineRunner {
     private final BusinessHelper businessHelper;
     private final BranchCategoryRepository branchCategoryRepository;
     private final CustomerGroupRepository customerGroupRepository;
+    private final QRDataRepository qrDataRepository;
 
     @Value("${spring.sql.init.mode}")
     private String initMode;
@@ -234,6 +235,30 @@ public class DataLoader implements CommandLineRunner {
 
         } else if (initMode.equals("never")) {
 //            updatePermission(); // TODO: 5/29/2023 if you add new permission
+            Optional<Role> superAdmin = roleRepository.findByName(Constants.SUPER_ADMIN);
+            if (superAdmin.isPresent()) {
+                Optional<User> optionalUser = userRepository.findByRoleName(superAdmin.get().getName());
+                if (optionalUser.isPresent()) {
+                    QRData qrData = new QRData();
+                    User user = optionalUser.get();
+                    Set<Branch> branches = user.getBranches();
+                    for (Branch branch : branches) {
+                        if (branch.getBranchCategory() != null) {
+                            qrData.setBranchId(branch.getId());
+                            qrData.setBranchName(branch.getName());
+                            qrData.setUserId(user.getId());
+                            qrData.setUserName(user.getFirstName() + " " + user.getLastName());
+                            qrDataRepository.save(qrData);
+                            break;
+                        }
+                    }
+                }
+            }
+            for (int i = 1; i <= 100; i++) {
+                qrDataRepository.save(new QRData());
+            }
+
+
         }
     }
 

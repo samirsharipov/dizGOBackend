@@ -44,7 +44,6 @@ public class ProductService {
     private final ProductConvert productConvert;
     private final DiscountRepository discountRepository;
     private final MessageService messageService;
-    private final HttpServletRequest request;
 
     @Transactional
     public ApiResponse editProduct(UUID productId, ProductEditDto productEditDto) {
@@ -952,22 +951,11 @@ public class ProductService {
     }
 
     public ApiResponse searchTrade(UUID branchId, String name, String language) {
-        // 1️⃣ Xabarlar uchun map
-        Map<String, String> messages = Map.of(
-                "uz_found", "Mahsulot topildi !",
-                "uz_not_found", "Mahsulot topilmadi !",
-                "en_found", "Product found !",
-                "en_not_found", "Product not found !",
-                "ru_found", "Товар найден",
-                "ru_not_found", "Продукт не найден !"
-        );
 
-        // 2️⃣ Parametrlarni tekshirish
         if (name == null || name.isBlank()) {
-            return new ApiResponse(messages.get(language + "_not_found"), false);
+            return new ApiResponse(messageService.getMessage("product.not.found"), false);
         }
 
-        // 3️⃣ Mahsulotni qidirish (nomi yoki barcode bo'yicha)
         List<ProductResponseDTO> all = findProductByKeyword(branchId, name, language);
 
         // 4️⃣ Mahsulot topilmasa, barcode'dan keyin 'totalKg'ni aniqlashga harakat qilamiz
@@ -980,24 +968,21 @@ public class ProductService {
                     product.setAmount(totalKg);
                 }
             } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
-                return new ApiResponse(messages.get(language + "_not_found"), false);
+                return new ApiResponse(messageService.getMessage("error.message"), false);
             }
         }
 
-        // 5️⃣ Mahsulot topilmasa, xabarni qaytarish
         if (all.isEmpty()) {
-            String notFoundMessage = messages.getOrDefault(language + "_not_found", messages.get("uz_not_found"));
-            return new ApiResponse(notFoundMessage, false);
+            return new ApiResponse(messageService.getMessage("product.not.found"), false);
         }
 
         all.stream()
                 .filter(productResponseDTO -> Boolean.TRUE.equals(productResponseDTO.getDiscount()))
                 .forEach(productResponseDTO -> updateDiscount(productResponseDTO, branchId));
 
-        // 6️⃣ Mahsulot topilsa, xabarni qaytarish
-        String foundMessage = messages.getOrDefault(language + "_found", messages.get("uz_found"));
-        return new ApiResponse(foundMessage, true, all);
+        return new ApiResponse(messageService.getMessage("product.found"), true, all);
     }
+
 
     private List<ProductResponseDTO> findProductByKeyword(UUID branchId, String keyword, String language) {
         if (keyword == null || keyword.isBlank()) return new ArrayList<>();
