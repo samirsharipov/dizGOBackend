@@ -27,9 +27,9 @@ public class PlumController {
     }
 
     // ✅ 3. Kartani o‘chirish
-    @PostMapping("/delete-card")
-    public ResponseEntity<?> deleteUserCard(@RequestParam Long cardId) {
-        return plumPaymentService.deleteUserCard(cardId);
+    @DeleteMapping("/delete-card")
+    public ResponseEntity<?> deleteUserCard(@RequestParam Long userCardId) {
+        return plumPaymentService.deleteUserCard(userCardId);
     }
 
     // ✅ 4. Kartani yaratish (OTP yuboriladi)
@@ -46,8 +46,8 @@ public class PlumController {
     @PostMapping("/confirm-card")
     public ResponseEntity<?> confirmUserCard(@RequestParam Long session,
                                              @RequestParam String otp,
-                                             @RequestParam boolean isTrusted,
-                                             @RequestParam String cardName) {
+                                             @RequestParam(required = false) Boolean isTrusted,
+                                             @RequestParam(required = false) String cardName) {
         return plumPaymentService.confirmUserCardCreate(session, otp, isTrusted, cardName);
     }
 
