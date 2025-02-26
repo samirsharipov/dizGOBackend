@@ -11,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 import uz.pdp.springsecurity.entity.UserCard;
 import uz.pdp.springsecurity.repository.UserCardRepository;
 import uz.pdp.springsecurity.service.MessageService;
+
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -37,7 +38,7 @@ public class PlumPaymentService {
         this.userCardRepository = userCardRepository;
     }
 
-    private ResponseEntity<?> handleRequestWithHeaders(String url, HttpMethod method, Map<String, Object> request) {
+    private ResponseEntity<?> handleRequestWithHeaders(String url, HttpMethod method, Map<String, Object> request, boolean isSaveCard) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -45,6 +46,13 @@ public class PlumPaymentService {
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
             ResponseEntity<Map> response = restTemplate.exchange(url, method, entity, Map.class);
+
+            if (isSaveCard) {
+                if (response.getStatusCode().equals(HttpStatus.OK) && response.getBody() != null) {
+                    Object userId = response.getBody().get("userId");
+                    saveUserCard(userId.toString(), response.getBody());
+                }
+            }
 
             return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
         } catch (HttpClientErrorException | HttpServerErrorException e) {
@@ -70,26 +78,19 @@ public class PlumPaymentService {
         }
     }
 
-    private HttpHeaders createHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set(HttpHeaders.ACCEPT_LANGUAGE, LocaleContextHolder.getLocale().toLanguageTag());
-        return headers;
-    }
-
     // ✅ 1. Kartaga tegishli egani haqida ma'lumot olish
     public ResponseEntity<?> getCardOwnerInfoByPan(String cardNumber) {
-        return handleRequestWithHeaders(baseUrl + "/UserCard/getCardOwnerInfoByPan", HttpMethod.POST, Map.of("cardNumber", cardNumber));
+        return handleRequestWithHeaders(baseUrl + "/UserCard/getCardOwnerInfoByPan", HttpMethod.POST, Map.of("cardNumber", cardNumber), false);
     }
 
     // ✅ 2. Foydalanuvchiga tegishli barcha kartalarni olish
     public ResponseEntity<?> getAllUserCards(String userId) {
-        return handleRequestWithHeaders(baseUrl + "/UserCard/getAllUserCards?userId=" + userId, HttpMethod.GET, null);
+        return handleRequestWithHeaders(baseUrl + "/UserCard/getAllUserCards?userId=" + userId, HttpMethod.GET, null, false);
     }
 
     // ✅ 3. Kartani o‘chirish
-    public ResponseEntity<?> deleteUserCard(Long cardId) {
-        return handleRequestWithHeaders(baseUrl + "/UserCard/deleteUserCard", HttpMethod.POST, Map.of("cardId", cardId));
+    public ResponseEntity<?> deleteUserCard(Long userCardId) {
+        return handleRequestWithHeaders(baseUrl + "/UserCard/deleteUserCard?userCardId=" + userCardId, HttpMethod.DELETE, null, false);
     }
 
     // ✅ 4. Kartani yaratish va bazaga saqlash
@@ -104,27 +105,22 @@ public class PlumPaymentService {
         if (pinfl != null && !pinfl.isEmpty()) {
             request.put("pinfl", pinfl);
         }
-
-        ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<>(request, createHeaders()), Map.class);
-        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-            saveUserCard(userId, response.getBody());
-        }
-        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        return handleRequestWithHeaders(url, HttpMethod.POST, request, true);
     }
 
     // ✅ 5. Kartani tasdiqlash (OTP orqali)
-    public ResponseEntity<?> confirmUserCardCreate(Long session, String otp, boolean isTrusted, String cardName) {
+    public ResponseEntity<?> confirmUserCardCreate(Long session, String otp, Boolean isTrusted, String cardName) {
         return handleRequestWithHeaders(baseUrl + "/UserCard/confirmUserCardCreate", HttpMethod.POST, Map.of(
                 "session", session,
                 "otp", otp,
-                "isTrusted", isTrusted ? 1 : 0,
-                "cardName", cardName
-        ));
+                "isTrusted", isTrusted != null ? isTrusted ? 1 : 0 : 0,
+                "cardName", cardName != null ? cardName : ""
+        ), true);
     }
 
     // ✅ 6. OTP qayta yuborish
     public ResponseEntity<?> resendOtp(Long session) {
-        return handleRequestWithHeaders(baseUrl + "/UserCard/resendOtp?session=" + session, HttpMethod.GET, null);
+        return handleRequestWithHeaders(baseUrl + "/UserCard/resendOtp?session=" + session, HttpMethod.GET, null, false);
     }
 
     // ✅ 7. Oddiy to‘lov qilish
@@ -134,7 +130,7 @@ public class PlumPaymentService {
                 "cardId", cardId,
                 "amount", amount,
                 "extraId", extraId
-        ));
+        ), false);
     }
 
     // ✅ 8. Ro‘yxatdan o‘tmagan foydalanuvchi uchun to‘lov
@@ -143,7 +139,7 @@ public class PlumPaymentService {
                 "cardNumber", cardNumber,
                 "expireDate", expireDate,
                 "amount", amount
-        ));
+        ), false);
     }
 
     // ✅ 9. To‘lovni tasdiqlash (OTP orqali)
@@ -151,16 +147,16 @@ public class PlumPaymentService {
         return handleRequestWithHeaders(baseUrl + "/Payment/confirmPayment", HttpMethod.POST, Map.of(
                 "session", session,
                 "otp", otp
-        ));
+        ), false);
     }
 
     // ✅ 10. To‘lov tranzaktsiyalarini olish
     public ResponseEntity<?> getTransactions(String userId) {
-        return handleRequestWithHeaders(baseUrl + "/Payment/getTransactions?userId=" + userId, HttpMethod.GET, null);
+        return handleRequestWithHeaders(baseUrl + "/Payment/getTransactions?userId=" + userId, HttpMethod.GET, null, false);
     }
 
     // ✅ 11. To‘lovni qaytarish
     public ResponseEntity<?> paymentReverse(Long transactionId) {
-        return handleRequestWithHeaders(baseUrl + "/Payment/paymentReverse", HttpMethod.POST, Map.of("transactionId", transactionId));
+        return handleRequestWithHeaders(baseUrl + "/Payment/paymentReverse", HttpMethod.POST, Map.of("transactionId", transactionId), false);
     }
 }
