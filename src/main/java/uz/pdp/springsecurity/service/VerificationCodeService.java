@@ -43,6 +43,7 @@ public class VerificationCodeService {
             // Agar telefon raqami mavjud bo'lmasa, yangi yozuv qo'shish
             existingCode = new VerificationCode(phoneNumber, code, LocalDateTime.now().plusMinutes(3), isSuperAdmin);
         }
+        existingCode.setVerified(false);
         verificationCodeRepository.save(existingCode);
 
         // SMS xizmatidan kodni yuborish (asinxron)
