@@ -49,11 +49,9 @@ public class PlumPaymentService {
 
             if (isSaveCard) {
                 if (response.getStatusCode().equals(HttpStatus.OK) && response.getBody() != null) {
-                    Object userId = response.getBody().get("userId");
-                    saveUserCard(userId.toString(), response.getBody());
+                    saveUserCard(response.getBody());
                 }
             }
-
             return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
@@ -62,19 +60,35 @@ public class PlumPaymentService {
         }
     }
 
-    private void saveUserCard(String userId, Map<String, Object> responseBody) {
+    private void saveUserCard(Map<String, Object> responseBody) {
         Map<String, Object> cardData = (Map<String, Object>) responseBody.get("result");
         if (cardData != null) {
-            UserCard userCard = new UserCard();
-            userCard.setUserId(UUID.fromString(userId));
-            userCard.setCardId(Long.parseLong(cardData.get("cardId").toString()));
-            userCard.setCardNumber(cardData.get("number").toString());
-            userCard.setExpireDate(cardData.get("expireDate").toString());
-            userCard.setOwnerName(cardData.get("owner").toString());
-            userCard.setBalance(new BigDecimal(cardData.get("balance").toString()));
-            userCard.setStatus(cardData.get("status").toString());
+            Map<String, Object> resultMap = (Map<String, Object>) cardData;
+            Object cardObj = resultMap.get("card");
+            if (cardObj instanceof Map) {
+                Map<String, Object> cardMap = (Map<String, Object>) cardObj;
+                Object userId = cardMap.get("userId");
+                UUID uuid = UUID.fromString(userId.toString());
+                String cardNumber = cardMap.get("number").toString();
 
-            userCardRepository.save(userCard);
+
+                UserCard userCard = new UserCard();
+                Optional<UserCard> optionalUserCard = userCardRepository.findByUserIdAndCardNumber(uuid, cardNumber);
+                if (optionalUserCard.isPresent()) {
+                    userCard = optionalUserCard.get();
+                } else {
+                    userCard.setUserId(uuid);
+                    userCard.setCardNumber(cardNumber);
+                }
+
+                userCard.setCardId(Long.parseLong(cardMap.get("cardId").toString()));
+                userCard.setExpireDate(cardMap.get("expireDate").toString());
+                userCard.setOwnerName(cardMap.get("owner").toString());
+                userCard.setBalance(new BigDecimal(cardMap.get("balance").toString()));
+                userCard.setStatus(cardMap.get("status").toString());
+
+                userCardRepository.save(userCard);
+            }
         }
     }
 
@@ -105,7 +119,7 @@ public class PlumPaymentService {
         if (pinfl != null && !pinfl.isEmpty()) {
             request.put("pinfl", pinfl);
         }
-        return handleRequestWithHeaders(url, HttpMethod.POST, request, true);
+        return handleRequestWithHeaders(url, HttpMethod.POST, request, false);
     }
 
     // ✅ 5. Kartani tasdiqlash (OTP orqali)
