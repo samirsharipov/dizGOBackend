@@ -3,6 +3,7 @@ package uz.pdp.springsecurity.controller.integration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import uz.pdp.springsecurity.payload.TransactionalDto;
 import uz.pdp.springsecurity.service.integration.PlumPaymentService;
 
 import java.math.BigDecimal;
@@ -62,8 +63,9 @@ public class PlumController {
     public ResponseEntity<?> createPayment(@RequestParam String userId,
                                            @RequestParam Long cardId,
                                            @RequestParam BigDecimal amount,
-                                           @RequestParam String extraId) {
-        return plumPaymentService.createPayment(userId, cardId, amount, extraId);
+                                           @RequestParam String extraId,
+                                           @RequestParam(required = false) TransactionalDto transactionalDto) {
+        return plumPaymentService.createPayment(userId, cardId, amount, extraId, transactionalDto);
     }
 
     // ✅ 8. Ro‘yxatdan o‘tmagan foydalanuvchi uchun to‘lov
