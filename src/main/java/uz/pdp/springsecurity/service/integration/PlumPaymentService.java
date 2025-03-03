@@ -1,5 +1,7 @@
 package uz.pdp.springsecurity.service.integration;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -8,7 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import uz.pdp.springsecurity.entity.PaymentTransaction;
 import uz.pdp.springsecurity.entity.UserCard;
+import uz.pdp.springsecurity.payload.TransactionalDto;
+import uz.pdp.springsecurity.repository.PaymentTransactionRepository;
 import uz.pdp.springsecurity.repository.UserCardRepository;
 import uz.pdp.springsecurity.service.MessageService;
 
@@ -21,13 +26,14 @@ public class PlumPaymentService {
     private final String baseUrl;
     private final MessageService messageService;
     private final UserCardRepository userCardRepository;
+    private final PaymentTransactionRepository paymentTransactionRepository;
 
     public PlumPaymentService(@Value("${plum.api.base-url}") String baseUrl,
                               @Value("${plum.api.username}") String username,
                               @Value("${plum.api.password}") String password,
                               RestTemplateBuilder restTemplateBuilder,
                               MessageService messageService,
-                              UserCardRepository userCardRepository) {
+                              UserCardRepository userCardRepository, PaymentTransactionRepository paymentTransactionRepository) {
         this.baseUrl = baseUrl;
         String authHeader = "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
 
@@ -36,6 +42,7 @@ public class PlumPaymentService {
                 .build();
         this.messageService = messageService;
         this.userCardRepository = userCardRepository;
+        this.paymentTransactionRepository = paymentTransactionRepository;
     }
 
     private ResponseEntity<?> handleRequestWithHeaders(String url, HttpMethod method, Map<String, Object> request, boolean isSaveCard) {
@@ -138,13 +145,39 @@ public class PlumPaymentService {
     }
 
     // ✅ 7. Oddiy to‘lov qilish
-    public ResponseEntity<?> createPayment(String userId, Long cardId, BigDecimal amount, String extraId) {
-        return handleRequestWithHeaders(baseUrl + "/Payment/payment", HttpMethod.POST, Map.of(
+    public ResponseEntity<?> createPayment(String userId, Long cardId, BigDecimal amount, String extraId, TransactionalDto transactionalDto) {
+
+        ResponseEntity<?> responseEntity = handleRequestWithHeaders(baseUrl + "/Payment/payment", HttpMethod.POST, Map.of(
                 "userId", userId,
                 "cardId", cardId,
                 "amount", amount,
                 "extraId", extraId
         ), false);
+
+        if (responseEntity.getStatusCode().equals(HttpStatus.OK) && responseEntity.getBody() != null && transactionalDto != null) {
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            // JSON ni Map ga o‘girish
+            Map<String, Object> responseMap = objectMapper.convertValue(responseEntity.getBody(), new TypeReference<Map<String, Object>>() {
+            });
+
+            // "result" obyektini olish
+            Map<String, Object> resultMap = (Map<String, Object>) responseMap.get("result");
+
+            // transactionId ni olish
+            long transactionId = ((Number) resultMap.get("transactionId")).longValue();
+
+            PaymentTransaction paymentTransaction = new PaymentTransaction(transactionalDto.getCustomerId(),
+                    transactionalDto.getBranchId(),
+                    transactionalDto.getTotalAmount(),
+                    transactionalDto.getPaidAmount(),
+                    transactionalDto.getDiscountAmount(),
+                    transactionId);
+            paymentTransaction.setActive(false);
+            paymentTransactionRepository.save(paymentTransaction);
+        }
+
+        return responseEntity;
     }
 
     // ✅ 8. Ro‘yxatdan o‘tmagan foydalanuvchi uchun to‘lov
@@ -158,10 +191,33 @@ public class PlumPaymentService {
 
     // ✅ 9. To‘lovni tasdiqlash (OTP orqali)
     public ResponseEntity<?> confirmPayment(Long session, String otp) {
-        return handleRequestWithHeaders(baseUrl + "/Payment/confirmPayment", HttpMethod.POST, Map.of(
+        ResponseEntity<?> responseEntity = handleRequestWithHeaders(baseUrl + "/Payment/confirmPayment", HttpMethod.POST, Map.of(
                 "session", session,
                 "otp", otp
         ), false);
+        if (responseEntity.getStatusCode().equals(HttpStatus.OK)) {
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            // JSON ni Map ga o‘girish
+            Map<String, Object> responseMap = objectMapper.convertValue(responseEntity.getBody(), new TypeReference<Map<String, Object>>() {
+            });
+
+            // "result" obyektini olish
+            Map<String, Object> resultMap = (Map<String, Object>) responseMap.get("result");
+
+            // transactionId ni olish
+            long transactionId = ((Number) resultMap.get("transactionId")).longValue();
+
+            Optional<PaymentTransaction> optional =
+                    paymentTransactionRepository.findByTransactionIdAndActiveFalse(transactionId);
+            if (optional.isPresent()) {
+                PaymentTransaction paymentTransaction = optional.get();
+                paymentTransaction.setActive(true);
+                paymentTransactionRepository.save(paymentTransaction);
+            }
+
+        }
+        return responseEntity;
     }
 
     // ✅ 10. To‘lov tranzaktsiyalarini olish
