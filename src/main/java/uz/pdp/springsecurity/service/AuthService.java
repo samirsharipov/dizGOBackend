@@ -12,8 +12,6 @@ import uz.pdp.springsecurity.repository.UserRepository;
 import uz.pdp.springsecurity.security.JwtProvider;
 import uz.pdp.springsecurity.utils.Constants;
 
-import java.util.Date;
-
 
 @Slf4j
 @Service

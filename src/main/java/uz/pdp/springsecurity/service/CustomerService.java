@@ -98,6 +98,13 @@ public class CustomerService {
 
             User user = new User();
 
+            if (customerDto.getUserId() == null) {
+                Optional<User> optionalUser = userRepository.findByPhoneNumber(customerDto.getPhoneNumber());
+                if (optionalUser.isPresent()) {
+                    user = optionalUser.get();
+                }
+            }
+
             if (customerDto.getUserId() != null) {
                 Optional<User> optionalUser = userRepository.findById(customerDto.getUserId());
                 if (optionalUser.isEmpty()) {
@@ -117,13 +124,6 @@ public class CustomerService {
                 user.setEnabled(true); // Akkaunt aktiv
                 user.setActive(true); // Akkaunt faol
                 userRepository.save(user);
-            }
-
-            if (customerDto.getUserId() == null) {
-                Optional<User> optionalUser = userRepository.findByPhoneNumber(customerDto.getPhoneNumber());
-                if (optionalUser.isPresent()) {
-                    user = optionalUser.get();
-                }
             }
 
             // 4. Customer yaratish va User bilan bog'lash

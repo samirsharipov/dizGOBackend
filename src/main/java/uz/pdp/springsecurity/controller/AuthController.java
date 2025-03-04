@@ -37,11 +37,10 @@ public class AuthController {
     private final SalaryCountService salaryCountService;
     private final AuthService authService;
     private final ResponseEntityHelper responseEntityHelper;
+    private final MessageService messageService;
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@Valid @RequestBody LoginDto loginDto) {
-        String messageUsernameOrPasswordInvalid = ("username.password.incorrect");
-
         try {
             log.info("Login request: username={}", loginDto.getUsername());
 
@@ -54,13 +53,13 @@ public class AuthController {
             if (Constants.SUPER_ADMIN.equals(principal.getRole().getName())) {
                 authService.refreshVerificationCodes();
                 return ResponseEntity.status(206)
-                        .body(new ApiResponse("verification.codes.sent", true));
+                        .body(new ApiResponse(messageService.getMessage("verification.codes.sent"), true));
             }
 
             String token = jwtProvider.generateToken(principal.getUsername(), principal.getRole());
             DecodedJWT jwt = JWT.decode(token);
             if (jwt.getExpiresAt().before(new Date())) {
-                return ResponseEntity.status(401).body(new ApiResponse("Token is expired", false));
+                return ResponseEntity.status(401).body(new ApiResponse(messageService.getMessage("token.is.expired"), false));
             }
 
             principal.getBranches().forEach(salaryCountService::addSalaryMonth);
@@ -69,10 +68,10 @@ public class AuthController {
             return ResponseEntity.ok(new ApiResponse(token, true, principal));
         } catch (AuthenticationException e) {
             log.warn("Authentication failed for username={} Reason: {}", loginDto.getUsername(), e.getMessage());
-            return ResponseEntity.status(401).body(new ApiResponse(messageUsernameOrPasswordInvalid, false));
+            return ResponseEntity.status(401).body(new ApiResponse(messageService.getMessage("username.password.incorrect"), false));
         } catch (Exception e) {
             log.error("Internal server error during login process for username={}", loginDto.getUsername(), e);
-            return ResponseEntity.status(500).body(new ApiResponse("Internal server error", false));
+            return ResponseEntity.status(500).body(new ApiResponse(messageService.getMessage("error.message"), false));
         }
     }
 

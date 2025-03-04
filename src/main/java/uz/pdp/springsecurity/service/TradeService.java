@@ -50,13 +50,11 @@ public class TradeService {
     private final FifoCalculationService fifoCalculationService;
     private final WarehouseRepository warehouseRepository;
     private final PaymentMapper paymentMapper;
-    private final SubscriptionRepository subscriptionRepository;
     private final PaymentRepository paymentRepository;
     private final SalaryCountService salaryCountService;
     private final AgreementRepository agreementRepository;
     private final BalanceService balanceService;
     private final BusinessRepository businessRepository;
-    private final ProductRepository productRepository;
     private final HistoryRepository historyRepository;
     private final BusinessService businessService;
     private final CustomerSupplierRepository customerSupplierRepository;
@@ -78,11 +76,12 @@ public class TradeService {
             String invoiceStr = optionalTrade.get().getInvoice();
             invoice = invoiceStr != null ? Integer.parseInt(invoiceStr) : 0;
         }
+        int inc = invoice++;
 
         Trade trade = new Trade();
         trade.setBranch(optionalBranch.get());
         trade.setLid(tradeDTO.isLid());
-        trade.setInvoice(String.valueOf(++invoice));
+        trade.setInvoice(String.valueOf(inc));
         return createOrEditTrade(trade, tradeDTO, false);
     }
 
@@ -201,10 +200,14 @@ public class TradeService {
                 }
 
             } else if (tradeDTO.getCustomerId() != null) {
+
                 Optional<Customer> optionalCustomer = customerRepository.findById(tradeDTO.getCustomerId());
                 if (optionalCustomer.isEmpty()) return new ApiResponse("CUSTOMER NOT FOUND", false);
                 Customer customer = optionalCustomer.get();
                 trade.setCustomer(customer);
+                //customerga savdo qilgan dukonini idsini biriktirish
+                customer.addBranchId(branch.getId());
+                customerRepository.save(customer);
             }
         } catch (Exception e) {
             return new ApiResponse("CUSTOMER ERROR", false);
