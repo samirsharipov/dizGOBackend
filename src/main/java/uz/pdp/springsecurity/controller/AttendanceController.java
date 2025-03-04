@@ -22,10 +22,12 @@ public class AttendanceController {
 
     // QR kod orqali keldi-ketdi tasdiqlash
     @PostMapping("/check-in")
-    public ResponseEntity<ApiResponse> checkInWithQRCode(@RequestParam UUID employeeId, @RequestParam UUID branchId, @RequestParam String qrCodeData,boolean input) {
+    public ResponseEntity<ApiResponse> checkInWithQRCode(@RequestParam UUID employeeId,
+                                                         @RequestParam UUID branchId,
+                                                         @RequestParam String qrCodeData,
+                                                         boolean input) {
         return responseEntityHelper.buildResponse(attendanceService.checkInWithQRCode(branchId, employeeId, qrCodeData,input));
     }
-
 
     @GetMapping("/get-userId/{userId}")
     public ResponseEntity<ApiResponse> getUserId(@PathVariable UUID userId,
@@ -48,5 +50,4 @@ public class AttendanceController {
                                                         @RequestParam(required = false) Timestamp endDate) {
         return responseEntityHelper.buildResponse(attendanceService.getByBusinessId(businessId,branchId,startDate,endDate));
     }
-
 }

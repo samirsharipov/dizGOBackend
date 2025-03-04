@@ -20,6 +20,7 @@ import uz.pdp.springsecurity.repository.UserRepository;
 import uz.pdp.springsecurity.service.functions.GeoCheck;
 
 import java.sql.Timestamp;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -33,6 +34,7 @@ public class AttendanceService {
     private final GeoCheck geoCheck;
     private final BranchRepository branchRepository;
     private final MessageService messageService;
+    private final UserRepository userRepository;
 
     // QR kod orqali keldi-ketdi tasdiqlash
     public ApiResponse checkInWithQRCode(UUID branchId, UUID employeeId, String qrCodeData, boolean input) {
@@ -46,7 +48,6 @@ public class AttendanceService {
         if (optionalBranch.isEmpty()) {
             return new ApiResponse("Branch topilmadi", false);
         }
-
 
         UUID qrEmployeeId = UUID.fromString(qrParts[0]);
         long timestampLong = Long.parseLong(qrParts[1]);
@@ -93,12 +94,34 @@ public class AttendanceService {
 
 
             if (geoCheck.checkDistance(distance, radius)) {
+
+                Optional<User> optionalUser = userRepository.findById(employeeId);
+                if (optionalUser.isEmpty())
+                    return new ApiResponse("Xodim malumotlari topilmadi!", false);
+                User user = optionalUser.get();
+
                 Attendance attendance = new Attendance();
-                attendance.setEmployeeId(employeeId);
                 attendance.setCheckInTime(new Timestamp(System.currentTimeMillis()));
+                attendance.setEmployeeId(user.getId());
                 attendance.setIsArrived(true);
                 attendance.setIncomeDistance(distance);
                 attendance.setBranchId(branchId);
+
+                String arrivalTime = user.getArrivalTime();
+                if (arrivalTime != null) {
+                    LocalTime expectedArrivalTime = LocalTime.parse(arrivalTime); // HH:mm formatidan LocalTime ga aylantirish
+                    LocalTime actualArrivalTime = attendance.getCheckInTime().toLocalDateTime().toLocalTime();
+
+                    if (actualArrivalTime.isAfter(expectedArrivalTime)) {
+                        long minutesDifference = java.time.Duration.between(expectedArrivalTime, actualArrivalTime).toMinutes();
+                        attendance.setLateMinutes(minutesDifference);
+                        attendance.setIsLate(true);
+                    } else {
+                        attendance.setLateMinutes(0L);
+                        attendance.setIsLate(false);
+                    }
+                }
+
                 attendanceRepository.save(attendance);
                 return new ApiResponse("Ishga kelish vaqti tasdiqlandi", true);
             } else {

@@ -105,9 +105,7 @@ public class User extends AbsEntity implements UserDetails {
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private boolean grossPriceControlOneUser; // Bu foydalanuvchi uchun narxni boshqarish uchun maxsus bayroq (aniq ma'nosi noaniq)
 
-
     // shartnoma
-
     private String contractNumber; // Shartnoma raqami
 
     @ManyToOne

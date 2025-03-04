@@ -135,9 +135,9 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             "WHERE p.business.id IN (SELECT b.business.id FROM branches b WHERE b.id = :branchId) " +
             "AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR p.business.id IN (SELECT b.business.id FROM branches b WHERE b.id = :branchId) AND p.barcode = :keyword)" +
-            "or p.business.id in (select b.business.id from branches b where b.id = :branchId) " +
+            "OR p.business.id IN (SELECT b.business.id FROM branches b WHERE b.id = :branchId) " +
             "AND (LOWER(pt.name) LIKE LOWER(CONCAT('%', :keyword, '%')))" +
-            "group by p.id")
+            "GROUP BY p.id, pt.name, p.salePrice, p.barcode, p.MXIKCode, p.discount")
     List<ProductResponseDTO> findProductsByBranchIdAndKeyword(
             @Param("branchId") UUID branchId,
             @Param("keyword") String keyword,

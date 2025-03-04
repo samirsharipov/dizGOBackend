@@ -8,8 +8,10 @@ import uz.pdp.springsecurity.entity.template.AbsEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import java.sql.Timestamp;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Entity
@@ -29,6 +31,9 @@ public class Attendance extends AbsEntity {
 
     @Column
     private Boolean isLate; // Kechikish bo'ldi yoki yo'q
+
+    @Column
+    private Long lateMinutes = 0L; // Kechikkan daqiqalar
 
     @Column
     private Boolean isLeftEarly; // Vaqtidan oldin chiqib ketish
