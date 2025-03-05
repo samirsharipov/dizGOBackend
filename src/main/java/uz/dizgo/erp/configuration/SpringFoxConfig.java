@@ -20,7 +20,7 @@ public class SpringFoxConfig {
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("uz.pdp.springsecurity.controller"))
+                .apis(RequestHandlerSelectors.basePackage("uz.dizgo.erp.controller"))
                 .paths(PathSelectors.any())
                 .build()
                 .securityContexts(List.of(securityContext()))
