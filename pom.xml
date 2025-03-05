@@ -11,7 +11,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>uz.pdp</groupId>
-    <artifactId>spring-security</artifactId>
+    <artifactId>DizGO-Backend</artifactId>
 
     <name>spring-security</name>
     <description>Demo project for Spring Boot</description>
