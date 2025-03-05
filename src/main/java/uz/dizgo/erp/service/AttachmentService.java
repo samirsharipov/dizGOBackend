@@ -38,6 +38,7 @@ public class AttachmentService {
             attachment.setSize(size);
             attachment.setContentType(contentType);
             Attachment savedAttachment = attachmentRepository.save(attachment);
+
             AttachmentContent attachmentContent = new AttachmentContent();
             attachmentContent.setId(attachment.getId());
             attachmentContent.setMainContent(file.getBytes());

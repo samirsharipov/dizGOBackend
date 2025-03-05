@@ -20,7 +20,7 @@ public class ApiResponse implements Serializable {
 
     // Constructor with message and success
     public ApiResponse(String message, boolean success) {
-        this.message = message.equals("Success") ? "AMALGA OSHIRILDI" : message;
+        this.message = message;
         this.success = success;
     }
 
