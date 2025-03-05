@@ -6,19 +6,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import uz.dizgo.erp.entity.Attendance;
-import uz.dizgo.erp.entity.Branch;
-import uz.dizgo.erp.entity.Location;
-import uz.dizgo.erp.entity.User;
+import uz.dizgo.erp.entity.*;
 import uz.dizgo.erp.payload.ApiResponse;
 import uz.dizgo.erp.payload.AttendanceGetDto;
 import uz.dizgo.erp.payload.EmployeeWorkDurationDto;
-import uz.dizgo.erp.repository.AttendanceRepository;
-import uz.dizgo.erp.repository.BranchRepository;
-import uz.dizgo.erp.repository.LocationRepository;
-import uz.dizgo.erp.repository.UserRepository;
+import uz.dizgo.erp.repository.*;
 import uz.dizgo.erp.service.functions.GeoCheck;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalTime;
 import java.util.*;
@@ -35,6 +30,8 @@ public class AttendanceService {
     private final BranchRepository branchRepository;
     private final MessageService messageService;
     private final UserRepository userRepository;
+    private final PenaltyTemplateRepository penaltyTemplateRepository;
+    private final PenaltyRepository penaltyRepository;
 
     // QR kod orqali keldi-ketdi tasdiqlash
     public ApiResponse checkInWithQRCode(UUID branchId, UUID employeeId, String qrCodeData, boolean input) {
@@ -116,6 +113,22 @@ public class AttendanceService {
                         long minutesDifference = java.time.Duration.between(expectedArrivalTime, actualArrivalTime).toMinutes();
                         attendance.setLateMinutes(minutesDifference);
                         attendance.setIsLate(true);
+
+                        Penalty penalty = new Penalty();
+                        penalty.setEmployeeId(user.getId());
+
+                        BigDecimal penaltySumma = BigDecimal.valueOf(0);
+
+                        List<PenaltyTemplate> all = penaltyTemplateRepository.findAllByBranchId(branchId);
+                        for (PenaltyTemplate penaltyTemplate : all) {
+                            penalty.setPenaltyTemplateId(penaltyTemplate.getId());
+                            penalty.setPerMinutePenalty(penaltyTemplate.getPerMinutePenalty());
+                            penaltySumma = penaltyTemplate.getPerMinutePenalty();
+                        }
+                        penalty.setPerMinutePenalty(BigDecimal.valueOf(minutesDifference));
+                        BigDecimal penaltyTotalSum = penaltySumma.multiply(BigDecimal.valueOf(minutesDifference));
+                        penalty.setTotalPenalty(penaltyTotalSum);
+                        penaltyRepository.save(penalty);
                     } else {
                         attendance.setLateMinutes(0L);
                         attendance.setIsLate(false);

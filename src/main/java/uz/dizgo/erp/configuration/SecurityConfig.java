@@ -105,7 +105,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/api/plum/payment-without-registration",
                         "/api/plum/resend-otp",
                         "/api/plum/confirm-payment",
-                        "/api/plum/payment-reverse"
+                        "/api/plum/payment-reverse",
+                        "/api/cardType/check"
                 )
                 .permitAll()
                 .anyRequest()
