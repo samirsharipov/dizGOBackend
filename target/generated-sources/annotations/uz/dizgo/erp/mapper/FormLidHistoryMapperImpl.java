@@ -1,0 +1,66 @@
+package uz.dizgo.erp.mapper;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+import uz.dizgo.erp.entity.Business;
+import uz.dizgo.erp.entity.FormLidHistory;
+import uz.dizgo.erp.payload.FormLidHistoryDto;
+
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2025-03-05T09:58:03+0500",
+    comments = "version: 1.5.2.Final, compiler: javac, environment: Java 17.0.14 (Amazon.com Inc.)"
+)
+@Component
+public class FormLidHistoryMapperImpl implements FormLidHistoryMapper {
+
+    @Override
+    public FormLidHistoryDto toDto(FormLidHistory formLidHistory) {
+        if ( formLidHistory == null ) {
+            return null;
+        }
+
+        FormLidHistoryDto formLidHistoryDto = new FormLidHistoryDto();
+
+        formLidHistoryDto.setBusinessId( formLidHistoryBusinessId( formLidHistory ) );
+        formLidHistoryDto.setName( formLidHistory.getName() );
+        formLidHistoryDto.setTotalSumma( formLidHistory.getTotalSumma() );
+        formLidHistoryDto.setTotalLid( formLidHistory.getTotalLid() );
+        formLidHistoryDto.setAverage( formLidHistory.getAverage() );
+        formLidHistoryDto.setActive( formLidHistory.isActive() );
+
+        return formLidHistoryDto;
+    }
+
+    @Override
+    public List<FormLidHistoryDto> toDto(List<FormLidHistory> formLidHistories) {
+        if ( formLidHistories == null ) {
+            return null;
+        }
+
+        List<FormLidHistoryDto> list = new ArrayList<FormLidHistoryDto>( formLidHistories.size() );
+        for ( FormLidHistory formLidHistory : formLidHistories ) {
+            list.add( toDto( formLidHistory ) );
+        }
+
+        return list;
+    }
+
+    private UUID formLidHistoryBusinessId(FormLidHistory formLidHistory) {
+        if ( formLidHistory == null ) {
+            return null;
+        }
+        Business business = formLidHistory.getBusiness();
+        if ( business == null ) {
+            return null;
+        }
+        UUID id = business.getId();
+        if ( id == null ) {
+            return null;
+        }
+        return id;
+    }
+}

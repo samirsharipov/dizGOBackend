@@ -1,0 +1,12 @@
+package uz.dizgo.erp.payload;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class LanguageDto {
+    private String code;         // Til kodi (masalan, 'uz', 'en', 'ru')
+    private String name;         // Til nomi
+    private String description;  //
+}
