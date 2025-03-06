@@ -30,15 +30,15 @@ jobs:
 
     - name: Serverda git pull qilish (Agar loyihangiz mavjud bo'lsa)
       run: |
-        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'cd /home/root/deploy/optimitBackend && git pull origin main'
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no bnav@176.96.243.201 'cd /home/root/deploy/optimitBackend && git pull origin main'
 
     - name: Maven build qilish
       run: |
-        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 'cd /home/root/deploy/optimitBackend && mvn clean install -DskipTests'
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no bnav@176.96.243.201 'cd /home/root/deploy/optimitBackend && mvn clean install -DskipTests'
 
     - name: Deploy qilish
       run: |
-        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@162.55.182.148 '
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no bnav@176.96.243.201 '
         JAR_PATH="/home/root/deploy/optimitBackend/target/spring-security.jar"
         SCREEN_NAME="spring_app"
         LOG_DIR="/home/root/deploy/optimitBackend/logs"
