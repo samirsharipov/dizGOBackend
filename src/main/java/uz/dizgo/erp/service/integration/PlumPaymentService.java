@@ -229,4 +229,9 @@ public class PlumPaymentService {
     public ResponseEntity<?> paymentReverse(Long transactionId) {
         return handleRequestWithHeaders(baseUrl + "/Payment/paymentReverse", HttpMethod.POST, Map.of("transactionId", transactionId), false);
     }
+
+    // ✅ 12. Card check
+    public ResponseEntity<?> getCardOwnerInfo(String cardNumber) {
+        return handleRequestWithHeaders(baseUrl + "/UserCard/getCardOwnerInfoByPan", HttpMethod.POST, Map.of("cardNumber", cardNumber), false);
+    }
 }

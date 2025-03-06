@@ -3,10 +3,14 @@ package uz.dizgo.erp.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import uz.dizgo.erp.entity.Branch;
 import uz.dizgo.erp.entity.QRData;
+import uz.dizgo.erp.entity.User;
 import uz.dizgo.erp.payload.ApiResponse;
 import uz.dizgo.erp.payload.QRDataDto;
+import uz.dizgo.erp.repository.BranchRepository;
 import uz.dizgo.erp.repository.QRDataRepository;
+import uz.dizgo.erp.repository.UserRepository;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -17,6 +21,9 @@ import java.util.Optional;
 public class QRDataService {
 
     private final QRDataRepository repository;
+    private final BranchRepository branchRepository;
+    private final MessageService messageService;
+    private final UserRepository userRepository;
 
     public ApiResponse add(@Valid QRDataDto qrDataDto) {
         QRData qrData = new QRData();
@@ -31,14 +38,28 @@ public class QRDataService {
 
     public ApiResponse edit(Long id, QRDataDto qrDataDto) {
         Optional<QRData> optionalQRData = repository.findById(id);
-        if (optionalQRData.isEmpty()) {
+        if (optionalQRData.isEmpty())
             return new ApiResponse("QR ma'lumotlari topilmadi", false);
-        }
+
+        Optional<Branch> optionalBranch = branchRepository.findById(qrDataDto.getBranchId());
+        if (optionalBranch.isEmpty())
+            return new ApiResponse(messageService.getMessage("not.found"), false);
+
         QRData qrData = optionalQRData.get();
-        qrData.setBranchId(qrDataDto.getBranchId());
-        qrData.setBranchName(qrDataDto.getBranchName());
-        qrData.setUserId(qrDataDto.getUserId());
-        qrData.setUserName(qrDataDto.getUserName());
+        Branch branch = optionalBranch.get();
+
+        if (qrDataDto.getUserId() != null) {
+            Optional<User> optionalUser = userRepository.findById(qrDataDto.getUserId());
+            if (optionalUser.isEmpty())
+                return new ApiResponse(messageService.getMessage("not.found"), false);
+
+            User user = optionalUser.get();
+            qrData.setUserId(user.getId());
+            qrData.setUserName(user.getFirstName() + " " + user.getLastName());
+        }
+
+        qrData.setBranchId(branch.getId());
+        qrData.setBranchName(branch.getName());
         qrData.setEPosCode(qrDataDto.getEPosCode());
         repository.save(qrData);
         return new ApiResponse("QR ma'lumotlari muvaffaqiyatli yangilandi", true);
