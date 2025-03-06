@@ -59,3 +59,4 @@ jobs:
         screen -dmS $SCREEN_NAME bash -c "java -jar $JAR_PATH > $LOG_FILE 2>&1"
         echo "Application deployed successfully."
         '
+        
