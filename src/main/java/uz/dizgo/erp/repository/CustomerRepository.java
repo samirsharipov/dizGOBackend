@@ -18,6 +18,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface CustomerRepository extends JpaRepository<Customer, UUID> {
+
+    Optional<Customer> findByPhoneNumber(String phoneNumber);
+
     List<Customer> findAllByBusiness_IdAndActiveIsTrueOrBusiness_IdAndActiveIsNull(UUID business_id, UUID business_id2);
 
     List<Customer> findAllByCustomerGroupIdAndActiveIsTrueOrCustomerGroupIdAndActiveIsNull(UUID customerGroup_id, UUID customerGroup_id2);
@@ -45,7 +48,6 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
     List<Customer> findAllByPayDateBetweenAndBusinessIdAndActiveIsTrueOrPayDateBetweenAndBusinessIdAndActiveIsNull(Date payDate, Date payDate2, UUID business_id, Date payDate3, Date payDate4, UUID business_id2);
 
     List<Customer> findAllByBranchesIdAndLidCustomerIsTrueAndActiveIsTrueOrBranchesIdAndLidCustomerIsTrueAndActiveIsNull(UUID branches_id, UUID branches_id2);
-
 
     int countAllByBranchesId(UUID branchId);
 
@@ -82,7 +84,6 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
     Integer countAllByBusiness_IdAndCreatedAtBetween(UUID businessId, Timestamp createdAt, Timestamp createdAt2);
 
     List<Customer> findAllByBranchIdAndNameContainingIgnoreCaseAndActiveTrue(UUID branch_id, String name);
-
 
     Page<Customer> findAllByBusinessIdAndNameContainingIgnoreCaseAndActiveTrueOrBusinessIdAndPhoneNumberNotContainingIgnoreCaseAndActiveTrue(UUID business_id, String name, UUID business_id2, String phoneNumber, Pageable pageable);
 
@@ -132,5 +133,6 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
     // 3️ **Telefon raqami bo‘yicha mijozni qidirish**
     @Query("SELECT new uz.dizgo.erp.payload.CustomerGetInfoDto(c.id, c.name, c.phoneNumber, SIZE(c.branchIds)) " +
             "FROM Customer c WHERE (LOWER(c.phoneNumber) LIKE LOWER(CONCAT('%', :phoneNumber, '%')))")
-    Page<CustomerGetInfoDto> findByPhoneNumber(@Param("phoneNumber") String phoneNumber, Pageable pageable);
+    Page<CustomerGetInfoDto> findByPhoneNumberPageable(@Param("phoneNumber") String phoneNumber, Pageable pageable);
+
 }

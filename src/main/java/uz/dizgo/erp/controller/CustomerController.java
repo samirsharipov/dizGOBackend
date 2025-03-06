@@ -245,4 +245,10 @@ public class CustomerController {
                                                     @RequestParam int size) {
         return responseEntityHelper.buildResponse(customerService.customerInfo(phoneNumber,page,size));
     }
+
+    @PutMapping("/forget-password")
+    public HttpEntity<?> forgetPassword(@RequestParam String phoneNumber,
+                                        @RequestParam String password) {
+        return responseEntityHelper.buildResponse(customerService.forgetPassword(phoneNumber,password));
+    }
 }
