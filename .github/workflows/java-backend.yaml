@@ -12,7 +12,7 @@ jobs:
     steps:
     - name: Kodingizni tekshirish
       uses: actions/checkout@v2
-
+ 
     - name: SSH Private Keyni yaratish
       run: |
         mkdir -p ~/.ssh
