@@ -843,7 +843,7 @@ public class CustomerService {
 
         Page<CustomerGetInfoDto> all = phoneNumber == null || phoneNumber.trim().isEmpty()
                 ? customerRepository.getCustomersSortedByBranchSize(pageable)
-                : customerRepository.findByPhoneNumber(phoneNumber, pageable);
+                : customerRepository.findByPhoneNumberPageable(phoneNumber, pageable);
 
         if (all.isEmpty()) {
             return new ApiResponse(messageService.getMessage("not.found"), false);
@@ -856,5 +856,22 @@ public class CustomerService {
                 "currentPage", all.getNumber(),
                 "pageSize", all.getSize()
         ));
+    }
+
+    public ApiResponse forgetPassword(String phoneNumber, String password) {
+        Optional<Customer> optionalCustomer =
+                customerRepository.findByPhoneNumber(phoneNumber);
+
+        if (optionalCustomer.isEmpty())
+            return new ApiResponse(messageService.getMessage("not.found"), false);
+
+        Customer customer = optionalCustomer.get();
+        User user = customer.getUser();
+        customer.setPassword(password);
+        user.setPassword(password);
+        customerRepository.save(customer);
+        userRepository.save(user);
+
+        return new ApiResponse(messageService.getMessage("edited.successfully"), true);
     }
 }
