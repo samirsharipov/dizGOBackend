@@ -94,4 +94,10 @@ public class PlumController {
     public ResponseEntity<?> paymentReverse(@RequestParam Long transactionId) {
         return plumPaymentService.paymentReverse(transactionId);
     }
+
+    // ✅ 12. Card check
+    @GetMapping("/card-owner-info")
+    public ResponseEntity<?> getCardOwnerInfo(@RequestParam String cardNumber) {
+        return plumPaymentService.getCardOwnerInfo(cardNumber);
+    }
 }
