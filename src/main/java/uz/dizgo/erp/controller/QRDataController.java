@@ -8,6 +8,7 @@ import uz.dizgo.erp.payload.QRDataDto;
 import uz.dizgo.erp.service.QRDataService;
 
 import javax.validation.Valid;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/qrdata")
@@ -40,5 +41,10 @@ public class QRDataController {
     @DeleteMapping("/{id}")
     public HttpEntity<?> delete(@PathVariable Long id) {
         return responseEntityHelper.buildResponse(qrDataService.delete(id));
+    }
+
+    @GetMapping("/get-by-branch/{id}")
+    public HttpEntity<?> getByBranch(@PathVariable UUID id) {
+        return responseEntityHelper.buildResponse(qrDataService.getByBranch(id));
     }
 }

@@ -14,7 +14,7 @@ import uz.dizgo.erp.repository.UserRepository;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,49 +25,33 @@ public class QRDataService {
     private final MessageService messageService;
     private final UserRepository userRepository;
 
-    public ApiResponse add(@Valid QRDataDto qrDataDto) {
-        QRData qrData = new QRData();
-        qrData.setBranchId(qrDataDto.getBranchId());
-        qrData.setBranchName(qrDataDto.getBranchName());
-        qrData.setUserId(qrDataDto.getUserId());
-        qrData.setUserName(qrDataDto.getUserName());
-        qrData.setEPosCode(qrDataDto.getEPosCode());
-        repository.save(qrData);
+    public ApiResponse add(@Valid QRDataDto dto) {
+        if (dto != null) {
+            repository.save(mapToEntity(new QRData(), dto));
+        } else {
+            repository.save(new QRData());
+        }
         return new ApiResponse("QR ma'lumotlari muvaffaqiyatli qo'shildi", true);
     }
 
     public ApiResponse edit(Long id, QRDataDto qrDataDto) {
-        Optional<QRData> optionalQRData = repository.findById(id);
-        if (optionalQRData.isEmpty())
-            return new ApiResponse("QR ma'lumotlari topilmadi", false);
+        return repository.findById(id)
+                .map(qrData -> {
+                    if (!branchRepository.existsById(qrDataDto.getBranchId()))
+                        return new ApiResponse(messageService.getMessage("not.found"), false);
 
-        Optional<Branch> optionalBranch = branchRepository.findById(qrDataDto.getBranchId());
-        if (optionalBranch.isEmpty())
-            return new ApiResponse(messageService.getMessage("not.found"), false);
+                    if (qrDataDto.getUserId() != null && !userRepository.existsById(qrDataDto.getUserId()))
+                        return new ApiResponse(messageService.getMessage("not.found"), false);
 
-        QRData qrData = optionalQRData.get();
-        Branch branch = optionalBranch.get();
-
-        if (qrDataDto.getUserId() != null) {
-            Optional<User> optionalUser = userRepository.findById(qrDataDto.getUserId());
-            if (optionalUser.isEmpty())
-                return new ApiResponse(messageService.getMessage("not.found"), false);
-
-            User user = optionalUser.get();
-            qrData.setUserId(user.getId());
-            qrData.setUserName(user.getFirstName() + " " + user.getLastName());
-        }
-
-        qrData.setBranchId(branch.getId());
-        qrData.setBranchName(branch.getName());
-        qrData.setEPosCode(qrDataDto.getEPosCode());
-        repository.save(qrData);
-        return new ApiResponse("QR ma'lumotlari muvaffaqiyatli yangilandi", true);
+                    repository.save(mapToEntity(qrData, qrDataDto));
+                    return new ApiResponse("QR ma'lumotlari muvaffaqiyatli yangilandi", true);
+                })
+                .orElseGet(() -> new ApiResponse("QR ma'lumotlari topilmadi", false));
     }
 
     public ApiResponse get(Long id) {
-        Optional<QRData> optionalQRData = repository.findById(id);
-        return optionalQRData.map(qrData -> new ApiResponse("QR ma'lumotlari", true, qrData))
+        return repository.findById(id)
+                .map(qrData -> new ApiResponse("QR ma'lumotlari", true, qrData))
                 .orElseGet(() -> new ApiResponse("QR ma'lumotlari topilmadi", false));
     }
 
@@ -77,11 +61,31 @@ public class QRDataService {
     }
 
     public ApiResponse delete(Long id) {
-        Optional<QRData> optionalQRData = repository.findById(id);
-        if (optionalQRData.isEmpty()) {
+        if (!repository.existsById(id))
             return new ApiResponse("QR ma'lumotlari topilmadi", false);
-        }
+
         repository.deleteById(id);
         return new ApiResponse("QR ma'lumotlari muvaffaqiyatli o'chirildi", true);
+    }
+
+    public ApiResponse getByBranch(UUID id) {
+        List<QRData> all = repository.findAllByBranchId(id);
+        return all.isEmpty()
+                ? new ApiResponse(messageService.getMessage("not.found"), false)
+                : new ApiResponse(messageService.getMessage("found"), true, all);
+    }
+
+    private QRData mapToEntity(QRData qrData, QRDataDto dto) {
+        qrData.setBranchId(dto.getBranchId());
+        qrData.setBranchName(branchRepository.findById(dto.getBranchId()).map(Branch::getName).orElse(null));
+        qrData.setEPosCode(dto.getEPosCode());
+
+        if (dto.getUserId() != null) {
+            userRepository.findById(dto.getUserId()).ifPresent(user -> {
+                qrData.setUserId(user.getId());
+                qrData.setUserName(user.getFirstName() + " " + user.getLastName());
+            });
+        }
+        return qrData;
     }
 }
