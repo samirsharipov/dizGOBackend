@@ -141,7 +141,7 @@ public class UserController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    @GetMapping("/xmber/{phoneNumber}")
+    @GetMapping("/ember/{phoneNumber}")
     public HttpEntity<?> getByPhoneNumber(@PathVariable String phoneNumber) {
         return responseEntityHelper.buildResponse(userService.getByPhoneNumber(phoneNumber));
     }
