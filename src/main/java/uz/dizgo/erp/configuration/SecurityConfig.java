@@ -108,7 +108,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/api/plum/confirm-payment",
                         "/api/plum/payment-reverse",
                         "/api/cardType/check",
-                        "/api/qrdata"
+                        "/api/qrdata/**"
                 )
                 .permitAll()
                 .anyRequest()
