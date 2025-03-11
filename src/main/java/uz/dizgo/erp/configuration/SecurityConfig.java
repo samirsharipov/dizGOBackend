@@ -101,12 +101,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/api/customer/registration",
                         "/api/verification/**",
                         "/api/customer/check-number",
+                        "/api/customer/forget-password/",
                         "/api/user/get-by-phone-number/*",
                         "/api/plum/payment-without-registration",
                         "/api/plum/resend-otp",
                         "/api/plum/confirm-payment",
                         "/api/plum/payment-reverse",
-                        "/api/cardType/check"
+                        "/api/cardType/check",
+                        "/api/qrdata"
                 )
                 .permitAll()
                 .anyRequest()

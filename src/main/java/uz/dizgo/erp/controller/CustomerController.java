@@ -240,7 +240,7 @@ public class CustomerController {
     }
 
     @GetMapping("/get-info-customers")
-    public ResponseEntity<ApiResponse> customerInfo(@RequestParam String phoneNumber,
+    public ResponseEntity<ApiResponse> customerInfo(@RequestParam(required = false) String phoneNumber,
                                                     @RequestParam int page,
                                                     @RequestParam int size) {
         return responseEntityHelper.buildResponse(customerService.customerInfo(phoneNumber,page,size));

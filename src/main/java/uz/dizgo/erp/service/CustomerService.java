@@ -126,7 +126,7 @@ public class CustomerService {
 
             // 4. Customer yaratish va User bilan bog'lash
             Customer customer = new Customer();
-            customer.setName(customerDto.getFirstName());
+            customer.setName(customerDto.getFirstName() + " " + customerDto.getLastName());
             customer.setPhoneNumber(customerDto.getPhoneNumber());
             customer.setUsername(customerDto.getPhoneNumber());
             customer.setPassword(passwordEncoder.encode(customerDto.getPassword()));
@@ -823,12 +823,9 @@ public class CustomerService {
     }
 
     public ApiResponse checkNumber(String number) {
-        boolean exists = customerRepository.existsByUsername(number);
-        if (exists) {
-            return new ApiResponse("Customer already exists", true);
-        }
-
-        return new ApiResponse("Customer does not exist", false);
+        Optional<Customer> optionalCustomer = customerRepository.findByPhoneNumber(number);
+        return optionalCustomer.map(customer -> new ApiResponse("Customer already exists", true, customer.getId()))
+                .orElseGet(() -> new ApiResponse("Customer does not exist", false));
     }
 
     public ApiResponse getForTrade(String query) {
