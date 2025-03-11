@@ -824,7 +824,7 @@ public class CustomerService {
 
     public ApiResponse checkNumber(String number) {
         Optional<Customer> optionalCustomer = customerRepository.findByPhoneNumber(number);
-        return optionalCustomer.map(customer -> new ApiResponse("Customer already exists", true, customer.getId()))
+        return optionalCustomer.map(customer -> new ApiResponse("Customer already exists", true, customer.getUser().getId()))
                 .orElseGet(() -> new ApiResponse("Customer does not exist", false));
     }
 
