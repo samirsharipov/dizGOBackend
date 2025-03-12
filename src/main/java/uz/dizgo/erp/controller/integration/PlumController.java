@@ -64,8 +64,10 @@ public class PlumController {
                                            @RequestParam Long cardId,
                                            @RequestParam BigDecimal amount,
                                            @RequestParam String extraId,
-                                           @RequestParam(required = false) TransactionalDto transactionalDto) {
-        return plumPaymentService.createPayment(userId, cardId, amount, extraId, transactionalDto);
+                                           @RequestParam(required = false) TransactionalDto transactionalDto,
+                                           @RequestParam(required = false) boolean sendOtp,
+                                           @RequestParam(required = false) String ePosCode) {
+        return plumPaymentService.createPayment(userId, cardId, amount, extraId, transactionalDto, sendOtp, ePosCode);
     }
 
     // ✅ 8. Ro‘yxatdan o‘tmagan foydalanuvchi uchun to‘lov
