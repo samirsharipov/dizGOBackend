@@ -119,6 +119,9 @@ public class CustomerService {
 
                 user.setPhoneNumber(customerDto.getPhoneNumber());
                 user.setRole(customerRole);
+                user.setSex(customerDto.isSex());
+                user.setBirthday(customerDto.getBirthday());
+
                 user.setEnabled(true); // Akkaunt aktiv
                 user.setActive(true); // Akkaunt faol
                 userRepository.save(user);

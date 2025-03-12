@@ -426,7 +426,7 @@ public class TradeService {
 
         Map<String, Object> response = new HashMap<>();
         response.put("invoice", trade.getInvoice());
-        response.put("tradeId", trade.getId());  // Savdo ID raqamini qo'shish
+        response.put("tradeId", trade.getId());
         response.put("message", "Savdo muvaffaqiyatli amalga oshirildi");
 
         if (trade.getCustomer() != null)
