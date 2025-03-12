@@ -474,3 +474,41 @@ Caused by: org.hibernate.HibernateException: Access to DialectResolutionInfo can
 	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.initiateService(StandardServiceRegistryImpl.java:101)
 	at org.hibernate.service.internal.AbstractServiceRegistryImpl.createService(AbstractServiceRegistryImpl.java:263)
 	... 124 common frames omitted
+2025-03-11 14:47:38 [main] INFO  uz.dizgo.erp.DizGOApplication - Starting DizGOApplication using Java 17.0.14 on Samirs-Air.home with PID 9345 (/Users/samirsharipov/biznesNavigator/optimitBackend/target/classes started by samirsharipov in /Users/samirsharipov/biznesNavigator/optimitBackend)
+2025-03-11 14:47:38 [main] INFO  uz.dizgo.erp.DizGOApplication - The following profiles are active: dev
+2025-03-11 14:47:38 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-03-11 14:47:39 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 138 ms. Found 127 JPA repository interfaces.
+2025-03-11 14:47:39 [main] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler@45571cfc' of type [org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2025-03-11 14:47:39 [main] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'methodSecurityMetadataSource' of type [org.springframework.security.access.method.DelegatingMethodSecurityMetadataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2025-03-11 14:47:39 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8081 (http)
+2025-03-11 14:47:39 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8081"]
+2025-03-11 14:47:39 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-03-11 14:47:39 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.54]
+2025-03-11 14:47:39 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-03-11 14:47:39 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1344 ms
+2025-03-11 14:47:39 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-03-11 14:47:39 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 5.4.32.Final
+2025-03-11 14:47:39 [main] INFO  o.h.annotations.common.Version - HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2025-03-11 14:47:39 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-03-11 14:47:40 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@4be3de36
+2025-03-11 14:47:40 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-03-11 14:47:40 [main] INFO  org.hibernate.dialect.Dialect - HHH000400: Using dialect: org.hibernate.dialect.PostgreSQL10Dialect
+2025-03-11 14:47:42 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2025-03-11 14:47:42 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-03-11 14:47:47 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoint(s) beneath base path '/actuator'
+2025-03-11 14:47:47 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@1b9a38f5, org.springframework.security.web.context.SecurityContextPersistenceFilter@88e78, org.springframework.security.web.header.HeaderWriterFilter@66353861, org.springframework.web.filter.CorsFilter@70b95f05, org.springframework.security.web.authentication.logout.LogoutFilter@71f0a294, uz.dizgo.erp.security.JwtFilter@5ad92945, org.springframework.security.web.session.ConcurrentSessionFilter@192ac204, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@6cbce551, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@72ccfe4f, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@8717557, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@53cb68dc, org.springframework.security.web.session.SessionManagementFilter@4d645ec4, org.springframework.security.web.access.ExceptionTranslationFilter@6ff1b8dc, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@d74bc63]
+2025-03-11 14:47:48 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8081"]
+2025-03-11 14:47:48 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port(s): 8081 (http) with context path ''
+2025-03-11 14:47:50 [main] INFO  uz.dizgo.erp.DizGOApplication - Started DizGOApplication in 11.816 seconds (JVM running for 13.159)
+2025-03-11 15:30:24 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=2m44s271ms).
+2025-03-11 15:49:40 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=4m45s118ms).
+2025-03-11 16:13:46 [http-nio-8081-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-03-11 16:13:46 [http-nio-8081-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-03-11 16:13:46 [http-nio-8081-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 14 ms
+2025-03-11 16:13:46 [http-nio-8081-exec-2] INFO  u.d.erp.controller.AuthController - Login request: username=admin
+2025-03-11 16:13:46 [http-nio-8081-exec-2] INFO  u.d.erp.controller.AuthController - User authenticated successfully: admin
+2025-03-11 16:13:46 [http-nio-8081-exec-2] INFO  u.d.erp.controller.AuthController - Login successful, token generated for user: admin
+2025-03-11 16:50:16 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=5m36s325ms).
+2025-03-11 17:02:07 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-03-11 17:02:07 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-03-11 17:02:07 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.

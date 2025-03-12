@@ -414,7 +414,9 @@ public class TradeService {
         if (customerDebt.getDebtSum() != null) {
             customerDebt.setTrade(trade);
             customerDebtRepository.save(customerDebt);
-            Optional<CustomerSupplier> optionalCustomerSupplier = customerSupplierRepository.findByCustomerId(customerDebt.getCustomer().getId());
+            Optional<CustomerSupplier> optionalCustomerSupplier = customerSupplierRepository
+                    .findByCustomerId(customerDebt.getCustomer().getId());
+
             optionalCustomerSupplier.ifPresent(customerSupplierService::calculation);
 
             if (tradeDTO.getCustomerCreditDto() != null) {
@@ -422,48 +424,14 @@ public class TradeService {
             }
         }
 
-        if (!isEdit) {
-            UUID uuid = tradeRepository.findTradeIdByBranchIdAndInvoice(branch.getId(), trade.getInvoice());
-            ApiResponse res = getOne(uuid);
-            TradeGetOneDto tradeGetOneDto = (TradeGetOneDto) res.getObject();
-
-            StringBuilder products = new StringBuilder();
-            for (TradeProduct tradeProduct : tradeGetOneDto.getTradeProductList()) {
-                products.append("<b>Mahsulot nomi: ").append(tradeProduct.getProduct().getName()).append("</b>").append(" || ").append(tradeProduct.getTradedQuantity()).append(" X ").append(tradeProduct.getProduct().getSalePrice()).append(" = ").append(tradeProduct.getTotalSalePrice()).append("\n");
-
-            }
-            String sendText = telegramSendText(trade, products);
-            Business business = tradeGetOneDto.getTrade().getTrader().getBusiness();
-            for (User admin : userRepository.findAllByBusiness_IdAndRoleName(business.getId(), Constants.ADMIN)) {
-                if (admin.getChatId() != null) {
-//                    SendMessage sendMessage = SendMessage
-//                            .builder()
-//                            .text(sendText)
-//                            .parseMode(ParseMode.HTML)
-//                            .chatId(admin.getChatId())
-//                            .build();
-//                    RestTemplate restTemplate = new RestTemplate();
-//                    restTemplate.postForObject("https://api.telegram.org/bot" + Constants.BOT_TOKEN + "/sendMessage", sendMessage, Object.class);
-                }
-            }
-            Customer customerX = tradeGetOneDto.getTrade().getCustomer();
-            if (customerX != null && customerX.getChatId() != null) {
-//                SendMessage sendMessage = SendMessage
-//                        .builder()
-//                        .text(sendText)
-//                        .parseMode(ParseMode.HTML)
-//                        .chatId(customerX.getChatId())
-//                        .build();
-//                RestTemplate restTemplate = new RestTemplate();
-//                restTemplate.postForObject("https://api.telegram.org/bot" + Constants.CUSTOMER_BOT_TOKEN + "/sendMessage", sendMessage, Object.class);
-            }
-        }
         Map<String, Object> response = new HashMap<>();
         response.put("invoice", trade.getInvoice());
         response.put("tradeId", trade.getId());  // Savdo ID raqamini qo'shish
         response.put("message", "Savdo muvaffaqiyatli amalga oshirildi");
+
         if (trade.getCustomer() != null)
             response.put("customerDebt", trade.getCustomer().getDebt());
+
         return new ApiResponse("SUCCESS", true, response);
     }
 

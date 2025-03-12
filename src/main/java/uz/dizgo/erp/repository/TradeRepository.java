@@ -158,18 +158,11 @@ public interface TradeRepository extends JpaRepository<Trade, UUID>, JpaSpecific
 
     List<Trade> findAllByBranch_IdOrderByCreatedAtDesc(UUID branch_id);
 
-    @Query("SELECT t.id FROM Trade t WHERE t.branch.id = :branchId AND t.invoice = :invoice")
-    UUID findTradeIdByBranchIdAndInvoice(@Param("branchId") UUID branchId, @Param("invoice") String invoice);
-
     List<Trade> findAllByCreatedAtBetweenAndBranchId(Timestamp start, Timestamp end, UUID branch_id);
 
     List<Trade> findAllByCreatedAtBetweenAndBranch_BusinessId(Timestamp start, Timestamp end, UUID businessId);
 
     List<Trade> findAllByBranch_Business_IdOrderByCreatedAtDesc(UUID businessId);
-
-
-
-    double countAllByBranchIdAndCreatedAtBetween(UUID branch_id, Timestamp startDate, Timestamp endDate);
 
     double countAllByBranch_BusinessIdAndCreatedAtBetween(UUID branch_business_id, Timestamp startDate, Timestamp endDate);
 
