@@ -14,6 +14,7 @@ import uz.dizgo.erp.entity.PaymentTransaction;
 import uz.dizgo.erp.entity.UserCard;
 import uz.dizgo.erp.payload.TransactionalDto;
 import uz.dizgo.erp.repository.PaymentTransactionRepository;
+import uz.dizgo.erp.repository.QRDataRepository;
 import uz.dizgo.erp.repository.UserCardRepository;
 import uz.dizgo.erp.service.MessageService;
 
@@ -27,14 +28,16 @@ public class PlumPaymentService {
     private final MessageService messageService;
     private final UserCardRepository userCardRepository;
     private final PaymentTransactionRepository paymentTransactionRepository;
+    private final QRDataRepository qrDataRepository;
 
     public PlumPaymentService(@Value("${plum.api.base-url}") String baseUrl,
                               @Value("${plum.api.username}") String username,
                               @Value("${plum.api.password}") String password,
                               RestTemplateBuilder restTemplateBuilder,
                               MessageService messageService,
-                              UserCardRepository userCardRepository, PaymentTransactionRepository paymentTransactionRepository) {
+                              UserCardRepository userCardRepository, PaymentTransactionRepository paymentTransactionRepository, QRDataRepository qrDataRepository) {
         this.baseUrl = baseUrl;
+        this.qrDataRepository = qrDataRepository;
         String authHeader = "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
 
         this.restTemplate = restTemplateBuilder
@@ -145,13 +148,14 @@ public class PlumPaymentService {
     }
 
     // ✅ 7. Oddiy to‘lov qilish
-    public ResponseEntity<?> createPayment(String userId, Long cardId, BigDecimal amount, String extraId, TransactionalDto transactionalDto) {
-
+    public ResponseEntity<?> createPayment(String userId, Long cardId, BigDecimal amount, String extraId, TransactionalDto transactionalDto, boolean sendOtp, String ePosCode) {
         ResponseEntity<?> responseEntity = handleRequestWithHeaders(baseUrl + "/Payment/payment", HttpMethod.POST, Map.of(
                 "userId", userId,
                 "cardId", cardId,
                 "amount", amount,
-                "extraId", extraId
+                "extraId", extraId,
+                "sendOtp", sendOtp,
+                "ePosCode", ePosCode
         ), false);
 
         if (responseEntity.getStatusCode().equals(HttpStatus.OK) && responseEntity.getBody() != null && transactionalDto != null) {
