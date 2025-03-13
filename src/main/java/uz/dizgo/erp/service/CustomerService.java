@@ -867,8 +867,8 @@ public class CustomerService {
 
         Customer customer = optionalCustomer.get();
         User user = customer.getUser();
-        customer.setPassword(password);
-        user.setPassword(password);
+        customer.setPassword(passwordEncoder.encode(password));
+        user.setPassword(passwordEncoder.encode(password));
         customerRepository.save(customer);
         userRepository.save(user);
 
