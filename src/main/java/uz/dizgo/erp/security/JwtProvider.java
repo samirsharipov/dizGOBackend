@@ -11,7 +11,8 @@ import java.util.Date;
 
 @Component
 public class JwtProvider {
-    static long expireTime = 1000L * 60 * 60 * 24 * 30 * 6;
+//    static long expireTime = 1000L * 60 * 60 * 24 * 30 * 6;
+    static long expireTime = 1000L * 60;
     static String secretKey = "BuTokenniMaxfiySuziHechKimBilmasin1234567890";
 
     Logger logger = LoggerFactory.getLogger(JwtProvider.class);
@@ -37,13 +38,13 @@ public class JwtProvider {
                     .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
-            logger.debug("expired token " + e);
+            logger.debug("expired token {}", String.valueOf(e));
         } catch (MalformedJwtException e) {
-            logger.debug("malFormed jwt exception " + e);
+            logger.debug("malFormed jwt exception {}", String.valueOf(e));
         } catch (UnsupportedJwtException e) {
-            logger.debug("unsupported" + e);
+            logger.debug("unsupported{}", String.valueOf(e));
         } catch (IllegalArgumentException e) {
-            logger.debug("Illegal" + e);
+            logger.debug("Illegal{}", String.valueOf(e));
         } catch (Exception e) {
             e.printStackTrace();
         }

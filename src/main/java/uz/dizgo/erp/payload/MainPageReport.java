@@ -21,6 +21,10 @@ public class MainPageReport {
     private long totalProductCountLessThanZero;
     // Ogohlantirish miqdoriga yetgan maxsulotlar soni
     private long totalProductMinQuantity;
+    //sotish narxi
+    private double totalProductSalePrice;
+    //sotib olish narxi
+    private double totalProductPurchasePrice;
 
     // userlar soni
     private long countUsers;

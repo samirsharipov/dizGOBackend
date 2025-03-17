@@ -33,6 +33,8 @@ public class MainReportService {
         report.setCountUsers(countUsers(businessId, branchId));
         report.setOutlayTotalSum(totalOutlaySum(businessId, branchId, startDate, endDate));
         report.setPurchaseCount(totalPurchaseCount(businessId, branchId, startDate, endDate));
+        report.setTotalProductSalePrice(totalProductSalePrice(businessId, branchId, startDate, endDate));
+        report.setTotalProductPurchasePrice(totalProductBuyPrice(businessId, branchId, startDate, endDate));
         return new ApiResponse("all", true, report);
     }
 
@@ -170,5 +172,25 @@ public class MainReportService {
             purchaseCount += count != null ? count : 0L;
         }
         return purchaseCount;
+    }
+
+    private double totalProductSalePrice(UUID businessId, UUID branchId, Timestamp startDate, Timestamp endDate) {
+        double productSalePrice = 0L;
+        if (branchId != null) {
+            productSalePrice = productRepository.totalProductSalePriceByBranch(branchId, startDate, endDate);
+        } else {
+            productSalePrice = productRepository.totalProductSalePrice(businessId, startDate, endDate);
+        }
+        return productSalePrice;
+    }
+
+    private double totalProductBuyPrice(UUID businessId, UUID branchId, Timestamp startDate, Timestamp endDate) {
+        double productBuyPrice = 0L;
+        if (branchId != null) {
+            productBuyPrice = productRepository.totalProductBuyPriceByBranch(branchId, startDate, endDate);
+        } else {
+            productBuyPrice = productRepository.totalProductBuyPrice(businessId, startDate, endDate);
+        }
+        return productBuyPrice;
     }
 }
