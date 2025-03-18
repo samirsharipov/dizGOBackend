@@ -67,7 +67,7 @@ public class AuthController {
             return ResponseEntity.ok(new ApiResponse(token, true, principal));
         } catch (AuthenticationException e) {
             log.warn("Authentication failed for username={} Reason: {}", loginDto.getUsername(), e.getMessage());
-            return ResponseEntity.status(401).body(new ApiResponse(messageService.getMessage("username.password.incorrect"), false));
+            return ResponseEntity.status(409).body(new ApiResponse(messageService.getMessage("username.password.incorrect"), false));
         } catch (Exception e) {
             log.error("Internal server error during login process for username={}", loginDto.getUsername(), e);
             return ResponseEntity.status(500).body(new ApiResponse(messageService.getMessage("error.message"), false));
@@ -77,7 +77,7 @@ public class AuthController {
 
     @PostMapping("/verify-code")
     public HttpEntity<?> verifyCode(@RequestParam String code) {
-        return responseEntityHelper.buildResponse(authService.verifyCodeForSuperAdmin(code), 200, 401);
+        return responseEntityHelper.buildResponse(authService.verifyCodeForSuperAdmin(code), 200, 409);
     }
 
     @PostMapping("/refresh-code")
