@@ -28,7 +28,6 @@ public class PlumPaymentService {
     private final MessageService messageService;
     private final UserCardRepository userCardRepository;
     private final PaymentTransactionRepository paymentTransactionRepository;
-    private final QRDataRepository qrDataRepository;
 
     public PlumPaymentService(@Value("${plum.api.base-url}") String baseUrl,
                               @Value("${plum.api.username}") String username,
@@ -37,7 +36,6 @@ public class PlumPaymentService {
                               MessageService messageService,
                               UserCardRepository userCardRepository, PaymentTransactionRepository paymentTransactionRepository, QRDataRepository qrDataRepository) {
         this.baseUrl = baseUrl;
-        this.qrDataRepository = qrDataRepository;
         String authHeader = "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
 
         this.restTemplate = restTemplateBuilder
