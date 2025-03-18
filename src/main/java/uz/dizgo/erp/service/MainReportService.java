@@ -33,12 +33,18 @@ public class MainReportService {
         report.setCountUsers(countUsers(businessId, branchId));
         report.setOutlayTotalSum(totalOutlaySum(businessId, branchId, startDate, endDate));
         report.setPurchaseCount(totalPurchaseCount(businessId, branchId, startDate, endDate));
+
+        Double totalProductSalePrice = totalProductSalePrice(businessId, branchId, startDate, endDate);
+        report.setTotalProductSalePrice(totalProductSalePrice != null ? totalProductSalePrice : 0.0);
+        Double totalProductBuyPrice = totalProductBuyPrice(businessId, branchId, startDate, endDate);
+        report.setTotalProductPurchasePrice(totalProductBuyPrice != null ? totalProductBuyPrice : 0.0);
+
         return new ApiResponse("all", true, report);
     }
 
     // Jami savdo summasi
-    private double totalTradeSum(UUID businessId, UUID branchId, Timestamp startDate, Timestamp endDate) {
-        double totalTradeSum = 0.0;
+    private Double totalTradeSum(UUID businessId, UUID branchId, Timestamp startDate, Timestamp endDate) {
+        Double totalTradeSum = 0.0;
         if (branchId != null) {
             Double totalSum = tradeRepository.totalSum(branchId, startDate, endDate);
             totalTradeSum += totalSum != null ? totalSum : 0.0;
@@ -50,8 +56,8 @@ public class MainReportService {
     }
 
     //Jami savdo foyda summasi
-    private double totalTradeProfitSum(UUID businessId, UUID branchId, Timestamp startDate, Timestamp endDate) {
-        double totalTradeProfitSum = 0.0;
+    private Double totalTradeProfitSum(UUID businessId, UUID branchId, Timestamp startDate, Timestamp endDate) {
+        Double totalTradeProfitSum = 0.0;
         if (branchId != null) {
             Double totalProfitByBranchId = tradeRepository.totalProfit(branchId, startDate, endDate);
             totalTradeProfitSum += totalProfitByBranchId != null ? totalProfitByBranchId : 0.0;
@@ -148,8 +154,8 @@ public class MainReportService {
         return userCount;
     }
 
-    private double totalOutlaySum(UUID businessId, UUID branchId, Timestamp startDate, Timestamp endDate) {
-        double totalOutlaySum = 0.0;
+    private Double totalOutlaySum(UUID businessId, UUID branchId, Timestamp startDate, Timestamp endDate) {
+        Double totalOutlaySum = 0.0;
         if (branchId != null) {
             Double total = outlayRepository.outlayByBranchIdAndCreatedAtBetween(branchId, startDate, endDate);
             totalOutlaySum += total != null ? total : 0.0;
@@ -170,5 +176,25 @@ public class MainReportService {
             purchaseCount += count != null ? count : 0L;
         }
         return purchaseCount;
+    }
+
+    private Double totalProductSalePrice(UUID businessId, UUID branchId, Timestamp startDate, Timestamp endDate) {
+        Double productSalePrice = 0.0;
+        if (branchId != null) {
+            productSalePrice = productRepository.totalProductSalePriceByBranch(branchId, startDate, endDate);
+        } else {
+            productSalePrice = productRepository.totalProductSalePrice(businessId, startDate, endDate);
+        }
+        return productSalePrice;
+    }
+
+    private Double totalProductBuyPrice(UUID businessId, UUID branchId, Timestamp startDate, Timestamp endDate) {
+        Double productBuyPrice = 0.0;
+        if (branchId != null) {
+            productBuyPrice = productRepository.totalProductBuyPriceByBranch(branchId, startDate, endDate);
+        } else {
+            productBuyPrice = productRepository.totalProductBuyPrice(businessId, startDate, endDate);
+        }
+        return productBuyPrice;
     }
 }

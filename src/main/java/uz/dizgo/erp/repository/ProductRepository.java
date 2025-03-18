@@ -32,6 +32,30 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             @Param("businessId") UUID businessId
     );
 
+    @Query(value = "select sum(p.buyPrice) from Product p where p.business.id = :businessId and p.createdAt between :startDate and :endDate")
+    Double totalProductBuyPrice(@Param("businessId") UUID businessId,
+                                 @Param("startDate") Timestamp startDate,
+                                 @Param("endDate") Timestamp endDate);
+
+
+    @Query(value = "select sum(p.buyPrice) from Product p JOIN p.branch b where b.id = :branchId and p.createdAt between :startDate and :endDate")
+    Double totalProductBuyPriceByBranch(@Param("branchId") UUID branchId,
+                                         @Param("startDate") Timestamp startDate,
+                                         @Param("endDate") Timestamp endDate);
+
+
+    @Query(value = "select sum(p.salePrice) from Product p where p.business.id = :businessId and p.createdAt between :startDate and :endDate")
+    Double totalProductSalePrice(@Param("businessId") UUID businessId,
+                                 @Param("startDate") Timestamp startDate,
+                                 @Param("endDate") Timestamp endDate);
+
+
+    @Query(value = "select sum(p.salePrice) from Product p JOIN p.branch b where b.id = :branchId and p.createdAt between :startDate and :endDate")
+    Double totalProductSalePriceByBranch(@Param("branchId") UUID branchId,
+                                         @Param("startDate") Timestamp startDate,
+                                         @Param("endDate") Timestamp endDate);
+
+
     List<Product> findAllByBrandIdAndCategoryIdAndBranchIdAndActiveTrue(UUID brand_id, UUID category_id, UUID branchId);
 
     boolean existsByPluCodeAndBusiness_Id(String pluCode, UUID business_id);

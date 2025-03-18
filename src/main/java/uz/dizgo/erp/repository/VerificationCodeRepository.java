@@ -10,16 +10,7 @@ public interface VerificationCodeRepository extends JpaRepository<VerificationCo
 
     Optional<VerificationCode> findByPhoneNumberAndCodeAndVerifiedFalse(String phoneNumber, String code);
 
-    Optional<VerificationCode> findByPhoneNumberAndVerifiedFalse(String phoneNumber);
-
-    Optional<VerificationCode> findByPhoneNumberAndVerifiedTrue(String phoneNumber);
-
     Optional<VerificationCode> findByPhoneNumber(String phoneNumber);
 
-    void deleteByPhoneNumber(String phoneNumber);
-
     Optional<VerificationCode> findByCodeAndSuperAdminTrue(String code);
-
-    void deleteBySuperAdminTrue();
-
 }

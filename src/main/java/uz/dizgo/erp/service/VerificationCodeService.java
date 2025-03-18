@@ -102,4 +102,5 @@ public class VerificationCodeService {
     private String generateCode() {
         return String.format("%06d", new Random().nextInt(1000000));
     }
+
 }
