@@ -3,6 +3,7 @@ package uz.dizgo.erp.controller.integration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import uz.dizgo.erp.payload.PocketMoneyDto;
 import uz.dizgo.erp.payload.TransactionalDto;
 import uz.dizgo.erp.service.integration.PlumPaymentService;
 
@@ -66,8 +67,9 @@ public class PlumController {
                                            @RequestParam String extraId,
                                            @RequestParam(required = false) TransactionalDto transactionalDto,
                                            @RequestParam(required = false) boolean sendOtp,
-                                           @RequestParam(required = false) String ePosCode) {
-        return plumPaymentService.createPayment(userId, cardId, amount, extraId, transactionalDto, sendOtp, ePosCode);
+                                           @RequestParam(required = false) String ePosCode,
+                                           @RequestParam(required = false) PocketMoneyDto pocketMoneyDto) {
+        return plumPaymentService.createPayment(userId, cardId, amount, extraId, transactionalDto, sendOtp, ePosCode,pocketMoneyDto);
     }
 
     // ✅ 8. Ro‘yxatdan o‘tmagan foydalanuvchi uchun to‘lov
