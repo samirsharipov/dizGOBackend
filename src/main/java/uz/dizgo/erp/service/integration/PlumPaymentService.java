@@ -11,9 +11,12 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import uz.dizgo.erp.entity.PaymentTransaction;
+import uz.dizgo.erp.entity.PocketMoneyTransaction;
 import uz.dizgo.erp.entity.UserCard;
+import uz.dizgo.erp.payload.PocketMoneyDto;
 import uz.dizgo.erp.payload.TransactionalDto;
 import uz.dizgo.erp.repository.PaymentTransactionRepository;
+import uz.dizgo.erp.repository.PocketMoneyTransactionRepository;
 import uz.dizgo.erp.repository.QRDataRepository;
 import uz.dizgo.erp.repository.UserCardRepository;
 import uz.dizgo.erp.service.MessageService;
@@ -28,13 +31,14 @@ public class PlumPaymentService {
     private final MessageService messageService;
     private final UserCardRepository userCardRepository;
     private final PaymentTransactionRepository paymentTransactionRepository;
+    private final PocketMoneyTransactionRepository pocketMoneyTransactionRepository;
 
     public PlumPaymentService(@Value("${plum.api.base-url}") String baseUrl,
                               @Value("${plum.api.username}") String username,
                               @Value("${plum.api.password}") String password,
                               RestTemplateBuilder restTemplateBuilder,
                               MessageService messageService,
-                              UserCardRepository userCardRepository, PaymentTransactionRepository paymentTransactionRepository, QRDataRepository qrDataRepository) {
+                              UserCardRepository userCardRepository, PaymentTransactionRepository paymentTransactionRepository, QRDataRepository qrDataRepository, PocketMoneyTransactionRepository pocketMoneyTransactionRepository) {
         this.baseUrl = baseUrl;
         String authHeader = "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
 
@@ -44,6 +48,7 @@ public class PlumPaymentService {
         this.messageService = messageService;
         this.userCardRepository = userCardRepository;
         this.paymentTransactionRepository = paymentTransactionRepository;
+        this.pocketMoneyTransactionRepository = pocketMoneyTransactionRepository;
     }
 
     private ResponseEntity<?> handleRequestWithHeaders(String url, HttpMethod method, Map<String, Object> request, boolean isSaveCard) {
@@ -146,7 +151,7 @@ public class PlumPaymentService {
     }
 
     // ✅ 7. Oddiy to‘lov qilish
-    public ResponseEntity<?> createPayment(String userId, Long cardId, BigDecimal amount, String extraId, TransactionalDto transactionalDto, boolean sendOtp, String ePosCode) {
+    public ResponseEntity<?> createPayment(String userId, Long cardId, BigDecimal amount, String extraId, TransactionalDto transactionalDto, boolean sendOtp, String ePosCode, PocketMoneyDto pocketMoneyDto) {
         ResponseEntity<?> responseEntity = handleRequestWithHeaders(baseUrl + "/Payment/payment", HttpMethod.POST, Map.of(
                 "userId", userId,
                 "cardId", cardId,
@@ -156,27 +161,38 @@ public class PlumPaymentService {
                 "ePosCode", ePosCode
         ), false);
 
-        if (responseEntity.getStatusCode().equals(HttpStatus.OK) && responseEntity.getBody() != null && transactionalDto != null) {
-            ObjectMapper objectMapper = new ObjectMapper();
+        if (responseEntity.getStatusCode().equals(HttpStatus.OK) && responseEntity.getBody() != null) {
 
-            // JSON ni Map ga o‘girish
-            Map<String, Object> responseMap = objectMapper.convertValue(responseEntity.getBody(), new TypeReference<Map<String, Object>>() {
-            });
+            if (transactionalDto != null) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                // JSON ni Map ga o‘girish
+                Map<String, Object> responseMap = objectMapper.convertValue(responseEntity.getBody(), new TypeReference<Map<String, Object>>() {
+                });
 
-            // "result" obyektini olish
-            Map<String, Object> resultMap = (Map<String, Object>) responseMap.get("result");
+                // "result" obyektini olish
+                Map<String, Object> resultMap = (Map<String, Object>) responseMap.get("result");
 
-            // transactionId ni olish
-            long transactionId = ((Number) resultMap.get("transactionId")).longValue();
+                // transactionId ni olish
+                long transactionId = ((Number) resultMap.get("transactionId")).longValue();
 
-            PaymentTransaction paymentTransaction = new PaymentTransaction(transactionalDto.getCustomerId(),
-                    transactionalDto.getBranchId(),
-                    transactionalDto.getTotalAmount(),
-                    transactionalDto.getPaidAmount(),
-                    transactionalDto.getDiscountAmount(),
-                    transactionId);
-            paymentTransaction.setActive(false);
-            paymentTransactionRepository.save(paymentTransaction);
+                PaymentTransaction paymentTransaction = new PaymentTransaction(transactionalDto.getCustomerId(),
+                        transactionalDto.getBranchId(),
+                        transactionalDto.getTotalAmount(),
+                        transactionalDto.getPaidAmount(),
+                        transactionalDto.getDiscountAmount(),
+                        transactionId);
+                paymentTransaction.setActive(false);
+                paymentTransactionRepository.save(paymentTransaction);
+            }
+
+            if (pocketMoneyDto != null) {
+                PocketMoneyTransaction transaction = new PocketMoneyTransaction();
+                transaction.setCustomerUserId(pocketMoneyDto.getCustomerUserId());
+                transaction.setCashierUserId(pocketMoneyDto.getCashierUserId());
+                transaction.setAmount(pocketMoneyDto.getAmount());
+                pocketMoneyTransactionRepository.save(transaction);
+            }
+
         }
 
         return responseEntity;
