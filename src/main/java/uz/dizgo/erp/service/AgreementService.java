@@ -18,61 +18,81 @@ import static uz.dizgo.erp.enums.SalaryStatus.*;
 @RequiredArgsConstructor
 public class AgreementService {
     private final AgreementRepository agreementRepository;
+    private final MessageService messageService;
 
+    /**
+     * Foydalanuvchi uchun standart kelishuvlarni yaratadi va saqlaydi.
+     * @param user - kelishuvlar yaratiladigan foydalanuvchi
+     */
     public void add(User user) {
-        List<Agreement> agreementList =
-                Arrays.asList(
-                        new Agreement(user, HOUR, 0d, false),
-                        new Agreement(user, DAY, 0d, false),
-                        new Agreement(user, MONTH, 0d, false),
-                        new Agreement(user, KPI, 0d, true)
-                );
+        List<Agreement> agreementList = List.of(
+                new Agreement(user, HOUR, 0d, false),
+                new Agreement(user, DAY, 0d, false),
+                new Agreement(user, MONTH, 0d, false),
+                new Agreement(user, KPI, 0d, true)
+        );
         agreementRepository.saveAll(agreementList);
     }
 
+    /**
+     * Foydalanuvchining kelishuvlarini yangilaydi.
+     * @param userId - foydalanuvchining ID si
+     * @param agreementGetDto - yangilangan kelishuvlar ma'lumotlari
+     * @return - operatsiya natijasi bo‘yicha xabar
+     */
     public ApiResponse edit(UUID userId, AgreementGetDto agreementGetDto) {
-        Integer countAllByUserId = agreementRepository.countAllByUserId(userId);
-        if (countAllByUserId != SalaryStatus.values().length) return new ApiResponse("ERROR", false);
-        if (countAllByUserId != agreementGetDto.getAgreementDtoList().size())
-            return new ApiResponse("LIST SIZE ERROR", false);
-        List<Agreement> agreementList = new ArrayList<>();
-        for (AgreementDto agreementDto : agreementGetDto.getAgreementDtoList()) {
-            Optional<Agreement> optionalAgreement = agreementRepository.findByUserIdAndSalaryStatus(userId, SalaryStatus.valueOf(agreementDto.getSalaryStatus()));
-            if (optionalAgreement.isEmpty()) return new ApiResponse("AGREEMENT NOT FOUND", false);
-            Agreement agreement = editHelper(optionalAgreement.get(), agreementDto, agreementGetDto.getStartDate(), agreementGetDto.getEndDate());
-            agreementList.add(agreement);
+        // Foydalanuvchining kelishuvlar sonini tekshiramiz
+        int agreementCount = agreementRepository.countAllByUserId(userId);
+        if (agreementCount != SalaryStatus.values().length || agreementCount != agreementGetDto.getAgreementDtoList().size()) {
+            return new ApiResponse(messageService.getMessage("invalid.agreement.count"), false);
         }
+
+        // Kelishuvlarni yangilash
+        List<Agreement> agreementList = agreementGetDto.getAgreementDtoList().stream()
+                .map(dto -> agreementRepository.findByUserIdAndSalaryStatus(userId, SalaryStatus.valueOf(dto.getSalaryStatus()))
+                        .map(agreement -> {
+                            agreement.setActive(dto.isActive());
+                            agreement.setPrice(dto.getPrice());
+                            agreement.setStartDate(agreementGetDto.getStartDate());
+                            agreement.setEndDate(agreementGetDto.getEndDate());
+                            return agreement;
+                        }).orElse(null))
+                .filter(Objects::nonNull)
+                .toList();
+
+        if (agreementList.size() != agreementGetDto.getAgreementDtoList().size()) {
+            return new ApiResponse(messageService.getMessage("not.found"), false);
+        }
+
         agreementRepository.saveAll(agreementList);
-        return new ApiResponse("SUCCESS", true);
+        return new ApiResponse(messageService.getMessage("success"), true);
     }
 
-    private Agreement editHelper(Agreement agreement, AgreementDto agreementDto, Date startDate, Date endDate) {
-        agreement.setActive(agreementDto.isActive());
-        agreement.setPrice(agreementDto.getPrice());
-        agreement.setStartDate(startDate);
-        agreement.setEndDate(endDate);
-        return agreement;
-    }
-
-
+    /**
+     * Berilgan foydalanuvchining kelishuvlarini olish.
+     * @param userId - foydalanuvchining ID si
+     * @return - kelishuvlar haqidagi ma'lumotlar
+     */
     public ApiResponse getOne(UUID userId) {
+        // Barcha kelishuvlarni olish
         List<Agreement> agreementList = agreementRepository.findAllByUserId(userId);
-        if (agreementList.size() != SalaryStatus.values().length) return new ApiResponse("ERROR", false);
-        List<AgreementDto> agreementDtoList = new ArrayList<>();
-        for (Agreement agreement : agreementList) {
-            agreementDtoList.add(
-                    new AgreementDto(
-                            agreement.getId(),
-                            agreement.getSalaryStatus().name(),
-                            agreement.getPrice(),
-                            agreement.isActive())
-            );
+        if (agreementList.size() != SalaryStatus.values().length) {
+            return new ApiResponse(messageService.getMessage("error"), false);
         }
+
+        // AgreementGetDto yaratish
         AgreementGetDto agreementGetDto = new AgreementGetDto(
                 agreementList.get(0).getStartDate(),
                 agreementList.get(0).getEndDate(),
-                agreementDtoList
+                agreementList.stream()
+                        .map(agreement -> new AgreementDto(
+                                agreement.getId(),
+                                agreement.getSalaryStatus().name(),
+                                agreement.getPrice(),
+                                agreement.isActive()))
+                        .toList()
         );
-        return new ApiResponse("success", true, agreementGetDto);
+
+        return new ApiResponse(messageService.getMessage("success"), true, agreementGetDto);
     }
 }
