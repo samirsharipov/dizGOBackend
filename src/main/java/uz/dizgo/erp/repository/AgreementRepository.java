@@ -1,8 +1,11 @@
 package uz.dizgo.erp.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import uz.dizgo.erp.entity.Agreement;
 import uz.dizgo.erp.enums.SalaryStatus;
+import uz.dizgo.erp.payload.AgreementGetDto;
 
 import java.util.Date;
 import java.util.List;
