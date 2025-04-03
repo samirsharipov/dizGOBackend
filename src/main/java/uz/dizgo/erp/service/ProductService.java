@@ -1023,13 +1023,27 @@ public class ProductService {
 
     public ApiResponse generateBarcode(UUID businessId) {
         Random random = new Random();
-        long randomPart = (long) (random.nextDouble() * 1_000_000_0000L);
-        String barcode = String.format("200%10d", randomPart);
+        String prefix = "300";
+        int businessPart = Math.abs(businessId.hashCode()) % 1_000_000;
+        int productPart = random.nextInt(1_000);
+        String baseBarcode = String.format("%s%06d%03d", prefix, businessPart, productPart);
+        int checksum = calculateEAN13Checksum(baseBarcode);
+        String barcode = baseBarcode + checksum;
+
         boolean exist = productRepository.existsByBarcodeAndBusinessId(barcode, businessId);
         if (exist) {
             generateBarcode(businessId);
         }
 
         return new ApiResponse("success", true, barcode);
+    }
+
+    private static int calculateEAN13Checksum(String barcode) {
+        int sum = 0;
+        for (int i = 0; i < barcode.length(); i++) {
+            int digit = Character.getNumericValue(barcode.charAt(i));
+            sum += (i % 2 == 0) ? digit : digit * 3;
+        }
+        return (10 - (sum % 10)) % 10;
     }
 }
