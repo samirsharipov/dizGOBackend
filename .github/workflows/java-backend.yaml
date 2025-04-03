@@ -3,7 +3,8 @@ name: Deploy Spring Boot Project
 on:
   push:
     branches:
-      - main  # yoki boshqa asosiy branch
+      - main
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -11,52 +12,50 @@ jobs:
     steps:
     - name: Kodingizni tekshirish
       uses: actions/checkout@v2
- 
+
     - name: SSH Private Keyni yaratish
       run: |
         mkdir -p ~/.ssh
-        echo "$PRIVATE_KEY" > ~/.ssh/id_rsa
+        echo "$PRIVATE_KEY" | base64 --decode > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
       env:
         PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: SSH ruxsatlarini o‘rnatish
-      run: chmod 600 ~/.ssh/id_rsa
-
     - name: Host key verificationni o‘tkazib yuborish
       run: |
-        mkdir -p ~/.ssh
         echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
 
-    - name: Serverda git pull qilish (Agar loyihangiz mavjud bo'lsa)
+    - name: Serverda git pull qilish
       run: |
-        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no bnav@176.96.243.201 'cd /home/bnav/optimitBackend && git pull origin main'
+        ssh -i ~/.ssh/id_rsa bnav@176.96.243.201 'cd /home/bnav/optimitBackend && git pull origin main'
+
+    - name: Testlarni o‘tkazish
+      run: |
+        ssh -i ~/.ssh/id_rsa bnav@176.96.243.201 'cd /home/bnav/optimitBackend && mvn test'
 
     - name: Maven build qilish
       run: |
-        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no bnav@176.96.243.201 'cd /home/bnav/optimitBackend && mvn clean install -DskipTests'
+        ssh -i ~/.ssh/id_rsa bnav@176.96.243.201 'cd /home/bnav/optimitBackend && mvn clean install'
 
     - name: Deploy qilish
       run: |
-        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no bnav@176.96.243.201 '
+        ssh -i ~/.ssh/id_rsa bnav@176.96.243.201 '
         JAR_PATH="/home/bnav/optimitBackend/target/spring-security.jar"
         SCREEN_NAME="spring_app"
         LOG_DIR="/home/bnav/optimitBackend/logs"
-        LOG_FILE="$LOG_DIR/spring_app.log"
-  
-        # Loglar uchun papka mavjudligini tekshirish, yo‘q bo‘lsa yaratish
-        if [ ! -d "$LOG_DIR" ]; then
-          mkdir -p "$LOG_DIR"
-        fi
+        LOG_FILE="$LOG_DIR/spring_app_$(date +%Y%m%d-%H%M%S).log"
 
-        # Agar screen sessiyasi mavjud bo‘lsa, uni to‘xtatish
-        if screen -list | grep -q "$SCREEN_NAME"; then
+        # Loglar uchun papkani yaratish
+        mkdir -p "$LOG_DIR"
+
+        # Jar faylni to‘xtatish
+        if pgrep -f "$JAR_PATH" > /dev/null; then
           echo "Stopping existing jar process..."
-          screen -S $SCREEN_NAME -X quit
+          pkill -f "$JAR_PATH"
+          sleep 5
         fi
 
-        # Yangi jar faylni screen orqali ishga tushirish va loglarni yozish
+        # Yangi jar faylni ishga tushirish
         echo "Starting new jar process..."
-        screen -dmS $SCREEN_NAME bash -c "java -jar $JAR_PATH > $LOG_FILE 2>&1"
-        echo "Application deployed successfully."
-        '
-        
+        nohup java -jar "$JAR_PATH" >> "$LOG_FILE" 2>&1 &
+        echo
