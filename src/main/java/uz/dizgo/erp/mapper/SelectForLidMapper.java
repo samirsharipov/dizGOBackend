@@ -11,6 +11,10 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface SelectForLidMapper {
+    @Mapping(target = "lastModifiedBy", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(target = "lidField", ignore = true)
     @Mapping(source = "lidFieldId", target = "lidField.id")
     @Mapping(target = "updateAt", ignore = true)

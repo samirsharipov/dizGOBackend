@@ -10,6 +10,10 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface SourceMapper {
+    @Mapping(target = "lastModifiedBy", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(target = "updateAt", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "business", ignore = true)
@@ -23,6 +27,10 @@ public interface SourceMapper {
 
     List<SourceDto> toDto(List<Source> sourceList);
 
+    @Mapping(target = "lastModifiedBy", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(target = "updateAt", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "business", ignore = true)

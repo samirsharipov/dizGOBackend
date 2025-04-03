@@ -10,11 +10,14 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ResourceMapper {
 
+    @Mapping(target = "updateAt", ignore = true)
+    @Mapping(target = "lastModifiedBy", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(source = "branchId",target = "branch.id")
     Resource toResource(ResourceDto resourceDto);
-
-    @Mapping(source = "branch.id",target = "branchId")
-    ResourceDto toResourceDto(Resource resource);
 
     List<ResourceDto> toResourceDtoList(List<Resource> resources);
 }

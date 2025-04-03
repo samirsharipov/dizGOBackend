@@ -16,11 +16,6 @@ public class GeoCheck {
         return R * c; // Returns distance in meters
     }
 
-    public boolean isInsideGeofence(double latitude, double longitude, double branchLatitude, double branchLongitude, double radius) {
-        double distance = calculateDistance(latitude, longitude, branchLatitude, branchLongitude);
-        return distance <= radius; // radius is in meters
-    }
-
     public boolean checkDistance(double distance, double radius) {
         return distance <= radius;
     }

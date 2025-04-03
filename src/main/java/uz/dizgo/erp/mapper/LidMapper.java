@@ -9,6 +9,13 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface LidMapper {
+    @Mapping(target = "userName", ignore = true)
+    @Mapping(target = "lastModifiedBy", ignore = true)
+    @Mapping(target = "description", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "delete", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(target = "business", ignore = true)
     @Mapping(target = "business.id", source = "businessId")
     @Mapping(target = "lidStatus", ignore = true)

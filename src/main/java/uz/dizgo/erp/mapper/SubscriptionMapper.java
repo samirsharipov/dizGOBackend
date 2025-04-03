@@ -11,6 +11,10 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface SubscriptionMapper {
 
+    @Mapping(target = "testDayFinish", ignore = true)
+    @Mapping(target = "lastModifiedBy", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "delete", ignore = true)
     @Mapping(target = "business", ignore = true)
     @Mapping(target = "updateAt", ignore = true)

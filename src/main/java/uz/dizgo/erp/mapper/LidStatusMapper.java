@@ -19,6 +19,11 @@ public interface LidStatusMapper {
 
     List<LidStatusDto> toDto(List<LidStatus> lidStatusList);
 
+    @Mapping(target = "orginalName", ignore = true)
+    @Mapping(target = "lastModifiedBy", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(target = "business", ignore = true)
     @Mapping(target = "updateAt", ignore = true)
     @Mapping(target = "id", ignore = true)
@@ -26,6 +31,11 @@ public interface LidStatusMapper {
     @Mapping(target = "business.id", source = "businessId")
     LidStatus toEntity(LidStatusPostDto lidStatusPostDto);
 
+    @Mapping(target = "orginalName", ignore = true)
+    @Mapping(target = "lastModifiedBy", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(target = "updateAt", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

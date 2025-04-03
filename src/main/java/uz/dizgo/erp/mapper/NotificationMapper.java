@@ -11,7 +11,6 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface NotificationMapper {
 
-    NotificationGetAllDto toDtoGet(Notification notification);
 
     List<NotificationGetAllDto> toDtoGetAll(List<Notification> notificationList);
 

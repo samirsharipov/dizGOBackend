@@ -13,6 +13,10 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ExchangeProductBranchMapper {
 
+    @Mapping(target = "lastModifiedBy", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(target = "delete", ignore = true)
     @Mapping(target = "exchangeProductList", ignore = true)
     @Mapping(target = "updateAt", ignore = true)
@@ -29,6 +33,7 @@ public interface ExchangeProductBranchMapper {
     ExchangeProductBranch toEntity(ExchangeProductBranchDTO exchangeProductBranchDTO);
 
 
+    @Mapping(target = "userId", ignore = true)
     @Mapping(target = "exchangeProductDTOS", ignore = true)
     @Mapping(target = "shippedBranchId", source = "shippedBranch.id")
     @Mapping(target = "receivedBranchId", source = "receivedBranch.id")

@@ -13,5 +13,6 @@ public interface HistoryMapper {
     @Mapping(target = "lastName", source = "user.lastName")
     @Mapping(target = "branchName", source = "branch.name")
     HistoryGetDto toDto(History history);
+
     List<HistoryGetDto> toDtoList(List<History> historyList);
 }
