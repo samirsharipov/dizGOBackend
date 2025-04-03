@@ -15,6 +15,10 @@ public interface CustomerGroupMapper {
 
     List<CustomerGroupDto> toDtoList(List<CustomerGroup> customerGroups);
 
+    @Mapping(target = "lastModifiedBy", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(target = "business", ignore = true)
     @Mapping(target = "updateAt", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

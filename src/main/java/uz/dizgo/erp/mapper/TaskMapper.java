@@ -32,9 +32,6 @@ public interface TaskMapper {
     @Mapping(target = "id", source = "task.id")
     TaskGetDto toDto(Task task);
 
-    default List<User> mapUsers(Set<User> users) {
-        return new ArrayList<>(users);
-    }
 
     List<TaskGetDto> toDto(List<Task> taskList);
 }

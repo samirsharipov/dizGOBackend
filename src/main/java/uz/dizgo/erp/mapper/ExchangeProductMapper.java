@@ -18,6 +18,8 @@ public interface ExchangeProductMapper {
 
     List<ExchangeProductDTO> toDtoList(List<ExchangeProduct> exchangeProducts);
 
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(target = "lastModifiedBy", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updateAt", ignore = true)

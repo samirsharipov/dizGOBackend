@@ -10,6 +10,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface PaymentMapper {
 
+    @Mapping(target = "isDollar", ignore = true)
     @Mapping(target = "paymentMethodId", source = "payMethod.id")
     PaymentDto toDto(Payment payment);
 

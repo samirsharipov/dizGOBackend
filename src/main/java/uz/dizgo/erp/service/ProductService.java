@@ -1023,8 +1023,8 @@ public class ProductService {
 
     public ApiResponse generateBarcode(UUID businessId) {
         Random random = new Random();
-        int randomPart = random.nextInt(1_000_000);
-        String barcode = String.format("300%06d", randomPart);
+        long randomPart = (long) (random.nextDouble() * 1_000_000_0000L);
+        String barcode = String.format("200%10d", randomPart);
         boolean exist = productRepository.existsByBarcodeAndBusinessId(barcode, businessId);
         if (exist) {
             generateBarcode(businessId);

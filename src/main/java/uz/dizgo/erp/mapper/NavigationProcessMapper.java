@@ -9,5 +9,6 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface NavigationProcessMapper {
     NavigationProcessDto toDto(NavigationProcess navigationProcess);
+
     List<NavigationProcessDto> toDtoList(List<NavigationProcess> navigationProcessList);
 }

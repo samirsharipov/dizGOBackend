@@ -9,12 +9,12 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface TradeLidMapper {
+    @Mapping(target = "customerPhoneNumber", source = "customer.phoneNumber")
+    @Mapping(target = "customerName", source = "customer.name")
     @Mapping(source = "trader.firstName", target = "traderName")
     @Mapping(source = "createdAt", target = "timestamp")
     @Mapping(source = "paymentStatus.status", target = "paymentStatusName")
     @Mapping(source = "payMethod.type", target = "paymentMethodName")
-//    @Mapping(source = "customer.phoneNumber", target = "customerPhoneNumber")
-//    @Mapping(source = "customer.name", target = "customerName")
     @Mapping(source = "branch.name", target = "branchName")
     TradeLidDto toDto(Trade trade);
 

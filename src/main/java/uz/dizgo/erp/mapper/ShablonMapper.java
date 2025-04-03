@@ -10,6 +10,10 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface ShablonMapper {
+    @Mapping(target = "lastModifiedBy", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(source = "businessId", target = "business.id")
     @Mapping(target = "updateAt", ignore = true)
     @Mapping(target = "originalName", ignore = true)
@@ -21,6 +25,10 @@ public interface ShablonMapper {
 
     List<ShablonDto> toDto(List<Shablon> shablonList);
 
+    @Mapping(target = "lastModifiedBy", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(target = "business", ignore = true)
     @Mapping(target = "updateAt", ignore = true)
     @Mapping(target = "originalName", ignore = true)

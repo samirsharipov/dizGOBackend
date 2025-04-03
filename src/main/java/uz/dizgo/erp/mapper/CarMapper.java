@@ -12,6 +12,10 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface CarMapper {
+    @Mapping(target = "lastModifiedBy", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(source = "businessId", target = "business.id")
     @Mapping(target = "updateAt", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
