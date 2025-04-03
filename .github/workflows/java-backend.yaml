@@ -31,6 +31,10 @@ jobs:
       run: |
         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no bnav@176.96.243.201 'cd /home/bnav/optimitBackend && git pull origin main'
 
+    - name: Testlarni o‘tkazish
+      run: |
+        ssh -i ~/.ssh/id_rsa bnav@176.96.243.201 'cd /home/bnav/optimitBackend && mvn test'
+
     - name: Maven build qilish
       run: |
         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no bnav@176.96.243.201 'cd /home/bnav/optimitBackend && mvn clean install -DskipTests'
