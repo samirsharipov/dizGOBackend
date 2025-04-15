@@ -75,7 +75,9 @@ public class ProductService {
         product.setMinQuantity(productEditDto.getMinQuantity());
         product.setGrossPrice(productEditDto.getGrossPrice());
 
-        //    product.setBarcode(productEditDto.getBarcode());
+        validateUniqueBarcode(productEditDto.getBarcode(), productId, product.getBusiness().getId());
+
+        product.setBarcode(productEditDto.getBarcode());
 
         product.setMeasurement(measurement);
 
