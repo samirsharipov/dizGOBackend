@@ -92,8 +92,8 @@ public class SelectedProductsService {
             return new ApiResponse("No products found for the branch", false);
         }
         dtoList.stream()
-                .filter(SelectedProductsGetDto::getDiscount)
-                .forEach(selectedProductsGetDto -> updateDiscount(selectedProductsGetDto, branchId));
+                .filter(dto -> Boolean.TRUE.equals(dto.getDiscount()))
+                .forEach(dto -> updateDiscount(dto, branchId));
 
         return new ApiResponse("Successfully selected products", true, dtoList);
     }
