@@ -175,7 +175,8 @@ public class PlumPaymentService {
                 // transactionId ni olish
                 long transactionId = ((Number) resultMap.get("transactionId")).longValue();
 
-                PaymentTransaction paymentTransaction = new PaymentTransaction(transactionalDto.getCustomerId(),
+                PaymentTransaction paymentTransaction = new PaymentTransaction(
+                        transactionalDto.getCustomerId(),
                         transactionalDto.getBranchId(),
                         transactionalDto.getTotalAmount(),
                         transactionalDto.getPaidAmount(),
