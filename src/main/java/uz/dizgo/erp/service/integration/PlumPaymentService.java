@@ -13,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 import uz.dizgo.erp.entity.PaymentTransaction;
 import uz.dizgo.erp.entity.PocketMoneyTransaction;
 import uz.dizgo.erp.entity.UserCard;
+import uz.dizgo.erp.payload.PaymentRequestDto;
 import uz.dizgo.erp.payload.PocketMoneyDto;
 import uz.dizgo.erp.payload.TransactionalDto;
 import uz.dizgo.erp.repository.PaymentTransactionRepository;
