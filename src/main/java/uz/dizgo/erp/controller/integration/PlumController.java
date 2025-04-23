@@ -65,10 +65,10 @@ public class PlumController {
                                            @RequestParam Long cardId,
                                            @RequestParam BigDecimal amount,
                                            @RequestParam String extraId,
-                                           @RequestParam(required = false) TransactionalDto transactionalDto,
+                                           @RequestBody(required = false) TransactionalDto transactionalDto,
                                            @RequestParam(required = false) boolean sendOtp,
                                            @RequestParam(required = false) String ePosCode,
-                                           @RequestParam(required = false) PocketMoneyDto pocketMoneyDto) {
+                                           @RequestBody(required = false) PocketMoneyDto pocketMoneyDto) {
         return plumPaymentService.createPayment(userId, cardId, amount, extraId, transactionalDto, sendOtp, ePosCode,pocketMoneyDto);
     }
 

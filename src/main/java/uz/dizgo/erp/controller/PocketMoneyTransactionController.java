@@ -21,7 +21,7 @@ public class PocketMoneyTransactionController {
     private final PocketMoneyTransactionService pocketMoneyTransactionService;
 
     @GetMapping("/get-all-by-cashier-id/{cashierUserId}")
-    public ResponseEntity<ApiResponse>getAllByCashierId(@PathVariable UUID cashierUserId) {
+    public ResponseEntity<ApiResponse> getAllByCashierId(@PathVariable UUID cashierUserId) {
         return responseEntityHelper.buildResponse(pocketMoneyTransactionService.getAllByUserId(cashierUserId));
     }
 
