@@ -22,6 +22,6 @@ public class PaymentTransactionService {
         if (all.isEmpty()) {
             return new ApiResponse(messageService.getMessage("not.found"), false);
         }
-        return new ApiResponse(messageService.getMessage("success"), true, all);
+        return new ApiResponse(messageService.getMessage("found"), true, all);
     }
 }
