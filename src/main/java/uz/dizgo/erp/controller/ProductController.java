@@ -71,9 +71,8 @@ public class ProductController {
     @CheckPermission("VIEW_PRODUCT")
     @GetMapping("/get-by-barcode/{barcode}/{branchId}")
     public HttpEntity<?> getByBarcode(@PathVariable String barcode,
-                                      @PathVariable UUID branchId,
-                                      @RequestParam String language) {
-        return responseEntityHelper.buildResponse(productService.getByBarcode(barcode, branchId, language));
+                                      @PathVariable UUID branchId) {
+        return responseEntityHelper.buildResponse(productService.getByBarcode(barcode, branchId));
     }
 
     @CheckPermission("VIEW_PRODUCT")

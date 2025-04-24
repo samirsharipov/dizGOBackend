@@ -156,14 +156,7 @@ public class ProductService {
         return new ApiResponse("NOT FOUND", false);
     }
 
-    public ApiResponse getByBarcode(String barcode, UUID branchId, String language) {
-
-        Map<String, String> messages = Map.of(
-                "uz_not_found", "Ushbu maxsulot allaqachon mavjud!",
-                "en_not_found", "This product already exists!",
-                "ru_not_found", "Этот продукт уже существует!"
-        );
-
+    public ApiResponse getByBarcode(String barcode, UUID branchId) {
 
         Branch branch = findByIdOrThrow(branchRepository, branchId, "branch");
 
@@ -175,7 +168,7 @@ public class ProductService {
         if (productRepository
                 .existsByBarcodeAndBusinessId(barcode,
                         branch.getBusiness().getId())) {
-            return new ApiResponse(messages.get(language + "_not_found"), false);
+            return new ApiResponse(messageService.getMessage("not.found"), false);
         }
 
         Optional<Product> optionalProduct = productRepository
@@ -193,8 +186,8 @@ public class ProductService {
                 productGetDto.setTranslates(translates);
             }
 
-            return new ApiResponse("FOUND", true, productGetDto);
-        }).orElseGet(() -> new ApiResponse("not found", false));
+            return new ApiResponse(messageService.getMessage("found"), true, productGetDto);
+        }).orElseGet(() -> new ApiResponse(messageService.getMessage("not.found"), false));
     }
 
     public ApiResponse getByCategory(UUID category_id, String code) {
@@ -203,10 +196,10 @@ public class ProductService {
                 productRepository.findAllByCategoryIdAndActiveOrderByNameAsc(category_id, code);
 
         if (productShortDto.isEmpty()) {
-            return new ApiResponse("NOT FOUND", false);
+            return new ApiResponse(messageService.getMessage("not.found"), false);
         }
 
-        return new ApiResponse("FOUND", true, productShortDto);
+        return new ApiResponse(messageService.getMessage("found"), true, productShortDto);
     }
 
     public ApiResponse getByBrand(UUID brand_id, String code) {
