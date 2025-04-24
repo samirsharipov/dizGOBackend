@@ -2,6 +2,7 @@ package uz.dizgo.erp.service;
 
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -977,10 +978,36 @@ public class ProductService {
         return new ApiResponse(messageService.getMessage("product.found"), true, all);
     }
 
+    public ApiResponse searchBarcode(UUID branchId, String barcodeWithKg) {
+        try {
+            Locale locale = LocaleContextHolder.getLocale();
+            String language = locale.getLanguage();
+            int barcode = Integer.parseInt(barcodeWithKg.substring(1, 7)); // barcode o'rni: 1-6
+            double totalKg = Double.parseDouble(barcodeWithKg.substring(7, barcodeWithKg.length() - 1)) / 1000; // 7-x dan oxirigacha
+
+            ProductResponseDTO productByKeywordDto =
+                    findProductByKeywordDto(branchId, String.valueOf(barcode), language);
+            if (productByKeywordDto == null) {
+                return new ApiResponse(messageService.getMessage("product.not.found"), false);
+            }
+            productByKeywordDto.setAmount(totalKg);
+
+            return new ApiResponse(messageService.getMessage("found"), true, productByKeywordDto);
+
+        } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
+            return new ApiResponse(messageService.getMessage("error.message"), false);
+        }
+    }
+
 
     private List<ProductResponseDTO> findProductByKeyword(UUID branchId, String keyword, String language) {
         if (keyword == null || keyword.isBlank()) return new ArrayList<>();
         return productRepository.findProductsByBranchIdAndKeyword(branchId, keyword, language);
+    }
+
+    private ProductResponseDTO findProductByKeywordDto(UUID branchId, String keyword, String language) {
+        Optional<ProductResponseDTO> optional = productRepository.findByBranchIdAndBarcodeDto(branchId, keyword, language);
+        return optional.orElse(null);
     }
 
     private void updateDiscount(ProductResponseDTO productResponseDTO, UUID branchId) {
@@ -1041,4 +1068,5 @@ public class ProductService {
         }
         return (10 - (sum % 10)) % 10;
     }
+
 }
