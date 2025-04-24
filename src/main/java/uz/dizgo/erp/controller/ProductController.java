@@ -92,6 +92,13 @@ public class ProductController {
         return responseEntityHelper.buildResponse(productService.searchTrade(branch_id, name, language));
     }
 
+    @CheckPermission("VIEW_PRODUCT")
+    @GetMapping("/search-barcode/{branch_id}")
+    public HttpEntity<?> searchBarcode(@PathVariable UUID branch_id,
+                                     @RequestParam String barcode) {
+        return responseEntityHelper.buildResponse(productService.searchBarcode(branch_id, barcode));
+    }
+
 
     @CheckPermission("VIEW_PRODUCT")
     @GetMapping("/get-by-category/{category_id}")

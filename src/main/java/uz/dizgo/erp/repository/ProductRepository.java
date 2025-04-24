@@ -167,6 +167,21 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             @Param("keyword") String keyword,
             @Param("languageCode") String languageCode);
 
+    @Query("SELECT new uz.dizgo.erp.payload.ProductResponseDTO( " +
+            "p.id, " +
+            "COALESCE(pt.name, p.name), " +
+            "p.salePrice, p.barcode, p.MXIKCode, " +
+            "p.discount) " +
+            "FROM Product p " +
+            "LEFT JOIN p.translations pt ON pt.language.code = :languageCode " +
+            "JOIN p.branch b " +
+            "WHERE b.id = :branchId AND p.barcode = :barcode " +
+            "GROUP BY p.id, pt.name, p.salePrice, p.barcode, p.MXIKCode, p.discount")
+    Optional<ProductResponseDTO> findByBranchIdAndBarcodeDto(
+            @Param("branchId") UUID branchId,
+            @Param("barcode") String barcode,
+            @Param("languageCode") String languageCode);
+
 
     // Business ID bo‘yicha mahsulot qidirish
     @Query("""
