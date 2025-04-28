@@ -812,9 +812,20 @@ public class ProductService {
         // Mahsulotni ID bo'yicha topish yoki xatolik yuborish
         Product product = findByIdOrThrow(productRepository, productId, "Product");
         // Measurement, Brand va Category-ni yangilash
-        Measurement measurement = findByIdOrThrow(measurementRepository, productEditMainDto.getMeasurementId(), "Measurement");
-        Brand brand = findByIdOrThrow(brandRepository, productEditMainDto.getBrandId(), "Brand");
-        Category category = findByIdOrThrow(categoryRepository, productEditMainDto.getCategoryId(), "Category");
+        Measurement measurement = new Measurement();
+        if (productEditMainDto.getMeasurementId() != null) {
+            measurement = findByIdOrThrow(measurementRepository, productEditMainDto.getMeasurementId(), "Measurement");
+        }
+
+        Brand brand = new Brand();
+        if (productEditMainDto.getBrandId() != null) {
+            brand = findByIdOrThrow(brandRepository, productEditMainDto.getBrandId(), "Brand");
+        }
+
+        Category category = new Category();
+        if (productEditMainDto.getCategoryId() != null) {
+            category = findByIdOrThrow(categoryRepository, productEditMainDto.getCategoryId(), "Category");
+        }
 
         String barcode = product.getBarcode();
         validateUniqueBarcode(productEditMainDto.getBarcode(), productId, product.getBusiness().getId());
