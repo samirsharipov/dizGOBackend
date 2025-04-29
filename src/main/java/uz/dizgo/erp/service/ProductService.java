@@ -994,22 +994,21 @@ public class ProductService {
             Locale locale = LocaleContextHolder.getLocale();
             String language = locale.getLanguage();
             ProductResponseDTO productByKeywordDto = new ProductResponseDTO();
-            if (barcodeWithKg.length() > 7) {
-                int barcode = Integer.parseInt(barcodeWithKg.substring(1, 7)); // barcode o'rni: 1-6
-                double totalKg = Double.parseDouble(barcodeWithKg.substring(7, barcodeWithKg.length() - 1)) / 1000; // 7-x dan oxirigacha
-                productByKeywordDto =
-                        findProductByKeywordDto(branchId, String.valueOf(barcode), language);
+            int barcode = Integer.parseInt(barcodeWithKg.substring(1, 7)); // barcode o'rni: 1-6
+            double totalKg = Double.parseDouble(barcodeWithKg.substring(7, barcodeWithKg.length() - 1)) / 1000; // 7-x dan oxirigacha
+            productByKeywordDto =
+                    findProductByKeywordDto(branchId, String.valueOf(barcode), language);
 
-                if (productByKeywordDto == null) {
-                    return new ApiResponse(messageService.getMessage("product.not.found"), false);
-                }
-                productByKeywordDto.setAmount(totalKg);
-            } else {
+            if (productByKeywordDto == null) {
                 productByKeywordDto =
                         findProductByKeywordDto(branchId, barcodeWithKg, language);
                 if (productByKeywordDto == null) {
                     return new ApiResponse(messageService.getMessage("product.not.found"), false);
                 }
+            }
+
+            if (totalKg > 0) {
+                productByKeywordDto.setAmount(totalKg);
             }
 
             return new ApiResponse(messageService.getMessage("found"), true, productByKeywordDto);
