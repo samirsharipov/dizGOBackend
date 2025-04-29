@@ -3910,3 +3910,67 @@ org.hibernate.PersistentObjectException: detached entity passed to persist: uz.d
 2025-04-28 17:50:42 [RMI TCP Connection(5)-192.168.1.50] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
 2025-04-28 17:50:42 [RMI TCP Connection(5)-192.168.1.50] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
 2025-04-28 17:50:42 [RMI TCP Connection(5)-192.168.1.50] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 4 ms
+2025-04-28 18:03:36 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=3m2s466ms).
+2025-04-28 18:10:48 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=7m12s410ms).
+2025-04-28 18:33:49 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=23m240ms).
+2025-04-28 19:18:42 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=44m53s279ms).
+2025-04-28 20:24:08 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h5m26s112ms).
+2025-04-28 20:34:58 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=10m49s569ms).
+2025-04-28 21:39:24 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h4m26s503ms).
+2025-04-28 21:56:28 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=17m3s650ms).
+2025-04-28 22:06:55 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=8m56s706ms).
+2025-04-28 23:07:50 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h55s672ms).
+2025-04-28 23:46:01 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=38m10s986ms).
+2025-04-29 00:41:55 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=55m54s1ms).
+2025-04-29 01:07:52 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=25m56s534ms).
+2025-04-29 02:10:54 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h3m2s20ms).
+2025-04-29 03:12:01 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h1m7s671ms).
+2025-04-29 04:28:50 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h16m48s627ms).
+2025-04-29 05:47:51 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h19m503ms).
+2025-04-29 07:00:04 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h12m13s157ms).
+2025-04-29 08:00:33 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h28s978ms).
+2025-04-29 08:45:44 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=45m11s520ms).
+2025-04-29 09:13:33 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=27m48s817ms).
+2025-04-29 09:19:26 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-04-29 09:19:26 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-04-29 09:19:26 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-04-29 10:07:57 [main] INFO  o.s.s.core.SpringSecurityCoreVersion - You are running with Spring Security Core 5.5.3
+2025-04-29 10:07:57 [main] INFO  uz.dizgo.erp.DizGOApplication - Starting DizGOApplication using Java 17.0.15 on Samirs-Air.home with PID 97280 (/Users/samirsharipov/Desktop/dizGOBackend/dizGOBackend/target/classes started by samirsharipov in /Users/samirsharipov/Desktop/dizGOBackend/dizGOBackend)
+2025-04-29 10:07:57 [main] INFO  uz.dizgo.erp.DizGOApplication - The following profiles are active: dev
+2025-04-29 10:07:58 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-04-29 10:07:58 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 162 ms. Found 128 JPA repository interfaces.
+2025-04-29 10:07:59 [main] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler@76af34b5' of type [org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2025-04-29 10:07:59 [main] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'methodSecurityMetadataSource' of type [org.springframework.security.access.method.DelegatingMethodSecurityMetadataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2025-04-29 10:07:59 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8081 (http)
+2025-04-29 10:07:59 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8081"]
+2025-04-29 10:07:59 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-04-29 10:07:59 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.54]
+2025-04-29 10:07:59 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-04-29 10:07:59 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1663 ms
+2025-04-29 10:07:59 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-04-29 10:07:59 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 5.4.32.Final
+2025-04-29 10:07:59 [main] INFO  o.h.annotations.common.Version - HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2025-04-29 10:07:59 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-04-29 10:07:59 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@2e09e367
+2025-04-29 10:07:59 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-04-29 10:07:59 [main] INFO  org.hibernate.dialect.Dialect - HHH000400: Using dialect: org.hibernate.dialect.PostgreSQL10Dialect
+2025-04-29 10:08:01 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2025-04-29 10:08:01 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-04-29 10:08:07 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoint(s) beneath base path '/actuator'
+2025-04-29 10:08:07 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@ed870c0, org.springframework.security.web.context.SecurityContextPersistenceFilter@4ed849c2, org.springframework.security.web.header.HeaderWriterFilter@39c0efdb, org.springframework.web.filter.CorsFilter@2e291b62, org.springframework.security.web.authentication.logout.LogoutFilter@40beeda, uz.dizgo.erp.security.JwtFilter@5dafbb36, org.springframework.security.web.session.ConcurrentSessionFilter@d2d0bde, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@390d7327, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@57bae294, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@423098bc, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@203855c2, org.springframework.security.web.session.SessionManagementFilter@25218c54, org.springframework.security.web.access.ExceptionTranslationFilter@249d9d05, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@3b7f00d9]
+2025-04-29 10:08:07 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8081"]
+2025-04-29 10:08:07 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port(s): 8081 (http) with context path ''
+2025-04-29 10:08:09 [main] INFO  uz.dizgo.erp.DizGOApplication - Started DizGOApplication in 11.529 seconds (JVM running for 13.329)
+2025-04-29 10:08:09 [RMI TCP Connection(4)-192.168.1.50] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-04-29 10:08:09 [RMI TCP Connection(4)-192.168.1.50] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-04-29 10:08:09 [RMI TCP Connection(4)-192.168.1.50] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 3 ms
+2025-04-29 10:34:08 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=17m8s996ms).
+2025-04-29 10:35:27 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1m18s590ms).
+2025-04-29 11:05:06 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=2m38s332ms).
+2025-04-29 11:06:14 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1m8s890ms).
+2025-04-29 14:46:10 [http-nio-8081-exec-4] INFO  u.d.erp.controller.AuthController - Login request: username=Rio-Blanco
+2025-04-29 14:46:10 [http-nio-8081-exec-4] WARN  u.d.erp.controller.AuthController - Authentication failed for username=Rio-Blanco Reason: Неверные учетные данные пользователя
+2025-04-29 14:46:37 [http-nio-8081-exec-7] INFO  u.d.erp.controller.AuthController - Login request: username=Rio-Blanco
+2025-04-29 14:46:37 [http-nio-8081-exec-7] WARN  u.d.erp.controller.AuthController - Authentication failed for username=Rio-Blanco Reason: Неверные учетные данные пользователя
+2025-04-29 14:46:58 [http-nio-8081-exec-9] INFO  u.d.erp.controller.AuthController - Login request: username=Rio-Blanco
+2025-04-29 14:46:59 [http-nio-8081-exec-9] WARN  u.d.erp.controller.AuthController - Authentication failed for username=Rio-Blanco Reason: Неверные учетные данные пользователя
