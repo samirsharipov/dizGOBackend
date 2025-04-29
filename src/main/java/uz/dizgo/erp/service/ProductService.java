@@ -999,7 +999,9 @@ public class ProductService {
             productByKeywordDto =
                     findProductByKeywordDto(branchId, String.valueOf(barcode), language);
 
-            if (productByKeywordDto == null) {
+            if (productByKeywordDto != null) {
+                productByKeywordDto.setAmount(totalKg);
+            } else {
                 productByKeywordDto =
                         findProductByKeywordDto(branchId, barcodeWithKg, language);
                 if (productByKeywordDto == null) {
@@ -1007,9 +1009,6 @@ public class ProductService {
                 }
             }
 
-            if (totalKg > 0) {
-                productByKeywordDto.setAmount(totalKg);
-            }
 
             return new ApiResponse(messageService.getMessage("found"), true, productByKeywordDto);
 
