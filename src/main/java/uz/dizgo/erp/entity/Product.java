@@ -8,6 +8,8 @@ import org.hibernate.proxy.HibernateProxy;
 import uz.dizgo.erp.entity.template.AbsEntity;
 
 import javax.persistence.*;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -57,7 +59,12 @@ public class Product extends AbsEntity {
     private String uniqueSKU;           // Unikal SKU (Stock Keeping Unit)
 
     // Narxlar
-    private double salePrice;           // Mahsulotning sotish narxi (so'm)
+    @DecimalMax(value = "1000000000", inclusive = true, message = "Sale price juda katta bo'lishi mumkin emas")
+    @PositiveOrZero(message = "Sale price manfiy bo'lishi mumkin emas")
+    private double salePrice;// Mahsulotning sotish narxi (so'm)
+
+    @DecimalMax(value = "1000000000", inclusive = true, message = "Sale price juda katta bo'lishi mumkin emas")
+    @PositiveOrZero(message = "Sale price manfiy bo'lishi mumkin emas")
     private double salePriceDollar;     // Mahsulotning sotish narxi (dollar)
 
     // Inventar ma'lumotlari
@@ -89,6 +96,9 @@ public class Product extends AbsEntity {
     private boolean active = true;      // Faol yoki yo'qligini bildiruvchi holat
     private double profitPercent;       // Foyda foizi
     private double tax = 1;             // Soliq foizi
+
+    @DecimalMax(value = "1000000000", inclusive = true, message = "Buy price juda katta bo'lishi mumkin emas")
+    @PositiveOrZero(message = "Buy price manfiy bo'lishi mumkin emas")
     private double buyPrice;            // Sotib olish narxi
 
     // Boshqa narxlar
