@@ -5255,3 +5255,5 @@ Caused by: org.hibernate.hql.internal.ast.QuerySyntaxException: unexpected token
 2025-04-30 14:40:54 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8081"]
 2025-04-30 14:40:54 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port(s): 8081 (http) with context path ''
 2025-04-30 14:40:55 [main] INFO  uz.dizgo.erp.DizGOApplication - Started DizGOApplication in 10.58 seconds (JVM running for 12.036)
+2025-04-30 14:58:19 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=12m2s334ms).
+2025-04-30 15:01:47 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=3m27s618ms).
