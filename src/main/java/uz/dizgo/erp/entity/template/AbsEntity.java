@@ -6,6 +6,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @MappedSuperclass
 @Where(clause = "deleted = false AND active = true")
+@EntityListeners(AuditingEntityListener.class)
 public abstract class AbsEntity implements Serializable {
     @Id
     @GeneratedValue
