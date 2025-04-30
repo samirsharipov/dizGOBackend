@@ -39,7 +39,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                 join branches b on w.branch.id = b.id
                 where b.business.id = :businessId
                 and p.createdAt between :startDate and :endDate
-                and w.amount > 0
+                 and w.amount > 0 and p.salePrice > 0
             """)
     Double totalProductBuyPrice(@Param("businessId") UUID businessId,
                                  @Param("startDate") Timestamp startDate,
@@ -53,7 +53,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                 join Warehouse w on w.product = p and w.branch = b
                 where b.id = :branchId
                 and p.createdAt between :startDate and :endDate
-                and w.amount > 0
+                and w.amount > 0 and p.salePrice > 0
             """) Double totalProductBuyPriceByBranch(@Param("branchId") UUID branchId,
                                          @Param("startDate") Timestamp startDate,
                                          @Param("endDate") Timestamp endDate);
@@ -66,7 +66,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                 join branches b on w.branch.id = b.id
                 where b.business.id = :businessId
                 and p.createdAt between :startDate and :endDate
-                and w.amount > 0
+                and w.amount > 0 and p.salePrice > 0
             """)
     Double totalProductSalePrice(@Param("businessId") UUID businessId,
                                  @Param("startDate") Timestamp startDate,
@@ -80,7 +80,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                 join Warehouse w on w.product = p and w.branch = b
                 where b.id = :branchId
                 and p.createdAt between :startDate and :endDate
-                and w.amount > 0
+                 and w.amount > 0 and p.salePrice > 0
             """)
     Double totalProductSalePriceByBranch(@Param("branchId") UUID branchId,
                                          @Param("startDate") Timestamp startDate,
