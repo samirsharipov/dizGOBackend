@@ -44,13 +44,29 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
                                          @Param("endDate") Timestamp endDate);
 
 
-    @Query(value = "select sum(p.salePrice) from Product p where p.business.id = :businessId and p.createdAt between :startDate and :endDate")
+    @Query("""
+                select sum(p.salePrice * w.amount)
+                from Product p
+                join Warehouse w on w.product.id = p.id
+                join branches b on w.branch.id = b.id
+                where b.business.id = :businessId
+                and p.createdAt between :startDate and :endDate
+                and w.amount > 0
+            """)
     Double totalProductSalePrice(@Param("businessId") UUID businessId,
                                  @Param("startDate") Timestamp startDate,
                                  @Param("endDate") Timestamp endDate);
 
 
-    @Query(value = "select sum(p.salePrice) from Product p JOIN p.branch b where b.id = :branchId and p.createdAt between :startDate and :endDate")
+    @Query("""
+                select sum(p.salePrice * w.amount)
+                from Product p
+                join p.branch b
+                join Warehouse w on w.product = p and w.branch = b
+                where b.id = :branchId
+                and p.createdAt between :startDate and :endDate
+                and w.amount > 0
+            """)
     Double totalProductSalePriceByBranch(@Param("branchId") UUID branchId,
                                          @Param("startDate") Timestamp startDate,
                                          @Param("endDate") Timestamp endDate);
