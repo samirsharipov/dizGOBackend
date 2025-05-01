@@ -15,6 +15,7 @@ import uz.dizgo.erp.repository.*;
 import uz.dizgo.erp.enums.HistoryName;
 import uz.dizgo.erp.helpers.ProductEntityHelper;
 import uz.dizgo.erp.repository.specifications.PurchaseSpecification;
+import uz.dizgo.erp.service.logger.ProductActivityLogger;
 import uz.dizgo.erp.utils.Constants;
 import uz.dizgo.erp.utils.AppConstant;
 
@@ -47,6 +48,7 @@ public class PurchaseService {
     private final PurchaseOutlayRepository purchaseOutlayRepository;
     private final ProductEntityHelper productEntityHelper;
     private final MessageService messageService;
+    private final ProductActivityLogger productActivityLogger;
 
     public ApiResponse add(PurchaseDto purchaseDto) {
         Optional<Purchase> optionalPurchase = purchaseRepository.findFirstByBranchIdOrderByCreatedAtDesc(purchaseDto.getBranchId());
@@ -277,6 +279,9 @@ public class PurchaseService {
     private PurchaseProduct createOrEditPurchaseProduct(PurchaseProduct purchaseProduct, PurchaseProductDto purchaseProductDto, double course, Branch branch) {
 
         Product product = new Product();
+
+        Product oldProduct = new Product();
+        Product newProduct = new Product();
         UUID productId = purchaseProductDto.getProductId();
 
         if (purchaseProductDto.isNew()) {
@@ -295,6 +300,9 @@ public class PurchaseService {
 
             if (optionalProduct.isPresent()) {
                 product = optionalProduct.get();
+
+                oldProduct = product;
+
                 List<Branch> branches = product.getBranch();
                 branches.add(branch);
                 product.setBranch(branches);
@@ -315,6 +323,12 @@ public class PurchaseService {
         product.setMargin(purchaseProductDto.getMargin());
         product.setQqs(purchaseProductDto.isQqs());
         productRepository.save(product);
+
+        Map<String, Object> extra = Map.of(
+                "buy price", purchaseProductDto.getBuyPrice(),
+                "quantity", purchaseProductDto.getPurchasedQuantity(),
+                "total sum", purchaseProductDto.getTotalSum());
+        productActivityLogger.logPurchase(oldProduct, product, extra);
 
         purchaseProduct.setProduct(product);
         purchaseProduct.setPurchasedQuantity(purchaseProductDto.getPurchasedQuantity());

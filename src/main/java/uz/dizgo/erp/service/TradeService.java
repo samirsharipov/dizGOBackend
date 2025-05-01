@@ -21,6 +21,7 @@ import uz.dizgo.erp.enums.SalaryStatus;
 import uz.dizgo.erp.enums.StatusName;
 import uz.dizgo.erp.mapper.PaymentMapper;
 import uz.dizgo.erp.payload.projections.DataProjection;
+import uz.dizgo.erp.service.logger.ProductActivityLogger;
 import uz.dizgo.erp.utils.Constants;
 import uz.dizgo.erp.utils.AppConstant;
 import uz.dizgo.erp.utils.ConstantProduct;
@@ -60,6 +61,7 @@ public class TradeService {
     private final CustomerSupplierRepository customerSupplierRepository;
     private final CustomerSupplierService customerSupplierService;
     private final CustomerCreditRepository customerCreditRepository;
+    private final ProductActivityLogger productActivityLogger;
 
 
     @SneakyThrows
@@ -409,6 +411,13 @@ public class TradeService {
         }
         tradeRepository.save(trade);
         tradeProductRepository.saveAll(tradeProductList);
+
+        tradeProductList.forEach(tradeProduct -> {
+            Map<String, Object> extra = Map.of(
+                    "quantity", tradeProduct.getTradedQuantity(),
+                    "total sale price", tradeProduct.getTotalSalePrice());
+            productActivityLogger.logTrade(tradeProduct.getProduct().getId(), extra);
+        });
 
 
         if (customerDebt.getDebtSum() != null) {

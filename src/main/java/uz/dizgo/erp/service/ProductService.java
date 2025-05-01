@@ -17,6 +17,7 @@ import uz.dizgo.erp.repository.*;
 import uz.dizgo.erp.enums.DiscountType;
 import uz.dizgo.erp.mapper.converts.ProductConvert;
 import uz.dizgo.erp.repository.specifications.ProductSpecifications;
+import uz.dizgo.erp.service.logger.ProductActivityLogger;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -44,6 +45,7 @@ public class ProductService {
     private final ProductConvert productConvert;
     private final DiscountRepository discountRepository;
     private final MessageService messageService;
+    private final ProductActivityLogger logger;
 
     @Transactional
     public ApiResponse editProduct(UUID productId, ProductEditDto productEditDto) {
@@ -51,15 +53,35 @@ public class ProductService {
         Measurement measurement = findByIdOrThrow(measurementRepository, productEditDto.getMeasurementId(), "Measurement");
         Product product = findByIdOrThrow(productRepository, productId, "Product");
 
+        Product oldProduct = new Product();
+        Product newProduct = new Product();
+
         if (productEditDto.getBrandId() != null) {
             Brand brand = findByIdOrThrow(brandRepository, productEditDto.getBrandId(), "Brand");
+            oldProduct.setBrand(product.getBrand());
             product.setBrand(brand);
+            newProduct.setBrand(brand);
 
         }
         if (productEditDto.getCategoryId() != null) {
             Category category = findByIdOrThrow(categoryRepository, productEditDto.getCategoryId(), "Category");
+            oldProduct.setCategory(product.getCategory());
             product.setCategory(category);
+            newProduct.setCategory(category);
         }
+
+        oldProduct.setName(product.getName());
+        oldProduct.setDescription(product.getDescription());
+        oldProduct.setLongDescription(product.getLongDescription());
+        oldProduct.setKeywords(product.getKeywords());
+        oldProduct.setAttributes(product.getAttributes());
+        oldProduct.setPluCode(product.getPluCode());
+        oldProduct.setBuyPrice(product.getBuyPrice());
+        oldProduct.setSalePrice(product.getSalePrice());
+        oldProduct.setMXIKCode(product.getMXIKCode());
+        oldProduct.setKpi(product.getKpi());
+        oldProduct.setMinQuantity(product.getMinQuantity());
+        oldProduct.setMeasurement(product.getMeasurement());
 
         // Mahsulotni yangilash
         product.setName(productEditDto.getName());
@@ -70,28 +92,46 @@ public class ProductService {
         product.setPluCode(productEditDto.getPluCode());
         product.setBuyPrice(productEditDto.getBuyPrice());
         product.setSalePrice(productEditDto.getSalePrice());
-        product.setGrossPrice(productEditDto.getGrossPrice());
         product.setMXIKCode(productEditDto.getMXIKCode());
         product.setKpi(productEditDto.getKpi());
         product.setMinQuantity(productEditDto.getMinQuantity());
-        product.setGrossPrice(productEditDto.getGrossPrice());
+
+        newProduct.setName(productEditDto.getName());
+        newProduct.setDescription(productEditDto.getDescription());
+        newProduct.setLongDescription(productEditDto.getLongDescription());
+        newProduct.setKeywords(productEditDto.getKeywords());
+        newProduct.setAttributes(productEditDto.getAttributes());
+        newProduct.setPluCode(productEditDto.getPluCode());
+        newProduct.setBuyPrice(productEditDto.getBuyPrice());
+        newProduct.setSalePrice(productEditDto.getSalePrice());
+        newProduct.setMXIKCode(productEditDto.getMXIKCode());
+        newProduct.setKpi(productEditDto.getKpi());
+        newProduct.setMinQuantity(productEditDto.getMinQuantity());
 
         validateUniqueBarcode(productEditDto.getBarcode(), productId, product.getBusiness().getId());
 
+        oldProduct.setBarcode(product.getBarcode());
         product.setBarcode(productEditDto.getBarcode());
+        newProduct.setBarcode(productEditDto.getBarcode());
 
         product.setMeasurement(measurement);
+        newProduct.setMeasurement(measurement);
 
         // Foto ni yangilash
         if (productEditDto.getPhotoId() != null) {
             Attachment photo = findByIdOrThrow(attachmentRepository, productEditDto.getPhotoId(), "Photo");
+            oldProduct.setPhoto(product.getPhoto());
             product.setPhoto(photo);
+            newProduct.setPhoto(photo);
         }
+
         // Tarjimalarni yangilash
         saveProductTranslations(productEditDto.getTranslations(), product);
 
+
         // Mahsulotni saqlash
         productRepository.save(product);
+        logger.logUpdate(oldProduct, newProduct);
 
         return new ApiResponse("Product updated successfully", true);
     }
@@ -152,6 +192,7 @@ public class ProductService {
             warehouseRepository.deleteAllByProductId(product.getId());
             fifoCalculationRepository.deleteAllByProductId(product.getId());
             productRepository.save(product);
+            logger.logDelete(product);
             return new ApiResponse("DELETED", true);
         }
         return new ApiResponse("NOT FOUND", false);
@@ -430,6 +471,7 @@ public class ProductService {
                 warehouseRepository.deleteAllByProductId(product.getId());
                 fifoCalculationRepository.deleteAllByProductId(product.getId());
                 productRepository.save(product);
+                logger.logDelete(product);
             }
         }
         return new ApiResponse("DELETED", true);
@@ -739,6 +781,7 @@ public class ProductService {
         saveProductTranslations(productPostDto.getTranslations(), product);
 
         productRepository.save(product);  // Yangi maxsulotni saqlash
+        logger.logCreate(product);
 
         return new ApiResponse("success", true);
     }
@@ -811,6 +854,7 @@ public class ProductService {
     public ApiResponse editProductMain(UUID productId, ProductEditMainDto productEditMainDto) {
         // Mahsulotni ID bo'yicha topish yoki xatolik yuborish
         Product product = findByIdOrThrow(productRepository, productId, "Product");
+        Product oldProduct = product;
         // Measurement, Brand va Category-ni yangilash
         Measurement measurement = new Measurement();
         if (productEditMainDto.getMeasurementId() != null) {
@@ -862,6 +906,7 @@ public class ProductService {
         // Yangilangan mahsulotni saqlash
         productRepository.save(product);
         productRepository.saveAll(productsWithSameBarcode);
+        logger.logUpdate(oldProduct, product);
 
         return new ApiResponse("Product updated successfully", true);
     }

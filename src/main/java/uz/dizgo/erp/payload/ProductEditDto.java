@@ -32,7 +32,7 @@ public class ProductEditDto {
 
     private double buyPrice;            // Mahsulotning olish narxi (so'm)
     private double salePrice;           // Mahsulotning sotish narxi (so'm)
-    private double grossPrice;          // Optom narxi
+//    private double grossPrice;          // Optom narxi
 
     private double kpi;
     private double minQuantity;

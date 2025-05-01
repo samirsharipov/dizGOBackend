@@ -1,5 +1,6 @@
 package uz.dizgo.erp.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,10 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Where;
 import uz.dizgo.erp.entity.template.AbsEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 @Entity
 @Getter
@@ -36,8 +34,10 @@ public class ProductTranslate extends AbsEntity {
     private String attributes;          // Qo'shimcha xususiyatlar
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
     private Language language;
 }
