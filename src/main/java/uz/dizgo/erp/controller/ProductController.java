@@ -1,5 +1,6 @@
 package uz.dizgo.erp.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -32,7 +33,7 @@ public class ProductController {
 
     @CheckPermission("EDIT_PRODUCT")
     @PutMapping("edit-product/{id}")
-    public HttpEntity<?> edit(@PathVariable UUID id, @RequestBody ProductEditDto productDto) {
+    public HttpEntity<?> edit(@PathVariable UUID id, @RequestBody ProductEditDto productDto) throws JsonProcessingException {
         ApiResponse apiResponse = productService.editProduct(id, productDto);
         return ResponseEntity.status(apiResponse.isSuccess() ? HttpStatus.OK : HttpStatus.CONFLICT).body(apiResponse);
     }
@@ -198,5 +199,4 @@ public class ProductController {
     public HttpEntity<?> generateBarcode(@PathVariable UUID businessId) {
         return responseEntityHelper.buildResponse(productService.generateBarcode(businessId));
     }
-
 }

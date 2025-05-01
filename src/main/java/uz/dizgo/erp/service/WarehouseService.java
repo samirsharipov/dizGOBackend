@@ -121,7 +121,7 @@ public class WarehouseService {
         tradeProduct.setTotalSalePrice(tradeProductDto.getTotalSalePrice());
         tradeProduct.setTradedQuantity(tradeProductDto.getTradedQuantity());
         tradeProduct.setSubMeasurement(tradeProductDto.isSubMeasurement());
-        System.err.println("SALOOOOOOOOOOM");
+
         // save product history
         productAboutRepository.save(new ProductAbout(
                 tradeProduct.getProduct(),
@@ -130,7 +130,7 @@ public class WarehouseService {
                 -tradeProduct.getTradedQuantity(),
                 tradeId
         ));
-        System.err.println(tradeProductDto.getTradeProductId());
+
         return tradeProduct;
     }
 

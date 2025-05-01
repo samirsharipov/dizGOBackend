@@ -19,9 +19,10 @@ public class HibernateConfig implements AuditorAware<UUID> {
         this.userSession = userSession;
     }
 
+
     @NotNull
     @Override
     public Optional<UUID> getCurrentAuditor() {
-        return Optional.ofNullable(userSession.getUser() != null ? userSession.getUser().getId() : null);
+        return userSession.getUser() != null ? Optional.ofNullable(userSession.getUser().getId()) : null;
     }
 }

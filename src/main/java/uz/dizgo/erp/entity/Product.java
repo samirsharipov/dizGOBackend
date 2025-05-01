@@ -1,5 +1,6 @@
 package uz.dizgo.erp.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -28,7 +29,6 @@ import java.util.Objects;
                 @Index(name = "idx_product_barcode", columnList = "barcode"),
                 @Index(name = "idx_product_category_id", columnList = "category_id"),
                 @Index(name = "idx_product_brand_id", columnList = "brand_id")
-
         }
 )
 @Where(clause = "deleted = false AND active = true")
@@ -53,6 +53,7 @@ public class Product extends AbsEntity {
     // Mahsulot tarjimalari
     @ToString.Exclude
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<ProductTranslate> translations; // Mahsulotga oid tarjimalar ro'yxati
 
     // Mahsulotning boshqa ma'lumotlari
