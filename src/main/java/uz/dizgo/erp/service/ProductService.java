@@ -2,6 +2,7 @@ package uz.dizgo.erp.service;
 
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.mapstruct.Mapper;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,6 +13,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.dizgo.erp.entity.*;
+import uz.dizgo.erp.mapper.ProductMapper;
 import uz.dizgo.erp.payload.*;
 import uz.dizgo.erp.repository.*;
 import uz.dizgo.erp.enums.DiscountType;
@@ -70,18 +72,8 @@ public class ProductService {
             newProduct.setCategory(category);
         }
 
-        oldProduct.setName(product.getName());
-        oldProduct.setDescription(product.getDescription());
-        oldProduct.setLongDescription(product.getLongDescription());
-        oldProduct.setKeywords(product.getKeywords());
-        oldProduct.setAttributes(product.getAttributes());
-        oldProduct.setPluCode(product.getPluCode());
-        oldProduct.setBuyPrice(product.getBuyPrice());
-        oldProduct.setSalePrice(product.getSalePrice());
-        oldProduct.setMXIKCode(product.getMXIKCode());
-        oldProduct.setKpi(product.getKpi());
-        oldProduct.setMinQuantity(product.getMinQuantity());
-        oldProduct.setMeasurement(product.getMeasurement());
+
+        ProductMapper.update(product, oldProduct);
 
         // Mahsulotni yangilash
         product.setName(productEditDto.getName());
@@ -96,17 +88,7 @@ public class ProductService {
         product.setKpi(productEditDto.getKpi());
         product.setMinQuantity(productEditDto.getMinQuantity());
 
-        newProduct.setName(productEditDto.getName());
-        newProduct.setDescription(productEditDto.getDescription());
-        newProduct.setLongDescription(productEditDto.getLongDescription());
-        newProduct.setKeywords(productEditDto.getKeywords());
-        newProduct.setAttributes(productEditDto.getAttributes());
-        newProduct.setPluCode(productEditDto.getPluCode());
-        newProduct.setBuyPrice(productEditDto.getBuyPrice());
-        newProduct.setSalePrice(productEditDto.getSalePrice());
-        newProduct.setMXIKCode(productEditDto.getMXIKCode());
-        newProduct.setKpi(productEditDto.getKpi());
-        newProduct.setMinQuantity(productEditDto.getMinQuantity());
+        ProductMapper.update(product, newProduct);
 
         validateUniqueBarcode(productEditDto.getBarcode(), productId, product.getBusiness().getId());
 
@@ -131,7 +113,7 @@ public class ProductService {
 
         // Mahsulotni saqlash
         productRepository.save(product);
-        logger.logUpdate(oldProduct, newProduct);
+        logger.logUpdate(productId, oldProduct, newProduct);
 
         return new ApiResponse("Product updated successfully", true);
     }
@@ -854,8 +836,12 @@ public class ProductService {
     public ApiResponse editProductMain(UUID productId, ProductEditMainDto productEditMainDto) {
         // Mahsulotni ID bo'yicha topish yoki xatolik yuborish
         Product product = findByIdOrThrow(productRepository, productId, "Product");
-        Product oldProduct = product;
         // Measurement, Brand va Category-ni yangilash
+
+        Product oldProduct = new Product();
+        Product newProduct = new Product();
+        ProductMapper.update(product, oldProduct);
+
         Measurement measurement = new Measurement();
         if (productEditMainDto.getMeasurementId() != null) {
             measurement = findByIdOrThrow(measurementRepository, productEditMainDto.getMeasurementId(), "Measurement");
@@ -906,7 +892,9 @@ public class ProductService {
         // Yangilangan mahsulotni saqlash
         productRepository.save(product);
         productRepository.saveAll(productsWithSameBarcode);
-        logger.logUpdate(oldProduct, product);
+
+        ProductMapper.update(product, newProduct);
+        logger.logUpdate(productId, oldProduct, newProduct);
 
         return new ApiResponse("Product updated successfully", true);
     }

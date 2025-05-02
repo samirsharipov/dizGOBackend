@@ -23,40 +23,43 @@ public class AddressController {
     @CheckPermission("ADD_ADDRESS")
     @PostMapping
     public HttpEntity<ApiResponse> add(@Valid @RequestBody AddressDto addressDto) {
-        return helper.buildResponse(addressService.createAddress(addressDto));
+        return buildResponse(addressService.createAddress(addressDto));
     }
 
     @CheckPermission("EDIT_ADDRESS")
     @PutMapping("/{id}")
     public HttpEntity<ApiResponse> edit(@PathVariable UUID id, @RequestBody AddressDto addressDto) {
-        return helper.buildResponse(addressService.updateAddress(id, addressDto));
+        return buildResponse(addressService.updateAddress(id, addressDto));
     }
 
     @CheckPermission("VIEW_ADDRESS")
     @GetMapping("/{id}")
     public HttpEntity<ApiResponse> get(@PathVariable UUID id) {
-        return helper.buildResponse(addressService.getAddress(id));
+        return buildResponse(addressService.getAddress(id));
     }
 
     @GetMapping("/get-parent-is-null")
     public HttpEntity<ApiResponse> get() {
-        return helper.buildResponse(addressService.getAddresses());
+        return buildResponse(addressService.getAddresses());
     }
 
     @GetMapping("/get-parent-id/{parentId}")
     public HttpEntity<ApiResponse> getParentId(@PathVariable UUID parentId) {
-        return helper.buildResponse(addressService.getByParentId(parentId));
+        return buildResponse(addressService.getByParentId(parentId));
     }
 
     @GetMapping("/tree")
     public HttpEntity<ApiResponse> getAddressTree() {
-        return helper.buildResponse(addressService.getAddressTreeByBusiness());
+        return buildResponse(addressService.getAddressTreeByBusiness());
     }
-
 
     @CheckPermission("DELETE_ADDRESS")
     @DeleteMapping("/{id}")
     public HttpEntity<ApiResponse> delete(@PathVariable UUID id) {
-        return helper.buildResponse(addressService.deleteAddress(id));
+        return buildResponse(addressService.deleteAddress(id));
+    }
+
+    private HttpEntity<ApiResponse> buildResponse(ApiResponse apiResponse) {
+        return helper.buildResponse(apiResponse);
     }
 }

@@ -25,9 +25,9 @@ public class ProductActivityLogger {
         log(product.getId(), ProductActionType.CREATE, null, newData, null);
     }
 
-    public void logUpdate(Product oldProduct, Product newProduct) {
+    public void logUpdate(UUID productId,Product oldProduct, Product newProduct) {
         Map<String, Map<String, Object>> diff = DiffUtil.getDiff(oldProduct, newProduct);
-        log(newProduct.getId(), ProductActionType.UPDATE,
+        log(productId, ProductActionType.UPDATE,
                 diff.get("old_data"), diff.get("new_data"), null);
     }
 
@@ -35,9 +35,9 @@ public class ProductActivityLogger {
         log(product.getId(), ProductActionType.DELETE, product, null, null);
     }
 
-    public void logPurchase(Product oldProduct, Product newProduct, Map<String, Object> extraData) {
+    public void logPurchase(UUID productId,Product oldProduct, Product newProduct, Map<String, Object> extraData) {
         Map<String, Map<String, Object>> diff = DiffUtil.getDiff(oldProduct, newProduct);
-        log(newProduct.getId(), ProductActionType.PURCHASE,
+        log(productId, ProductActionType.PURCHASE,
                 diff.get("old_data"), diff.get("new_data"), extraData
         );
     }

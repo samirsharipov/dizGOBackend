@@ -301,7 +301,6 @@ public class PurchaseService {
             if (optionalProduct.isPresent()) {
                 product = optionalProduct.get();
 
-                oldProduct = product;
 
                 List<Branch> branches = product.getBranch();
                 branches.add(branch);
@@ -316,6 +315,14 @@ public class PurchaseService {
             if (optional.isEmpty()) return null;
             product = optional.get();
         }
+
+        if (product.getSalePrice() != purchaseProductDto.getSalePrice() || product.getBuyPrice() != purchaseProductDto.getBuyPrice()) {
+            oldProduct.setSalePrice(product.getSalePrice());
+            newProduct.setSalePrice(purchaseProductDto.getSalePrice());
+            oldProduct.setBuyPrice(product.getBuyPrice());
+            newProduct.setBuyPrice(purchaseProductDto.getBuyPrice());
+        }
+
         product.setSalePrice(purchaseProductDto.getSalePrice());
         product.setBuyPrice(purchaseProductDto.getBuyPrice());
         product.setBuyPriceDollar(Math.round(purchaseProductDto.getBuyPrice() / course * 100) / 100.);
@@ -324,11 +331,12 @@ public class PurchaseService {
         product.setQqs(purchaseProductDto.isQqs());
         productRepository.save(product);
 
+
         Map<String, Object> extra = Map.of(
                 "buy price", purchaseProductDto.getBuyPrice(),
                 "quantity", purchaseProductDto.getPurchasedQuantity(),
                 "total sum", purchaseProductDto.getTotalSum());
-        productActivityLogger.logPurchase(oldProduct, product, extra);
+        productActivityLogger.logPurchase(productId, oldProduct, newProduct, extra);
 
         purchaseProduct.setProduct(product);
         purchaseProduct.setPurchasedQuantity(purchaseProductDto.getPurchasedQuantity());

@@ -20,10 +20,6 @@ public class AgreementService {
     private final AgreementRepository agreementRepository;
     private final MessageService messageService;
 
-    /**
-     * Foydalanuvchi uchun standart kelishuvlarni yaratadi va saqlaydi.
-     * @param user - kelishuvlar yaratiladigan foydalanuvchi
-     */
     public void add(User user) {
         List<Agreement> agreementList = List.of(
                 new Agreement(user, HOUR, 0d, false),
@@ -34,12 +30,6 @@ public class AgreementService {
         agreementRepository.saveAll(agreementList);
     }
 
-    /**
-     * Foydalanuvchining kelishuvlarini yangilaydi.
-     * @param userId - foydalanuvchining ID si
-     * @param agreementGetDto - yangilangan kelishuvlar ma'lumotlari
-     * @return - operatsiya natijasi bo‘yicha xabar
-     */
     public ApiResponse edit(UUID userId, AgreementGetDto agreementGetDto) {
         // Foydalanuvchining kelishuvlar sonini tekshiramiz
         int agreementCount = agreementRepository.countAllByUserId(userId);
@@ -68,19 +58,12 @@ public class AgreementService {
         return new ApiResponse(messageService.getMessage("success"), true);
     }
 
-    /**
-     * Berilgan foydalanuvchining kelishuvlarini olish.
-     * @param userId - foydalanuvchining ID si
-     * @return - kelishuvlar haqidagi ma'lumotlar
-     */
     public ApiResponse getOne(UUID userId) {
-        // Barcha kelishuvlarni olish
         List<Agreement> agreementList = agreementRepository.findAllByUserId(userId);
         if (agreementList.size() != SalaryStatus.values().length) {
             return new ApiResponse(messageService.getMessage("error"), false);
         }
 
-        // AgreementGetDto yaratish
         AgreementGetDto agreementGetDto = new AgreementGetDto(
                 agreementList.get(0).getStartDate(),
                 agreementList.get(0).getEndDate(),
