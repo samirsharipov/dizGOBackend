@@ -14,6 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductActivityLog extends AbsEntity {
+
     private UUID productId;
 
     @Enumerated(EnumType.STRING)

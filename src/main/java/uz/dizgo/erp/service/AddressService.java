@@ -66,9 +66,7 @@ public class AddressService {
     }
 
 
-    /**
-     * Helper method to prepare Address entity from DTO.
-     */
+
     private Address prepareAddressFromDto(Address address, AddressDto addressDto) {
         addressMapper.updateEntityFromDto(addressDto, address);
         if (addressDto.getPatientId() != null) {
@@ -87,13 +85,10 @@ public class AddressService {
     }
 
     private List<AddressGetDto> buildAddressTreeByBusiness(UUID parentId) {
-        // Ota address bo'yicha bolalarni va biznesni filtrlaymiz
         List<Address> childAddresses = addressRepository.findAllByParentAddress_Id(parentId);
 
-        // Har bir bola address uchun DTO yaratamiz
         List<AddressGetDto> addressTree = new ArrayList<>();
         for (Address address : childAddresses) {
-            // DTO yaratish
             AddressGetDto dto = new AddressGetDto(
                     address.getId(),
                     address.getName(),
@@ -101,7 +96,6 @@ public class AddressService {
                     address.getParentAddress() != null ? address.getParentAddress().getName() : null
             );
 
-            // Rekursiv ravishda bolalarini qo'shamiz
             dto.setChildren(buildAddressTreeByBusiness(address.getId()));
             addressTree.add(dto);
         }

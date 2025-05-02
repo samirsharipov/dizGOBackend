@@ -1,10 +1,11 @@
 package uz.dizgo.erp.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import uz.dizgo.erp.annotations.CheckPermission;
+import uz.dizgo.erp.helpers.ResponseEntityHelper;
 import uz.dizgo.erp.payload.ApiResponse;
 import uz.dizgo.erp.service.AttachmentService;
 
@@ -18,25 +19,25 @@ import java.util.UUID;
 public class AttachmentController {
 
     private final AttachmentService attachmentService;
+    private final ResponseEntityHelper helper;
 
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadFile(MultipartHttpServletRequest request) throws IOException {
+    public HttpEntity<ApiResponse> uploadFile(MultipartHttpServletRequest request) throws IOException {
         ApiResponse apiResponse = attachmentService.upload(request);
-        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+        return helper.buildResponse(apiResponse);
     }
 
     @PostMapping("/uploadAnyFile")
-    public ResponseEntity<?> uploadAnyFiles(MultipartHttpServletRequest request) throws IOException {
+    public HttpEntity<ApiResponse> uploadAnyFiles(MultipartHttpServletRequest request) throws IOException {
         ApiResponse apiResponse = attachmentService.uploadAnyFiles(request);
-        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+        return helper.buildResponse(apiResponse);
     }
-
 
     @CheckPermission("VIEW_MEDIA_INFO")
     @GetMapping("/info/{id}")
-    public ResponseEntity<?> getInfo(@PathVariable UUID id) {
+    public HttpEntity<ApiResponse> getInfo(@PathVariable UUID id) {
         ApiResponse apiResponse = attachmentService.getById(id);
-        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+        return helper.buildResponse(apiResponse);
     }
 
     @GetMapping("/download/{id}")
@@ -50,8 +51,8 @@ public class AttachmentController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteMedia(@PathVariable UUID id) {
+    public HttpEntity<ApiResponse> deleteMedia(@PathVariable UUID id) {
         ApiResponse apiResponse = attachmentService.delete(id);
-        return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+        return helper.buildResponse(apiResponse);
     }
 }
