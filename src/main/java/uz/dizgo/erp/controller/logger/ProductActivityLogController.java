@@ -19,8 +19,10 @@ public class ProductActivityLogController {
 
     @GetMapping("/{productId}")
     public ResponseEntity<ApiResponse> getProductActivityLog(@PathVariable UUID productId,
-                                                             @RequestParam(required = false) String activityType) {
-        ApiResponse response = service.getProductActivityLog(productId, activityType);
+                                                             @RequestParam(required = false) String activityType,
+                                                             @RequestParam int size,
+                                                             @RequestParam int page) {
+        ApiResponse response = service.getProductActivityLog(productId, activityType,size,page);
         return helper.buildResponse(response);
     }
 }

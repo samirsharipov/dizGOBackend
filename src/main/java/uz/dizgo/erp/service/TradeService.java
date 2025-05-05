@@ -415,7 +415,8 @@ public class TradeService {
         tradeProductList.forEach(tradeProduct -> {
             Map<String, Object> extra = Map.of(
                     "quantity", tradeProduct.getTradedQuantity(),
-                    "total sale price", tradeProduct.getTotalSalePrice());
+                    "total sale price", tradeProduct.getTotalSalePrice(),
+                    "customer ", tradeProduct.getTrade().getCustomer()!=null ? tradeProduct.getTrade().getCustomer().getName() : "null");
             productActivityLogger.logTrade(tradeProduct.getProduct().getId(), extra);
         });
 

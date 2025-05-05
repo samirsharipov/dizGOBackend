@@ -2,6 +2,7 @@ package uz.dizgo.erp.service;
 
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -658,5 +659,10 @@ public class UserService {
         return users.isEmpty()
                 ? new ApiResponse(messageService.getMessage("not.found"), false)
                 : new ApiResponse(messageService.getMessage("found"), true, users);
+    }
+
+    @Cacheable(value = "users", key = "#id")
+    public Optional<User> getUserById(UUID id) {
+        return userRepository.findById(id);
     }
 }

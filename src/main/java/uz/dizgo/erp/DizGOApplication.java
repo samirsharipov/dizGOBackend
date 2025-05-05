@@ -12,8 +12,6 @@ import org.springframework.security.core.SpringSecurityCoreVersion;
 @EnableScheduling
 @EnableCaching
 public class DizGOApplication {
-
-
     public static void main(String[] args) {
         System.out.println("Spring Security Version: " + SpringSecurityCoreVersion.getVersion());
         System.out.println("Spring Boot Version: " + SpringBootVersion.getVersion());
