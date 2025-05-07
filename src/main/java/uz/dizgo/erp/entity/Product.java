@@ -127,7 +127,7 @@ public class Product extends AbsEntity {
     @ManyToOne
     private Brand brand;                 // Brend ma'lumotlari
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Category category;           // Kategoriya ma'lumotlari
 
