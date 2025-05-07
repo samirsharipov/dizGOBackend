@@ -169,7 +169,7 @@ public class PurchaseService {
 
         for (PurchaseProductDto purchaseProductDto : purchaseProductDtoList) {
             if (purchaseProductDto.getPurchaseProductId() == null) {
-                PurchaseProduct purchaseProduct = createOrEditPurchaseProduct(new PurchaseProduct(), purchaseProductDto, course, branch);
+                PurchaseProduct purchaseProduct = createOrEditPurchaseProduct(new PurchaseProduct(), purchaseProductDto, course, branch,supplier);
                 if (purchaseProduct == null) continue;
                 purchaseProduct.setPurchase(purchase);
                 purchaseProductRepository.save(purchaseProduct);
@@ -187,7 +187,7 @@ public class PurchaseService {
                 if (optionalPurchaseProduct.isEmpty()) continue;
                 PurchaseProduct purchaseProduct = optionalPurchaseProduct.get();
                 double amount = purchaseProductDto.getPurchasedQuantity() - purchaseProduct.getPurchasedQuantity();
-                PurchaseProduct editPurchaseProduct = createOrEditPurchaseProduct(purchaseProduct, purchaseProductDto, course, branch);
+                PurchaseProduct editPurchaseProduct = createOrEditPurchaseProduct(purchaseProduct, purchaseProductDto, course, branch,supplier);
                 if (editPurchaseProduct == null) continue;
                 editPurchaseProduct.setPurchase(purchase);
                 purchaseProductList.add(editPurchaseProduct);
@@ -276,7 +276,7 @@ public class PurchaseService {
         }
     }
 
-    private PurchaseProduct createOrEditPurchaseProduct(PurchaseProduct purchaseProduct, PurchaseProductDto purchaseProductDto, double course, Branch branch) {
+    private PurchaseProduct createOrEditPurchaseProduct(PurchaseProduct purchaseProduct, PurchaseProductDto purchaseProductDto, double course, Branch branch,Supplier supplier) {
 
         Product product = new Product();
 
@@ -336,7 +336,7 @@ public class PurchaseService {
                 "buy price", purchaseProductDto.getBuyPrice(),
                 "quantity", purchaseProductDto.getPurchasedQuantity(),
                 "total sum", purchaseProductDto.getTotalSum(),
-                "supplier", purchaseProduct.getPurchase().getSupplier().getName());
+                "supplier", supplier.getName());
         productActivityLogger.logPurchase(productId, oldProduct, newProduct, extra);
 
         purchaseProduct.setProduct(product);
