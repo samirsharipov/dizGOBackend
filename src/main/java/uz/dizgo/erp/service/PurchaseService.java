@@ -335,7 +335,8 @@ public class PurchaseService {
         Map<String, Object> extra = Map.of(
                 "buy price", purchaseProductDto.getBuyPrice(),
                 "quantity", purchaseProductDto.getPurchasedQuantity(),
-                "total sum", purchaseProductDto.getTotalSum());
+                "total sum", purchaseProductDto.getTotalSum(),
+                "supplier", purchaseProduct.getPurchase().getSupplier().getName());
         productActivityLogger.logPurchase(productId, oldProduct, newProduct, extra);
 
         purchaseProduct.setProduct(product);
