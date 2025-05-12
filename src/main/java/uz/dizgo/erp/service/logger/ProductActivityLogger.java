@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uz.dizgo.erp.entity.Product;
 import uz.dizgo.erp.entity.ProductActivityLog;
 import uz.dizgo.erp.entity.template.ProductActionType;
+import uz.dizgo.erp.payload.ProductDTO;
 import uz.dizgo.erp.repository.logger.ProductActivityLogRepository;
 import uz.dizgo.erp.utils.DiffUtil;
 
@@ -25,7 +26,7 @@ public class ProductActivityLogger {
         log(product.getId(), ProductActionType.CREATE, null, newData, null);
     }
 
-    public void logUpdate(UUID productId,Product oldProduct, Product newProduct) {
+    public void logUpdate(UUID productId, ProductDTO oldProduct, ProductDTO newProduct) {
         Map<String, Map<String, Object>> diff = DiffUtil.getDiff(oldProduct, newProduct);
         log(productId, ProductActionType.UPDATE,
                 diff.get("old_data"), diff.get("new_data"), null);

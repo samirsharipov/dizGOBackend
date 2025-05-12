@@ -1,5 +1,6 @@
 package uz.dizgo.erp.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,7 @@ public class CategoryTranslate extends AbsEntity {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonManagedReference
     private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)

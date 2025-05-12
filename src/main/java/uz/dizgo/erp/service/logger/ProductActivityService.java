@@ -12,6 +12,7 @@ import uz.dizgo.erp.repository.logger.ProductActivityLogRepository;
 import uz.dizgo.erp.service.MessageService;
 import uz.dizgo.erp.service.UserService;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,15 +26,23 @@ public class ProductActivityService {
 
     private static final Sort DEFAULT_SORT = Sort.by(Sort.Direction.DESC, "createdAt");
 
-    public ApiResponse getProductActivityLog(UUID productId, String activityType, int size, int page) {
+    public ApiResponse getProductActivityLog(UUID productId, String activityType, int size, int page, Timestamp startDate, Timestamp endDate) {
         Pageable pageable = PageRequest.of(page, size, DEFAULT_SORT);
 
         if (isBlank(activityType)) {
+            if (startDate != null && endDate != null) {
+                return buildSuccessResponse(dtoList(repository.findAllByProductIdAndCreatedAtBetween(productId, startDate, endDate, pageable), pageable));
+            }
             return buildSuccessResponse(dtoList(repository.findAllByProductId(productId, pageable), pageable));
         }
 
         return parseActionType(activityType)
-                .map(type -> repository.findAllByProductIdAndActionType(productId, type, pageable))
+                .map(type -> {
+                    if (startDate != null && endDate != null) {
+                        return repository.findAllByProductIdAndActionTypeAndCreatedAtBetween(productId, type, startDate, endDate, pageable);
+                    }
+                    return repository.findAllByProductIdAndActionType(productId, type, pageable);
+                })
                 .map(logs -> buildSuccessResponse(dtoList(logs, pageable)))
                 .orElseGet(() -> new ApiResponse("Noto‘g‘ri actionType qiymati: " + activityType, false));
     }
