@@ -369,4 +369,11 @@ public interface TradeRepository extends JpaRepository<Trade, UUID>, JpaSpecific
     long countTotalBetween(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp endDate);
 
 
+    @Query("SELECT t FROM Trade t " +
+            "LEFT JOIN FETCH t.branch " +
+            "LEFT JOIN FETCH t.customer " +
+            "LEFT JOIN FETCH t.trader " +
+            "LEFT JOIN FETCH t.paymentStatus " +
+            "WHERE t.id = :id")
+    Optional<Trade> findByIdWithDetails(@Param("id") UUID id);
 }

@@ -34,11 +34,9 @@ public abstract class AbsEntity implements Serializable {
     private Timestamp updateAt;
 
     @CreatedBy
-    @Column(nullable = true)
     private UUID createdBy;
 
     @LastModifiedBy
-    @Column(nullable = true)
     private UUID lastModifiedBy;
 
     private boolean deleted = Boolean.FALSE;

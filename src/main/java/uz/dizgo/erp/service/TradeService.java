@@ -31,6 +31,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -62,6 +63,7 @@ public class TradeService {
     private final CustomerSupplierService customerSupplierService;
     private final CustomerCreditRepository customerCreditRepository;
     private final ProductActivityLogger productActivityLogger;
+    private final MessageService messageService;
 
 
     @SneakyThrows
@@ -78,7 +80,7 @@ public class TradeService {
             String invoiceStr = optionalTrade.get().getInvoice();
             invoice = invoiceStr != null ? Integer.parseInt(invoiceStr) : 0;
         }
-        int inc = invoice+1;
+        int inc = invoice + 1;
 
         Trade trade = new Trade();
         trade.setBranch(optionalBranch.get());
@@ -416,7 +418,7 @@ public class TradeService {
             Map<String, Object> extra = Map.of(
                     "quantity", tradeProduct.getTradedQuantity(),
                     "total sale price", tradeProduct.getTotalSalePrice(),
-                    "customer ", tradeProduct.getTrade().getCustomer()!=null ? tradeProduct.getTrade().getCustomer().getName() : "null");
+                    "customer ", tradeProduct.getTrade().getCustomer() != null ? tradeProduct.getTrade().getCustomer().getName() : "null");
             productActivityLogger.logTrade(tradeProduct.getProduct().getId(), extra);
         });
 
@@ -535,23 +537,70 @@ public class TradeService {
     }
 
     public ApiResponse getOne(UUID id) {
-        Optional<Trade> optionalTrade = tradeRepository.findById(id);
-        if (optionalTrade.isEmpty()) return new ApiResponse("NOT FOUND", false);
-        Trade trade = optionalTrade.get();
-        List<TradeProduct> tradeProductList = tradeProductRepository.findAllByTradeId(trade.getId());
-        if (tradeProductList.isEmpty()) return new ApiResponse("NOT FOUND", false);
-        for (TradeProduct tradeProduct : tradeProductList) {
-            Optional<Warehouse> optionalWarehouse;
-            optionalWarehouse = warehouseRepository.findByBranchIdAndProductId(trade.getBranch().getId(), tradeProduct.getProduct().getId());
-            tradeProduct.setRemainQuantity(optionalWarehouse.map(Warehouse::getAmount).orElse(0d));
+        Trade trade = tradeRepository.findByIdWithDetails(id)
+                .orElse(null);
+        if (trade == null) return new ApiResponse(messageService.getMessage("not.found"), false);
+
+        List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeId(id);
+        if (tradeProducts.isEmpty()) return new ApiResponse(messageService.getMessage("not.found"), false);
+
+        Set<UUID> productIds = tradeProducts.stream()
+                .map(tp -> tp.getProduct().getId())
+                .collect(Collectors.toSet());
+
+        List<Warehouse> warehouses = warehouseRepository.findAllByBranchIdAndProductIdIn(
+                trade.getBranch().getId(), productIds
+        );
+
+        Map<UUID, Double> remainMap = warehouses.stream()
+                .collect(Collectors.toMap(
+                        w -> w.getProduct().getId(),
+                        Warehouse::getAmount
+                ));
+
+        List<TradeProductDto> tradeProductDtoList = tradeProducts.stream().map(tp -> {
+            TradeProductDto dto = new TradeProductDto();
+            UUID productId = tp.getProduct().getId();
+            dto.setProductId(productId);
+            dto.setProductName(tp.getProduct().getName());
+            dto.setTradedQuantity(tp.getTradedQuantity());
+            dto.setTotalSalePrice(tp.getTotalSalePrice());
+            tp.setRemainQuantity(remainMap.getOrDefault(productId, 0d));
+            return dto;
+        }).collect(Collectors.toList());
+
+
+        List<PaymentDto> paymentDtos = paymentMapper
+                .toDtoList(paymentRepository.findAllByTradeId(id));
+
+
+        TradeDTO dto = new TradeDTO();
+        dto.setBacking(trade.getBacking());
+
+        if (trade.getCustomer() != null) {
+            dto.setCustomerId(trade.getCustomer().getId());
+            dto.setCustomerName(trade.getCustomer().getName());
         }
-        List<Payment> paymentList = paymentRepository.findAllByTradeId(trade.getId());
-        List<PaymentDto> paymentDtoList = paymentMapper.toDtoList(paymentList);
-        TradeGetOneDto tradeGetOneDto = new TradeGetOneDto();
-        tradeGetOneDto.setTrade(trade);
-        tradeGetOneDto.setTradeProductList(tradeProductList);
-        tradeGetOneDto.setPaymentDtoList(paymentDtoList);
-        return new ApiResponse(true, tradeGetOneDto);
+
+        if (trade.getTrader() != null) {
+            dto.setUserId(trade.getTrader().getId());
+            dto.setUserName(trade.getTrader().getFirstName());
+        }
+
+        dto.setBranchId(trade.getBranch().getId());
+        dto.setBranchName(trade.getBranch().getName());
+
+        dto.setPaymentStatusId(trade.getPaymentStatus().getId());
+        dto.setPaymentStatusName(trade.getPaymentStatus().getStatus());
+
+        dto.setPayDate(trade.getPayDate());
+        dto.setTotalSum(trade.getTotalSum());
+        dto.setPaidSum(trade.getPaidSum());
+        dto.setDebtSum(trade.getDebtSum());
+        dto.setPaymentDtoList(paymentDtos);
+        dto.setProductTraderDto(tradeProductDtoList);
+
+        return new ApiResponse(messageService.getMessage("found"), true, dto);
     }
 
     @Transactional

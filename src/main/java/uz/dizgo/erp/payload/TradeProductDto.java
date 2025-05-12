@@ -13,13 +13,11 @@ import java.util.UUID;
 public class TradeProductDto {
     private UUID tradeProductId;
 
-    //USE FOR SINGLE TYPE// OR NULL
     private UUID productId;
 
-    private String type;
+    private String productName;
 
-    //USE FOR MANY TYPE// OR NULL
-    private UUID productTypePriceId;
+    private String type;
 
     @NotNull(message = "required line")
     private double tradedQuantity;
@@ -29,4 +27,5 @@ public class TradeProductDto {
     private boolean delete = false;
 
     private boolean subMeasurement;
+
 }
