@@ -71,7 +71,6 @@ public class ProductService {
         }
 
 
-
         // Mahsulotni yangilash
         product.setName(productEditDto.getName());
         product.setDescription(productEditDto.getDescription());
@@ -1036,6 +1035,9 @@ public class ProductService {
                 if (productByKeywordDto == null) {
                     return new ApiResponse(messageService.getMessage("product.not.found"), false);
                 }
+            }
+            if (Boolean.TRUE.equals(productByKeywordDto.getDiscount())) {
+                updateDiscount(productByKeywordDto, branchId);
             }
 
 
