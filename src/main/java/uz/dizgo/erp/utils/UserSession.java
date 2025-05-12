@@ -19,14 +19,9 @@ public class UserSession {
     private final UserMapper userMapper;
     private final UserRepository userRepository;
 
-    private UserDTO cachedUserDto; // UserDTO uchun kesh maydoni
 
     @Transactional
     public UserDTO getUser() {
-        // Agar oldin saqlangan foydalanuvchi mavjud bo'lsa, uni qaytarish
-        if (cachedUserDto != null) {
-            return cachedUserDto;
-        }
 
         UserDTO userDto = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -42,8 +37,6 @@ public class UserSession {
             }
         }
 
-        // Keshga foydalanuvchini saqlash
-        cachedUserDto = userDto;
 
         return userDto;
     }

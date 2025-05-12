@@ -28,7 +28,7 @@ public class Reason extends AbsEntity {
     private Boolean active = true;
 
     public Reason(UUID id, String name, UUID businessId) {
-        super.setId(id);  // `AbsEntity`dan meros olingan `id` ni o'rnatish
+        super.setId(id);
         this.name = name;
         this.businessId = businessId;
     }

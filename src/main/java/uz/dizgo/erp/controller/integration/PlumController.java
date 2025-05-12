@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uz.dizgo.erp.payload.PaymentRequestDto;
-import uz.dizgo.erp.payload.PocketMoneyDto;
-import uz.dizgo.erp.payload.TransactionalDto;
 import uz.dizgo.erp.service.integration.PlumPaymentService;
 
 import java.math.BigDecimal;

@@ -10,6 +10,7 @@ import uz.dizgo.erp.entity.Warehouse;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public interface WarehouseRepository extends JpaRepository<Warehouse, UUID> {
@@ -83,4 +84,6 @@ public interface WarehouseRepository extends JpaRepository<Warehouse, UUID> {
             "where w.product.business.id = :businessId " +
             "and w.amount <= w.product.minQuantity")
     Long countProductsWithAmountLessThanOrEqualToMinQuantityByBusiness(@Param("businessId") UUID businessId);
+
+    List<Warehouse> findAllByBranchIdAndProductIdIn(UUID id, Set<UUID> productIds);
 }

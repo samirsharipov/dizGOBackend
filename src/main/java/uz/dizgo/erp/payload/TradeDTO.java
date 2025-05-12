@@ -18,14 +18,18 @@ public class TradeDTO {
     private boolean backing;
 
     private UUID customerId;
+    private String customerName;
 
     @NotNull
     private UUID userId;
+    private String userName;
 
     @NotNull
     private UUID branchId;
+    private String branchName;
 
     private UUID paymentStatusId;
+    private String paymentStatusName;
 
     @NotNull
     private List<PaymentDto> paymentDtoList;
