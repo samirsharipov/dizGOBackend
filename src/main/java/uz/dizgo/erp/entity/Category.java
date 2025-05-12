@@ -1,5 +1,6 @@
 package uz.dizgo.erp.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -34,7 +35,8 @@ public class Category extends AbsEntity {
     private Category parentCategory;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<CategoryTranslate> translations = new ArrayList<>();
 
     public Category(Business business, String name, boolean active, boolean delete) {

@@ -55,25 +55,22 @@ public class ProductService {
         Measurement measurement = findByIdOrThrow(measurementRepository, productEditDto.getMeasurementId(), "Measurement");
         Product product = findByIdOrThrow(productRepository, productId, "Product");
 
-        Product oldProduct = new Product();
-        Product newProduct = new Product();
+        ProductDTO oldProduct = new ProductDTO();
+        ProductDTO newProduct = new ProductDTO();
+
+        ProductMapper.update(product, oldProduct);
 
         if (productEditDto.getBrandId() != null) {
             Brand brand = findByIdOrThrow(brandRepository, productEditDto.getBrandId(), "Brand");
-            oldProduct.setBrand(product.getBrand());
             product.setBrand(brand);
-            newProduct.setBrand(brand);
 
         }
         if (productEditDto.getCategoryId() != null) {
             Category category = findByIdOrThrow(categoryRepository, productEditDto.getCategoryId(), "Category");
-            oldProduct.setCategory(product.getCategory());
             product.setCategory(category);
-            newProduct.setCategory(category);
         }
 
 
-        ProductMapper.update(product, oldProduct);
 
         // Mahsulotni yangilash
         product.setName(productEditDto.getName());
@@ -88,7 +85,6 @@ public class ProductService {
         product.setKpi(productEditDto.getKpi());
         product.setMinQuantity(productEditDto.getMinQuantity());
 
-        ProductMapper.update(product, newProduct);
 
         validateUniqueBarcode(productEditDto.getBarcode(), productId, product.getBusiness().getId());
 
@@ -97,14 +93,13 @@ public class ProductService {
         newProduct.setBarcode(productEditDto.getBarcode());
 
         product.setMeasurement(measurement);
-        newProduct.setMeasurement(measurement);
 
         // Foto ni yangilash
         if (productEditDto.getPhotoId() != null) {
             Attachment photo = findByIdOrThrow(attachmentRepository, productEditDto.getPhotoId(), "Photo");
-            oldProduct.setPhoto(product.getPhoto());
+            oldProduct.setPhoto(product.getPhoto().getId());
             product.setPhoto(photo);
-            newProduct.setPhoto(photo);
+            newProduct.setPhoto(photo.getId());
         }
 
         // Tarjimalarni yangilash
@@ -113,6 +108,7 @@ public class ProductService {
 
         // Mahsulotni saqlash
         productRepository.save(product);
+        ProductMapper.update(product, newProduct);
         logger.logUpdate(productId, oldProduct, newProduct);
 
         return new ApiResponse("Product updated successfully", true);
@@ -838,8 +834,8 @@ public class ProductService {
         Product product = findByIdOrThrow(productRepository, productId, "Product");
         // Measurement, Brand va Category-ni yangilash
 
-        Product oldProduct = new Product();
-        Product newProduct = new Product();
+        ProductDTO oldProduct = new ProductDTO();
+        ProductDTO newProduct = new ProductDTO();
         ProductMapper.update(product, oldProduct);
 
         Measurement measurement = new Measurement();

@@ -78,7 +78,7 @@ public class TradeService {
             String invoiceStr = optionalTrade.get().getInvoice();
             invoice = invoiceStr != null ? Integer.parseInt(invoiceStr) : 0;
         }
-        int inc = invoice++;
+        int inc = invoice+1;
 
         Trade trade = new Trade();
         trade.setBranch(optionalBranch.get());

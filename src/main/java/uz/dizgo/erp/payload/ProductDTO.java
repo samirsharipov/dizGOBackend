@@ -1,14 +1,17 @@
 package uz.dizgo.erp.payload;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class ProductDTO {
 
     private UUID id;                    // Unique product identifier
@@ -30,10 +33,7 @@ public class ProductDTO {
     private Double height;              // Product height
     private Double weight;              // Product weight
 
-    private String hsCode12;            // Harmonized System codes
-    private String hsCode22;
-    private String hsCode32;
-    private String hsCode44;
+    private String MXIKCode;
 
     private String agreementExportsID;  // Export agreement ID
     private String agreementExportsPID; // Export agreement PID
@@ -62,22 +62,13 @@ public class ProductDTO {
     private Date expireDate;            // Expiry date
 
     private String barcode;             // Product barcode
-    private String pluCode;             // Product pluCode
+    private String pluCode;
 
-    private double minQuantity;         // Minimum quantity for sale
+    private double minQuantity;
 
-    private UUID brandId;               // Brand reference
-    private UUID categoryId;            // Category reference
-    private UUID measurementId;         // Measurement reference
-    private UUID photoId;               // Attachment/photo reference
-    private UUID businessId;            // Business reference
-
-    private List<UUID> branchIds;       // Branches where the product is available
-    private List<UUID> rastaIds;        // Rastalar for warehouse locations
-
-    private Integer warehouseCount;     // Warehouse count
-    private Boolean isGlobal;           // Global availability
-    private boolean main;               // Main product indicator
-
-    private List<ProductTranslateDTO> translations;
+    private String brand;
+    private String category;
+    private String measurement;
+    private UUID photo;
+    private String business;
 }

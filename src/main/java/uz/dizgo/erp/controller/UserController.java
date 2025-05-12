@@ -39,7 +39,7 @@ public class UserController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    @CheckPermission("VIEW_USER")
+//    @CheckPermission("VIEW_USER")
     @GetMapping("/{id}")
     public HttpEntity<?> get(@PathVariable UUID id) {
         ApiResponse apiResponse = userService.getById(id);
@@ -53,7 +53,7 @@ public class UserController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 404).body(apiResponse);
     }
 
-    @CheckPermission("EDIT_MY_PROFILE")
+//    @CheckPermission("EDIT_MY_PROFILE")
     @PutMapping()
     public ResponseEntity<?> editMyProfile(@CurrentUser User user, @Valid @RequestBody ProfileDto profileDto) {
         ApiResponse apiResponse = userService.editMyProfile(user, profileDto);

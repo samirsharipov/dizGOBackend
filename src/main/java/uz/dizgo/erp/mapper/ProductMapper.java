@@ -1,11 +1,11 @@
 package uz.dizgo.erp.mapper;
 
 import uz.dizgo.erp.entity.Product;
+import uz.dizgo.erp.payload.ProductDTO;
 
-import java.util.UUID;
 
 public class ProductMapper {
-    public static void update(Product from , Product to){
+    public static void update(Product from, ProductDTO to) {
         to.setId(from.getId());
         to.setName(from.getName());
         to.setDescription(from.getDescription());
@@ -18,6 +18,8 @@ public class ProductMapper {
         to.setMXIKCode(from.getMXIKCode());
         to.setKpi(from.getKpi());
         to.setMinQuantity(from.getMinQuantity());
-        to.setMeasurement(from.getMeasurement());
+        to.setMeasurement(from.getMeasurement().getName());
+        to.setCategory(from.getCategory().getName());
+        to.setBrand(from.getBrand().getName());
     }
 }
