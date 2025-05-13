@@ -599,6 +599,8 @@ public class TradeService {
         dto.setDebtSum(trade.getDebtSum());
         dto.setPaymentDtoList(paymentDtos);
         dto.setProductTraderDto(tradeProductDtoList);
+        dto.setInvoice(trade.getInvoice());
+
 
         return new ApiResponse(messageService.getMessage("found"), true, dto);
     }
