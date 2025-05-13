@@ -15,7 +15,6 @@ import java.util.UUID;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class Cash extends AbsEntity {
     @Column(nullable = false)
     private String name; //  Kassa n : Kassa 1, Kassa 2

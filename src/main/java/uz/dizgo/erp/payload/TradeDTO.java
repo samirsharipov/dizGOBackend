@@ -65,4 +65,5 @@ public class TradeDTO {
     private Boolean differentPayment;
 
     private CustomerCreditDto customerCreditDto;
+    private String invoice;
 }
