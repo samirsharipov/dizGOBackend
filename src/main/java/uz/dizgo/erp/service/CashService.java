@@ -13,6 +13,7 @@ import uz.dizgo.erp.repository.CashRepository;
 public class CashService {
 
 	private final CashRepository cashRepository;
+	private final MessageService messageService;
 
 	public ApiResponse addCash(UUID branchId) {
 
@@ -27,15 +28,15 @@ public class CashService {
 				int lastNumber = Integer.parseInt(parts[2]);
 				cashAsc = lastNumber + cashAsc;
 			} catch (NumberFormatException e) {
-				return new ApiResponse("Error occurred while adding new cash " + lastname, false);
+				return new ApiResponse(messageService.getMessage("error.message"), false);
 			}
 		}
 
 		Cash cash = new Cash();
 		cash.setBranchId(branchId);
-		cash.setName("Cash desk " + cashAsc);
+		cash.setName("Kassa " + cashAsc);
 		cashRepository.save(cash);
-		return new ApiResponse("Successfully added new cash ", true);
+		return new ApiResponse(messageService.getMessage("added.successfully"), true);
 	}
 
 }
