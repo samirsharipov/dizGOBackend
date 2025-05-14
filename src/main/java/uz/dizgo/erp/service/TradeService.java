@@ -561,6 +561,7 @@ public class TradeService {
         List<TradeProductDto> tradeProductDtoList = tradeProducts.stream().map(tp -> {
             TradeProductDto dto = new TradeProductDto();
             UUID productId = tp.getProduct().getId();
+            dto.setTradeProductId(tp.getId());
             dto.setProductId(productId);
             dto.setProductName(tp.getProduct().getName());
             dto.setTradedQuantity(tp.getTradedQuantity());
