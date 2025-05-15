@@ -58,6 +58,10 @@ public class UserService {
             return checkUsernameAndPhoneNumber;
         }
 
+        if (businessRepository.findById(userDto.getBusinessId()).isEmpty()) {
+            return new ApiResponse("NOT FOUND BUSINESS", false);
+        }
+
         // Umumiy validatsiya: Business, Role va Username tekshiriladi
         ApiResponse validationResponse = validateUser(userDto);
         if (!validationResponse.isSuccess()) {
@@ -109,10 +113,7 @@ public class UserService {
     }
 
     private ApiResponse validateUser(UserDTO userDto) {
-        // Business mavjudligini tekshirish
-        if (businessRepository.findById(userDto.getBusinessId()).isEmpty()) {
-            return new ApiResponse("NOT FOUND BUSINESS", false);
-        }
+
 
         // Role mavjudligini tekshirish
         if (roleRepository.findById(userDto.getRoleId()).isEmpty()) {
@@ -225,6 +226,7 @@ public class UserService {
         if (!validationResponse.isSuccess()) {
             return validationResponse;
         }
+
 
         // Branchlarni tekshirish va yig'ish
         Set<Branch> branches = collectBranches(userDto.getBranchIds());
