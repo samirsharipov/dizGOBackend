@@ -4,6 +4,8 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,6 +23,12 @@ public class CashController {
 	@PostMapping
 	public HttpEntity<?> addCash(@RequestParam UUID branchId) {
 		ApiResponse apiResponse = cashService.addCash(branchId);
+		return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
+	}
+
+	@GetMapping("/{branchId}")
+	public HttpEntity<?> getAllCash(@PathVariable UUID branchId) {
+		ApiResponse apiResponse = cashService.getAllCashes(branchId);
 		return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
 	}
 }

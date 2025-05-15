@@ -21,4 +21,6 @@ public class Cash extends AbsEntity {
 
     @Column(nullable = false)
     private UUID branchId;
+
+
 }
