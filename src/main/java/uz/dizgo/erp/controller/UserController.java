@@ -32,7 +32,7 @@ public class UserController {
         return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
     }
 
-    @CheckPermission("EDIT_USER")
+//    @CheckPermission("EDIT_USER")
     @PutMapping("/{id}")
     public HttpEntity<?> editUser(@PathVariable UUID id, @RequestBody UserDTO userDto) {
         ApiResponse apiResponse = userService.edit(id, userDto);
