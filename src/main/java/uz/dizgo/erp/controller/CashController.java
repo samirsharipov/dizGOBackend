@@ -26,7 +26,7 @@ public class CashController {
 		return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
 	}
 
-	@GetMapping("/{branchId}")
+	@GetMapping("get-all-by-branchId/{branchId}")
 	public HttpEntity<?> getAllCash(@PathVariable UUID branchId) {
 		ApiResponse apiResponse = cashService.getAllCashes(branchId);
 		return ResponseEntity.status(apiResponse.isSuccess() ? 200 : 409).body(apiResponse);
